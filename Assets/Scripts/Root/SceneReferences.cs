@@ -2,11 +2,15 @@ using UnityEngine;
 
 public class SceneReferences : MonoBehaviour
 {
-    [SerializeField] public MainMenuScreen MainMenuScreen { get; private set; }
+    [SerializeField] private MainMenuScreen _mainMenuScreen;
+    [SerializeField] private RunScreen _runScreen;
+    [SerializeField] private VictoryScreen _victoryScreen;
+    [SerializeField] private DefeatScreen _defeatScreen;
+    [SerializeField] private Player _player;
 
-    [SerializeField] public RunScreen RunScreen { get; private set; }
-
-    [SerializeField] public VictoryScreen VictoryScreen { get; private set; }
-
-    [SerializeField] public DefeatScreen DefeatScreen { get; private set; }
+    public MainMenuScreen MainMenuScreen => _mainMenuScreen;
+    public RunScreen RunScreen => _runScreen;
+    public VictoryScreen VictoryScreen => _victoryScreen;
+    public DefeatScreen DefeatScreen => _defeatScreen;
+    public Player Player => _player;
 }

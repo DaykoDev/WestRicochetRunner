@@ -44,6 +44,8 @@ public class CompositionRoot
         _mainMenuPresenter.Dispose();
         _victoryPresenter.Dispose();
         _defeatPresenter.Dispose();
+
+        _runPresenter.Dispose();
     }
 
     private void CreateProgress()
@@ -55,7 +57,7 @@ public class CompositionRoot
     {
         _bootstrapState = new BootstrapState();
         _mainMenuState = new MainMenuState();
-        _runState = new RunState(_playerProgress);
+        _runState = new RunState(_playerProgress, _sceneReferences.Player);
         _victoryState = new VictoryState();
         _defeatState = new DefeatState();
     }
@@ -136,6 +138,8 @@ public class CompositionRoot
         _mainMenuPresenter.StartRequested += OnStartRequested;
         _victoryPresenter.MainMenuRequested += OnVictoryMainMenuRequested;
         _defeatPresenter.MainMenuRequested += OnDefeatMainMenuRequested;
+        _runPresenter.TestWinRequested += OnTestWinRequested;
+        _runPresenter.TestLoseRequested += OnTestLoseRequested;
     }
 
     private void UnsubscribeFromPresenterEvents()
@@ -143,6 +147,18 @@ public class CompositionRoot
         _mainMenuPresenter.StartRequested -= OnStartRequested;
         _victoryPresenter.MainMenuRequested -= OnVictoryMainMenuRequested;
         _defeatPresenter.MainMenuRequested -= OnDefeatMainMenuRequested;
+        _runPresenter.TestWinRequested -= OnTestWinRequested;
+        _runPresenter.TestLoseRequested -= OnTestLoseRequested;
+    }
+
+    private void OnTestWinRequested()
+    {
+        _runState.RequestWin();
+    }
+
+    private void OnTestLoseRequested()
+    {
+        _runState.RequestLose();
     }
 
     private void OnBootstrapCompleted()

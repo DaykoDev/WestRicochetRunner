@@ -3,6 +3,8 @@ using System;
 public class RunState : IState
 {
     private readonly PlayerProgress _playerProgress;
+    private readonly Player _player;
+
 
     private RunContext _context;
 
@@ -11,14 +13,16 @@ public class RunState : IState
     public event Action Won;
     public event Action Lost;
 
-    public RunState(PlayerProgress playerProgress)
+    public RunState(PlayerProgress playerProgress, Player player)
     {
         _playerProgress = playerProgress;
+        _player = player;
     }
 
     public void Enter()
     {
         CreateRunContext();
+        StartRunSystems();
 
         // TODO: Здесь будет подключён LevelGenerator.
         // _levelGenerator.BuildLevel(_context.Level, _context.Seed);
@@ -44,17 +48,21 @@ public class RunState : IState
         Lost?.Invoke();
     }
 
+    private void StartRunSystems()
+    {
+        _player.SetControlEnabled(true);
+    }
+
+    private void StopRunSystems()
+    {
+        _player.SetControlEnabled(false);
+    }
+
     private void CreateRunContext()
     {
         RunModifiers modifiers = new RunModifiers();
 
         _context = new RunContext(_playerProgress.CurrentLevel, _playerProgress.CurrentLevelSeed, modifiers);
-    }
-
-    private void StopRunSystems()
-    {
-        // TODO: Остановка gameplay-систем.
-        // Player, BallLauncher, LevelGenerator и т.д.
     }
 
     private void DestroyRunContext()
