@@ -1,17 +1,20 @@
-
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    [Header("References")]
     [SerializeField] private PlayerInputReader _inputReader;
-    [SerializeField] private PlayerLateralController _lateralController;
+    [SerializeField] private PlayerLateralCalculator _lateralCalculator;
     [SerializeField] private PlayerMover _mover;
+    [SerializeField] private PlayerShooting _playerShooting;
+
+    private bool _isControlEnabled;
 
     private void Awake()
     {
         float initialX = transform.position.x;
 
-        _lateralController.Initialize(initialX);
+        _lateralCalculator.Initialize(initialX);
         _mover.Initialize(initialX);
     }
 
@@ -31,23 +34,37 @@ public class Player : MonoBehaviour
 
     public void SetControlEnabled(bool isEnabled)
     {
+        _isControlEnabled = isEnabled;
+
         _mover.SetMovementEnabled(isEnabled);
         _inputReader.SetInputEnabled(isEnabled);
+        _playerShooting.SetControlEnabled(isEnabled);
 
         if (isEnabled == false)
         {
-            _lateralController.SetPointerHeld(false);
+            _lateralCalculator.SetPointerHeld(false);
+
         }
     }
 
     private void OnPointerMoved(Vector2 delta)
     {
-        float targetX = _lateralController.CalculateTargetX(delta.x);
+        if (_isControlEnabled == false)
+        {
+            return;
+        }
+
+        float targetX = _lateralCalculator.CalculateTargetX(delta.x);
         _mover.SetTargetX(targetX);
     }
 
     private void OnHoldPointerChanged(bool isHeld)
     {
-        _lateralController.SetPointerHeld(isHeld);
+        if (_isControlEnabled == false)
+        {
+            return;
+        }
+
+        _lateralCalculator.SetPointerHeld(isHeld);
     }
 }

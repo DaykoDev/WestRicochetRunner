@@ -37,8 +37,7 @@ public class PlayerMover : MonoBehaviour
 
     private void MoveForward()
     {
-        transform.position +=
-            Vector3.forward * (_forwardSpeed * Time.deltaTime);
+        transform.position += Vector3.forward * (_forwardSpeed * Time.deltaTime);
     }
 
     private void MoveLaterally()
