@@ -5,8 +5,6 @@ public class VictoryState : IState
     public event Action Entered;
     public event Action Exited;
 
-    public event Action MainMenuRequested;
-
     public void Enter()
     {
         Entered?.Invoke();
@@ -15,10 +13,5 @@ public class VictoryState : IState
     public void Exit()
     {
         Exited?.Invoke();
-    }
-
-    public void RequestMainMenu()
-    {
-        MainMenuRequested?.Invoke();
     }
 }

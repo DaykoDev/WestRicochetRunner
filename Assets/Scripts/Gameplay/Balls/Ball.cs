@@ -52,11 +52,11 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         Move(distance);
     }
 
-    public void Launch(Vector3 position, Vector3 direction, BallStats stats)
+    public bool Launch(Vector3 position, Vector3 direction, BallStats stats)
     {
         if (enabled == false || direction.sqrMagnitude < Mathf.Epsilon || stats.Speed <= 0f)
         {
-            return;
+            return false;
         }
 
         _stats = stats;
@@ -70,6 +70,8 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         _isActive = true;
 
         transform.position = position;
+
+        return true;
     }
 
     public void OnReturnedToPool()
@@ -80,8 +82,6 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         _bounceCount = 0;
         _direction = Vector3.zero;
         _stats = default(BallStats);
-
-        Died = null;
 
         ReturnedToPool?.Invoke(this);
     }

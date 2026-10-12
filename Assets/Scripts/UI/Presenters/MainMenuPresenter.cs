@@ -4,13 +4,13 @@ public class MainMenuPresenter : IDisposable
 {
     private readonly MainMenuScreen _screen;
 
-    public event Action StartRequested;
-
     public MainMenuPresenter(MainMenuScreen screen)
     {
         _screen = screen;
         _screen.StartClicked += OnStartClicked;
     }
+
+    public event Action StartRequested;
 
     public void HandleStateEntered()
     {

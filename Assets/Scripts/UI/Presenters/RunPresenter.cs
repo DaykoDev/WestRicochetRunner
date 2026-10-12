@@ -4,9 +4,6 @@ public class RunPresenter : IDisposable
 {
     private readonly RunScreen _screen;
 
-    public event Action TestWinRequested;
-    public event Action TestLoseRequested;
-
     public RunPresenter(RunScreen screen)
     {
         _screen = screen;
@@ -14,6 +11,9 @@ public class RunPresenter : IDisposable
         _screen.TestWinClicked += OnTestWinClicked;
         _screen.TestLoseClicked += OnTestLoseClicked;
     }
+
+    public event Action TestWinRequested;
+    public event Action TestLoseRequested;
 
     public void HandleStateEntered()
     {

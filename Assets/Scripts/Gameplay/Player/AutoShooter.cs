@@ -11,18 +11,6 @@ public class AutoShooter : MonoBehaviour
     private float _shootTimer;
     private bool _isShooting;
 
-    public void StartShooting()
-    {
-        _isShooting = true;
-        _shootTimer = 0f;
-    }
-
-    public void StopShooting()
-    {
-        _isShooting = false;
-        _shootTimer = 0f;
-    }
-
     private void Update()
     {
         if (_isShooting == false)
@@ -45,5 +33,17 @@ public class AutoShooter : MonoBehaviour
         {
             _shootTimer = 0.05f;
         }
+    }
+
+    public void StartShooting()
+    {
+        _isShooting = true;
+        _shootTimer = 0f;
+    }
+
+    public void StopShooting()
+    {
+        _isShooting = false;
+        _shootTimer = 0f;
     }
 }

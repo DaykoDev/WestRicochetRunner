@@ -47,6 +47,14 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void ResetToStart()
+    {
+        SetControlEnabled(false);
+
+        _mover.ResetToStart();
+        _lateralCalculator.ResetToStart(transform.position.x);
+    }
+
     private void OnPointerMoved(Vector2 delta)
     {
         if (_isControlEnabled == false)

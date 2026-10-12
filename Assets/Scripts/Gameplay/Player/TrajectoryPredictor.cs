@@ -12,7 +12,7 @@ public class TrajectoryPredictor : MonoBehaviour
     [SerializeField, Min(0.1f)] private float _maxDistance = 50f;
 
     private RaycastHit[] _raycastHits;
-    private Vector3[] _trajectoryPoints = new Vector3[2];
+    private Vector3[] _trajectoryPoints;
 
     public int PointCount { get; private set; }
     public int MaxPointCount => PreviewBounceCount + 2;

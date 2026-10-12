@@ -15,6 +15,12 @@ public class PlayerLateralCalculator : MonoBehaviour
         _targetX = Mathf.Clamp(initialX, _minX, _maxX);
     }
 
+    public void ResetToStart(float initialX)
+    {
+        _targetX = Mathf.Clamp(initialX, _minX, _maxX);
+        _isPointerHeld = false;
+    }
+
     public void SetPointerHeld(bool isHeld)
     {
         _isPointerHeld = isHeld;

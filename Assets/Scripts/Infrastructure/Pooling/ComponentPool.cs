@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -15,11 +16,33 @@ public class ComponentPool<T> where T : Component
         int capacity = 20,
         int maxSize = 50)
     {
+        if (container == null)
+        {
+            throw new ArgumentNullException(nameof(container));
+        }
+
+        if (capacity < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(capacity));
+        }
+
+        if (maxSize < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maxSize));
+        }
+
+        if (capacity > maxSize)
+        {
+            throw new ArgumentException(
+                "Capacity cannot exceed maxSize.",
+                nameof(capacity));
+        }
+
         _prefab = prefab;
         _container = container;
 
         _pool = new ObjectPool<T>(
-            createFunc: () => Object.Instantiate(_prefab, _container),
+            createFunc: () => UnityEngine.Object.Instantiate(_prefab, _container),
             actionOnGet: obj => obj.gameObject.SetActive(true),
             actionOnRelease: obj =>
             {
@@ -30,7 +53,7 @@ public class ComponentPool<T> where T : Component
 
                 obj.gameObject.SetActive(false);
             },
-            actionOnDestroy: obj => Object.Destroy(obj.gameObject),
+            actionOnDestroy: obj => UnityEngine.Object.Destroy(obj.gameObject),
             collectionCheck: true,
             defaultCapacity: capacity,
             maxSize: maxSize
@@ -69,6 +92,11 @@ public class ComponentPool<T> where T : Component
 
     public void Prewarm(int count)
     {
+        if (count < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(count));
+        }
+
         var objects = new List<T>(count);
 
         for (int i = 0; i < count; i++)

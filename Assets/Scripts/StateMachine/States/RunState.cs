@@ -5,13 +5,7 @@ public class RunState : IState
     private readonly PlayerProgress _playerProgress;
     private readonly Player _player;
 
-
     private RunContext _context;
-
-    public event Action Entered;
-    public event Action Exited;
-    public event Action Won;
-    public event Action Lost;
 
     public RunState(PlayerProgress playerProgress, Player player)
     {
@@ -19,13 +13,17 @@ public class RunState : IState
         _player = player;
     }
 
+    public event Action Entered;
+    public event Action Exited;
+    public event Action Won;
+    public event Action Lost;
+
     public void Enter()
     {
         CreateRunContext();
-        StartRunSystems();
 
-        // TODO: Здесь будет подключён LevelGenerator.
-        // _levelGenerator.BuildLevel(_context.Level, _context.Seed);
+        _player.ResetToStart();
+        StartRunSystems();
 
         Entered?.Invoke();
     }

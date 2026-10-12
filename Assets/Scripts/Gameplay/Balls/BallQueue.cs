@@ -42,6 +42,11 @@ public class BallQueue : MonoBehaviour
         return true;
     }
 
+    public void ReleaseBall(Ball ball)
+    {
+        _ballPool.Release(ball);
+    }
+
     public void SetCapacity(int newCapacity)
     {
         newCapacity = Mathf.Max(1, newCapacity);

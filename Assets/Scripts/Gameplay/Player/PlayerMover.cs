@@ -9,6 +9,9 @@ public class PlayerMover : MonoBehaviour
     private float _targetX;
     private bool _isMovementEnabled;
 
+    private Vector3 _startPosition;
+    private Quaternion _startRotation;
+
     private void Update()
     {
         if (_isMovementEnabled == false)
@@ -22,7 +25,16 @@ public class PlayerMover : MonoBehaviour
 
     public void Initialize(float initialX)
     {
+        _startPosition = transform.position;
+        _startRotation = transform.rotation;
         _targetX = initialX;
+    }
+
+    public void ResetToStart()
+    {
+        transform.SetPositionAndRotation(_startPosition, _startRotation);
+        _targetX = _startPosition.x;
+        _isMovementEnabled = false;
     }
 
     public void SetMovementEnabled(bool isEnabled)

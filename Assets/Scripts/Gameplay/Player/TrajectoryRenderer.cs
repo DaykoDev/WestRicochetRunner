@@ -32,6 +32,14 @@ public class TrajectoryRenderer : MonoBehaviour
         AnimateTexture();
     }
 
+    private void OnDestroy()
+    {
+        if (_lineMaterial != null)
+        {
+            Destroy(_lineMaterial);
+        }
+    }
+
     public void UpdateTrajectory(Vector3 origin, Vector3 direction, BallStats stats)
     {
         if (enabled == false)
@@ -80,13 +88,5 @@ public class TrajectoryRenderer : MonoBehaviour
         _textureOffset -= _scrollSpeed * Time.deltaTime;
 
         _lineMaterial.mainTextureOffset = new Vector2(_textureOffset, 0f);
-    }
-
-    private void OnDestroy()
-    {
-        if (_lineMaterial != null)
-        {
-            Destroy(_lineMaterial);
-        }
     }
 }

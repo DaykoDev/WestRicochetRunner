@@ -5,11 +5,11 @@ using UnityEngine.InputSystem;
 
 public class PlayerInputReader : MonoBehaviour, PlayerInputActions.IPlayerActions
 {
-    public event Action<Vector2> Moved;
-    public event Action<bool> HoldPointerChanged;
-
     private PlayerInputActions _controls;
     private bool _isHoldPointerPressed;
+
+    public event Action<Vector2> Moved;
+    public event Action<bool> HoldPointerChanged;
 
     private void Awake()
     {

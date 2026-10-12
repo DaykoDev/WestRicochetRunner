@@ -94,9 +94,6 @@ public class CompositionRoot
         _runState.Won += OnRunWon;
         _runState.Lost += OnRunLost;
 
-        _victoryState.MainMenuRequested += OnVictoryMainMenuRequested;
-        _defeatState.MainMenuRequested += OnDefeatMainMenuRequested;
-
         _mainMenuState.Entered += _mainMenuPresenter.HandleStateEntered;
         _mainMenuState.Exited += _mainMenuPresenter.HandleStateExited;
 
@@ -116,9 +113,6 @@ public class CompositionRoot
 
         _runState.Won -= OnRunWon;
         _runState.Lost -= OnRunLost;
-
-        _victoryState.MainMenuRequested -= OnVictoryMainMenuRequested;
-        _defeatState.MainMenuRequested -= OnDefeatMainMenuRequested;
 
         _mainMenuState.Entered -= _mainMenuPresenter.HandleStateEntered;
         _mainMenuState.Exited -= _mainMenuPresenter.HandleStateExited;

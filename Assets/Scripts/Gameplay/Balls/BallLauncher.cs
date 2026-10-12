@@ -18,7 +18,13 @@ public class BallLauncher : MonoBehaviour
             return false;
         }
 
-        ball.Launch(_playerAimer.FirePointPosition, _playerAimer.Direction, _ballStats);
+        bool launched = ball.Launch(_playerAimer.FirePointPosition, _playerAimer.Direction, _ballStats);
+
+        if (launched == false)
+        {
+            _ballQueue.ReleaseBall(ball);
+            return false;
+        }
 
         return true;
     }

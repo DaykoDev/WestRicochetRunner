@@ -4,13 +4,13 @@ public class VictoryPresenter : IDisposable
 {
     private readonly VictoryScreen _screen;
 
-    public event Action MainMenuRequested;
-
     public VictoryPresenter(VictoryScreen screen)
     {
         _screen = screen;
         _screen.MainMenuClicked += OnMainMenuClicked;
     }
+
+    public event Action MainMenuRequested;
 
     public void HandleStateEntered()
     {

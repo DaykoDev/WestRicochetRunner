@@ -1,17 +1,19 @@
-using UnityEngine;
+using System;
 
 public class PlayerProgress
 {
     private const int StartingLevel = 1;
 
-    public int CurrentLevel { get; private set; }
-    public int CurrentLevelSeed { get; private set; }
+    private readonly Random _random = new Random();
 
     public PlayerProgress()
     {
         CurrentLevel = StartingLevel;
         CurrentLevelSeed = GenerateSeed();
     }
+
+    public int CurrentLevel { get; private set; }
+    public int CurrentLevelSeed { get; private set; }
 
     public void CompleteCurrentLevel()
     {
@@ -21,6 +23,6 @@ public class PlayerProgress
 
     private int GenerateSeed()
     {
-        return Random.Range(int.MinValue, int.MaxValue);
+        return _random.Next(1, int.MaxValue);
     }
 }

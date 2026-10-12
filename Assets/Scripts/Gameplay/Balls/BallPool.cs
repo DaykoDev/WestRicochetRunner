@@ -25,6 +25,11 @@ public class BallPool : MonoBehaviour
         return _pool.Get();
     }
 
+    public void Release(Ball ball)
+    {
+        _pool?.Release(ball);
+    }
+
     public void ResetPool()
     {
         _pool?.Reset();
