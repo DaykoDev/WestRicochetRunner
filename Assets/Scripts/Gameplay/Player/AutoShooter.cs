@@ -10,29 +10,31 @@ public class AutoShooter : MonoBehaviour
 
     private float _shootTimer;
     private bool _isShooting;
+    private RunModifiers _runModifiers;
 
     private void Update()
     {
-        if (_isShooting == false)
-        {
+        if (!_isShooting)
             return;
-        }
-
-        _shootTimer -= Time.deltaTime;
 
         if (_shootTimer > 0f)
         {
+            _shootTimer -= Time.deltaTime;
             return;
         }
 
-        if (_ballLauncher.TryLaunch())
-        {
-            _shootTimer = _fireInterval;
-        }
-        else
-        {
-            _shootTimer = 0.05f;
-        }
+        float multiplier = _runModifiers != null
+            ? _runModifiers.FireRateMultiplier
+            : 1f;
+
+        float interval = _fireInterval / multiplier;
+
+        _shootTimer = _ballLauncher.TryLaunch() ? interval : 0.05f;
+    }
+
+    public void SetRunModifiers(RunModifiers modifiers)
+    {
+        _runModifiers = modifiers;
     }
 
     public void StartShooting()

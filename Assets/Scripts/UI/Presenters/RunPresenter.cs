@@ -3,21 +3,22 @@ using System;
 public class RunPresenter : IDisposable
 {
     private readonly RunScreen _screen;
+    private readonly PlayerHealth _playerHealth;
 
-    public RunPresenter(RunScreen screen)
+    public RunPresenter(RunScreen screen, PlayerHealth playerHealth)
     {
         _screen = screen;
+        _playerHealth = playerHealth;
 
-        _screen.TestWinClicked += OnTestWinClicked;
-        _screen.TestLoseClicked += OnTestLoseClicked;
+        _playerHealth.HealthChanged += OnHealthChanged;
     }
 
     public event Action TestWinRequested;
-    public event Action TestLoseRequested;
 
     public void HandleStateEntered()
     {
         _screen.Show();
+        _screen.SetHealth(_playerHealth.CurrentHealth, _playerHealth.MaxHealth);
     }
 
     public void HandleStateExited()
@@ -27,17 +28,14 @@ public class RunPresenter : IDisposable
 
     public void Dispose()
     {
-        _screen.TestWinClicked -= OnTestWinClicked;
-        _screen.TestLoseClicked -= OnTestLoseClicked;
+        _playerHealth.HealthChanged -= OnHealthChanged;
     }
+
+    private void OnHealthChanged(int currentHealth, int maxHealth) =>
+        _screen.SetHealth(currentHealth, maxHealth);
 
     private void OnTestWinClicked()
     {
         TestWinRequested?.Invoke();
-    }
-
-    private void OnTestLoseClicked()
-    {
-        TestLoseRequested?.Invoke();
     }
 }

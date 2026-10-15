@@ -9,14 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 01bad8c8c350a73498ba4a7155771d55, type: 3}
-  m_Name: BallMovementSettings
+  m_Script: {fileID: 11500000, guid: e7452b43cb49d744c826c3f7b045d855, type: 3}
+  m_Name: DefaultObstaclePlacementSettings
   m_EditorClassIdentifier: 
-  _radius: 0.25
-  _collisionOffset: 0.01
-  _collisionMask:
-    serializedVersion: 2
-    m_Bits: 64
-  _castBufferSize: 16
-  _minBounceAngle: 25
-  _maxCollisionsPerStep: 5
+  _safeEarly: 0.15
+  _safeMid: 0.25
+  _safeHigh: 0.35
+  _challengeEarly: 0.25
+  _challengeMid: 0.65
+  _challengeHigh: 1

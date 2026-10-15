@@ -6,21 +6,42 @@ public class BallLauncher : MonoBehaviour
     [SerializeField] private BallQueue _ballQueue;
     [SerializeField] private PlayerAimer _playerAimer;
 
-    [Header("Ball Settings")]
+    [Header("Base Stats")]
     [SerializeField] private BallStats _ballStats;
 
-    public BallStats CurrentStats => _ballStats;
+    private RunModifiers _runModifiers;
+
+    public BallStats CurrentStats
+    {
+        get
+        {
+            BallStats stats = _ballStats;
+
+            if (_runModifiers == null)
+                return stats;
+
+            stats.Speed *= _runModifiers.BallSpeedMultiplier;
+            stats.MaxBounces += _runModifiers.BounceCountBonus;
+
+            return stats;
+        }
+    }
+
+    public void SetRunModifiers(RunModifiers modifiers)
+    {
+        _runModifiers = modifiers;
+        _ballQueue.SetRunModifiers(modifiers);
+    }
 
     public bool TryLaunch()
     {
-        if (_ballQueue.TryGetBall(out Ball ball) == false)
-        {
+        if (_ballQueue == null || _playerAimer == null)
             return false;
-        }
 
-        bool launched = ball.Launch(_playerAimer.FirePointPosition, _playerAimer.Direction, _ballStats);
+        if (!_ballQueue.TryGetBall(out Ball ball))
+            return false;
 
-        if (launched == false)
+        if (!ball.Launch(_playerAimer.FirePointPosition, _playerAimer.Direction, CurrentStats))
         {
             _ballQueue.ReleaseBall(ball);
             return false;

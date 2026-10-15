@@ -20,6 +20,10 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
     private int _bounceCount;
     private bool _isActive;
 
+    private Collider[] _gateHits;
+
+    public int LaunchId { get; private set; }
+
     public event Action<Ball> Died;
     public event Action<Ball> ReturnedToPool;
 
@@ -28,6 +32,7 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
     private void Awake()
     {
         _hits = new RaycastHit[_movementSettings.CastBufferSize];
+        _gateHits = new Collider[_movementSettings.CastBufferSize];
     }
 
     private void FixedUpdate()
@@ -71,6 +76,8 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
 
         transform.position = position;
 
+        unchecked { LaunchId++; }
+
         return true;
     }
 
@@ -106,14 +113,26 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
 
             if (hasHit == false)
             {
-                transform.position += _direction * remainingDistance;
+                Vector3 endPosition = transform.position + _direction * remainingDistance;
+                ChargeGatesAlongSegment(transform.position, endPosition);
+                transform.position = endPosition;
                 return;
             }
 
             float traveledDistance = Mathf.Max(0f, hit.distance);
 
-            transform.position += _direction * traveledDistance;
+            Vector3 hitCenter = transform.position + _direction * traveledDistance;
+            ChargeGatesAlongSegment(transform.position, hitCenter);
+            transform.position = hitCenter;
+
             remainingDistance -= traveledDistance;
+
+            IDamageable damageable = hit.collider.GetComponentInParent<IDamageable>();
+
+            if (damageable != null)
+            {
+                damageable.TakeDamage(_stats.Damage);
+            }
 
             if (_bounceCount >= _stats.MaxBounces)
             {
@@ -136,6 +155,27 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         float maxPendingDistance = _stats.Speed * Time.fixedDeltaTime;
 
         _pendingDistance = Mathf.Min(remainingDistance, maxPendingDistance);
+    }
+
+    private void ChargeGatesAlongSegment(Vector3 start, Vector3 end)
+    {
+        int hitCount = Physics.OverlapCapsuleNonAlloc(
+            start,
+            end,
+            _movementSettings.Radius,
+            _gateHits,
+            _movementSettings.UpgradeGateMask,
+            QueryTriggerInteraction.Collide
+        );
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            if (_gateHits[i] == null)
+                continue;
+
+            UpgradeGateCharger charger = _gateHits[i].GetComponentInParent<UpgradeGateCharger>();
+            charger?.TryCharge(this);
+        }
     }
 
     private void Die()

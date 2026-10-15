@@ -1,25 +1,13 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class RunScreen : MonoBehaviour
 {
-    [SerializeField] private UnityEngine.UI.Button _testWinButton;
-    [SerializeField] private UnityEngine.UI.Button _testLoseButton;
-
-    public event Action TestWinClicked;
-    public event Action TestLoseClicked;
-
-    private void OnEnable()
-    {
-        _testWinButton.onClick.AddListener(OnTestWinButtonClicked);
-        _testLoseButton.onClick.AddListener(OnTestLoseButtonClicked);
-    }
-
-    private void OnDisable()
-    {
-        _testWinButton.onClick.RemoveListener(OnTestWinButtonClicked);
-        _testLoseButton.onClick.RemoveListener(OnTestLoseButtonClicked);
-    }
+    [Header("Health")]
+    [SerializeField] private Image[] _healthIcons;
+    [SerializeField] private Sprite _fullHeartSprite;
+    [SerializeField] private Sprite _emptyHeartSprite;
 
     public void Show()
     {
@@ -31,13 +19,17 @@ public class RunScreen : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    private void OnTestWinButtonClicked()
+    public void SetHealth(int currentHealth, int maxHealth)
     {
-        TestWinClicked?.Invoke();
-    }
+        for (int i = 0; i < _healthIcons.Length; i++)
+        {
+            Image icon = _healthIcons[i];
+            if (icon == null) continue;
 
-    private void OnTestLoseButtonClicked()
-    {
-        TestLoseClicked?.Invoke();
+            icon.gameObject.SetActive(i < maxHealth);
+
+            if (i < maxHealth)
+                icon.sprite = i < currentHealth ? _fullHeartSprite : _emptyHeartSprite;
+        }
     }
 }

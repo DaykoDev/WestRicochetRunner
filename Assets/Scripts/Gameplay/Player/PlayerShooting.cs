@@ -45,4 +45,10 @@ public class PlayerShooting : MonoBehaviour
             _autoShooter.StopShooting();
         }
     }
+
+    public void SetRunModifiers(RunModifiers modifiers)
+    {
+        _ballLauncher.SetRunModifiers(modifiers);
+        _autoShooter.SetRunModifiers(modifiers);
+    }
 }

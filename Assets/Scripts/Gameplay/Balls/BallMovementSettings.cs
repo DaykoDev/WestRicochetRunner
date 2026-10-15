@@ -21,6 +21,9 @@ public class BallMovementSettings : ScriptableObject
     [Header("Trajectory Capacity")]
     [SerializeField, Min(0)] private int _maxSupportedBounces = 16;
 
+    [Header("Upgrade Gates")]
+    [SerializeField] private LayerMask _upgradeGateMask;
+
     public int MaxSupportedBounces => _maxSupportedBounces;
     public float Radius => _radius;
     public float CollisionOffset => _collisionOffset;
@@ -28,4 +31,5 @@ public class BallMovementSettings : ScriptableObject
     public int CastBufferSize => _castBufferSize;
     public float MinBounceAngle => _minBounceAngle;
     public int MaxCollisionsPerStep => _maxCollisionsPerStep;
+    public LayerMask UpgradeGateMask => _upgradeGateMask;
 }

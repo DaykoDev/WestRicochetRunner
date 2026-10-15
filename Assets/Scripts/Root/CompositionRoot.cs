@@ -6,6 +6,7 @@ public class CompositionRoot
 
     private GameStateMachine _stateMachine;
     private PlayerProgress _playerProgress;
+    private PlayerHealth _playerHealth;
 
     private BootstrapState _bootstrapState;
     private MainMenuState _mainMenuState;
@@ -57,7 +58,10 @@ public class CompositionRoot
     {
         _bootstrapState = new BootstrapState();
         _mainMenuState = new MainMenuState();
-        _runState = new RunState(_playerProgress, _sceneReferences.Player);
+
+        _playerHealth = _sceneReferences.Player.GetComponent<PlayerHealth>();
+
+        _runState = new RunState(_playerProgress, _sceneReferences.Player, _playerHealth, _sceneReferences.LevelGenerator);
         _victoryState = new VictoryState();
         _defeatState = new DefeatState();
     }
@@ -80,7 +84,7 @@ public class CompositionRoot
     {
         _mainMenuPresenter = new MainMenuPresenter(_sceneReferences.MainMenuScreen);
 
-        _runPresenter = new RunPresenter(_sceneReferences.RunScreen);
+        _runPresenter = new RunPresenter(_sceneReferences.RunScreen, _playerHealth);
 
         _victoryPresenter = new VictoryPresenter(_sceneReferences.VictoryScreen);
 
@@ -91,8 +95,10 @@ public class CompositionRoot
     {
         _bootstrapState.Completed += OnBootstrapCompleted;
 
+        _playerHealth.Died += OnPlayerDied;
         _runState.Won += OnRunWon;
         _runState.Lost += OnRunLost;
+        _sceneReferences.LevelGenerator.Finished += OnLevelFinished;
 
         _mainMenuState.Entered += _mainMenuPresenter.HandleStateEntered;
         _mainMenuState.Exited += _mainMenuPresenter.HandleStateExited;
@@ -111,8 +117,10 @@ public class CompositionRoot
     {
         _bootstrapState.Completed -= OnBootstrapCompleted;
 
+        _playerHealth.Died -= OnPlayerDied;
         _runState.Won -= OnRunWon;
         _runState.Lost -= OnRunLost;
+        _sceneReferences.LevelGenerator.Finished -= OnLevelFinished;
 
         _mainMenuState.Entered -= _mainMenuPresenter.HandleStateEntered;
         _mainMenuState.Exited -= _mainMenuPresenter.HandleStateExited;
@@ -132,8 +140,6 @@ public class CompositionRoot
         _mainMenuPresenter.StartRequested += OnStartRequested;
         _victoryPresenter.MainMenuRequested += OnVictoryMainMenuRequested;
         _defeatPresenter.MainMenuRequested += OnDefeatMainMenuRequested;
-        _runPresenter.TestWinRequested += OnTestWinRequested;
-        _runPresenter.TestLoseRequested += OnTestLoseRequested;
     }
 
     private void UnsubscribeFromPresenterEvents()
@@ -141,18 +147,16 @@ public class CompositionRoot
         _mainMenuPresenter.StartRequested -= OnStartRequested;
         _victoryPresenter.MainMenuRequested -= OnVictoryMainMenuRequested;
         _defeatPresenter.MainMenuRequested -= OnDefeatMainMenuRequested;
-        _runPresenter.TestWinRequested -= OnTestWinRequested;
-        _runPresenter.TestLoseRequested -= OnTestLoseRequested;
     }
 
-    private void OnTestWinRequested()
-    {
-        _runState.RequestWin();
-    }
-
-    private void OnTestLoseRequested()
+    private void OnPlayerDied()
     {
         _runState.RequestLose();
+    }
+
+    private void OnLevelFinished()
+    {
+        _runState.RequestWin();
     }
 
     private void OnBootstrapCompleted()

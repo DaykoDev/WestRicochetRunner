@@ -55,6 +55,11 @@ public class Player : MonoBehaviour
         _lateralCalculator.ResetToStart(transform.position.x);
     }
 
+    public void SetRunModifiers(RunModifiers modifiers)
+    {
+        _playerShooting.SetRunModifiers(modifiers);
+    }
+
     private void OnPointerMoved(Vector2 delta)
     {
         if (_isControlEnabled == false)
