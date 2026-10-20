@@ -12,6 +12,7 @@ public class PlayerAimer : MonoBehaviour
     [SerializeField] private Transform _firePoint;
 
     public Vector3 FirePointPosition => _firePoint.position;
+    public Transform FirePointTransform => _firePoint;
 
     public Vector3 AimPointPosition
     {
@@ -19,10 +20,7 @@ public class PlayerAimer : MonoBehaviour
         {
             Vector3 firePosition = _firePoint.position;
 
-            return new Vector3(
-                _trackCenterX,
-                firePosition.y + _aimHeight,
-                firePosition.z + _aimDistance);
+            return new Vector3(_trackCenterX, firePosition.y + _aimHeight, firePosition.z + _aimDistance);
         }
     }
 

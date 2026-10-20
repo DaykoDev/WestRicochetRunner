@@ -52,16 +52,6 @@ public class ObstacleHealthView : MonoBehaviour
         }
     }
 
-    private void LateUpdate()
-    {
-        if (_camera == null)
-        {
-            return;
-        }
-
-        Vector3 direction = _camera.transform.position - _healthText.transform.position;
-    }
-
     private void OnHealthChanged(float currentHealth, float maxHealth)
     {
         Refresh();

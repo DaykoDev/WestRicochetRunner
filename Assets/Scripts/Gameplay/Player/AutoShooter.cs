@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class AutoShooter : MonoBehaviour
 {
+    private const float RetryInterval = 0.05f;
+
     [Header("References")]
     [SerializeField] private BallLauncher _ballLauncher;
 
@@ -14,8 +16,10 @@ public class AutoShooter : MonoBehaviour
 
     private void Update()
     {
-        if (!_isShooting)
+        if (_isShooting == false)
+        {
             return;
+        }
 
         if (_shootTimer > 0f)
         {
@@ -23,13 +27,10 @@ public class AutoShooter : MonoBehaviour
             return;
         }
 
-        float multiplier = _runModifiers != null
-            ? _runModifiers.FireRateMultiplier
-            : 1f;
-
+        float multiplier = _runModifiers != null ? _runModifiers.FireRateMultiplier : 1f;
         float interval = _fireInterval / multiplier;
 
-        _shootTimer = _ballLauncher.TryLaunch() ? interval : 0.05f;
+        _shootTimer = _ballLauncher.TryLaunch() ? interval : RetryInterval;
     }
 
     public void SetRunModifiers(RunModifiers modifiers)

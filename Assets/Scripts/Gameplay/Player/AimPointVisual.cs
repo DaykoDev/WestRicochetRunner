@@ -16,9 +16,7 @@ public class AimPointVisual : MonoBehaviour
 
     public void UpdateVisual(Vector3 aimPosition, Transform cameraTransform)
     {
-        transform.position =
-            aimPosition - cameraTransform.forward * _cameraOffset;
-
+        transform.position = aimPosition - cameraTransform.forward * _cameraOffset;
         transform.rotation = cameraTransform.rotation;
     }
 

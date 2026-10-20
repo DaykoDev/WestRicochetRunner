@@ -13,7 +13,9 @@ public class PlayerDamageReceiver : MonoBehaviour
     private void Awake()
     {
         if (_playerHealth == null)
+        {
             _playerHealth = GetComponent<PlayerHealth>();
+        }
 
         if (_playerHealth == null)
         {
@@ -25,12 +27,16 @@ public class PlayerDamageReceiver : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (_playerHealth.IsDead || Time.time < _nextDamageTime)
+        {
             return;
+        }
 
         Obstacle obstacle = other.GetComponentInParent<Obstacle>();
 
         if (obstacle == null || obstacle.IsDestroyed)
+        {
             return;
+        }
 
         _playerHealth.TakeDamage(obstacle.ContactDamage);
         _nextDamageTime = Time.time + _invulnerabilityDuration;

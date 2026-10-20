@@ -5,11 +5,8 @@ public class BallMovementSettings : ScriptableObject
 {
     [Header("Collision")]
     [SerializeField, Min(0.001f)] private float _radius = 0.15f;
-
     [SerializeField, Min(0.001f)] private float _collisionOffset = 0.01f;
-
     [SerializeField] private LayerMask _collisionMask;
-
     [SerializeField, Min(1)] private int _castBufferSize = 16;
 
     [Header("Ricochet")]

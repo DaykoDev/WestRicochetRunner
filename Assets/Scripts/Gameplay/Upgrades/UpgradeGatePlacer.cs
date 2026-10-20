@@ -55,6 +55,14 @@ public class UpgradeGatePlacer : MonoBehaviour
         var random = new System.Random(CreateSeed(seed, sectionIndex));
 
         Shuffle(points, random);
+        Shuffle(prefabs, random);
+
+        int maxPossible = Mathf.Min(points.Count, prefabs.Count);
+
+        if (maxPossible == 0)
+        {
+            return;
+        }
 
         int minCount = Mathf.Clamp(_minGates, 1, points.Count);
         int maxCount = Mathf.Clamp(_maxGates, minCount, points.Count);
@@ -63,7 +71,7 @@ public class UpgradeGatePlacer : MonoBehaviour
         for (int i = 0; i < gateCount; i++)
         {
             Transform point = points[i];
-            GameObject prefab = prefabs[random.Next(prefabs.Count)];
+            GameObject prefab = prefabs[i];
 
             GameObject gate = Instantiate(prefab, point.position, point.rotation, sectionRoot);
 

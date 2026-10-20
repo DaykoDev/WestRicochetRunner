@@ -40,14 +40,14 @@ public class TrajectoryRenderer : MonoBehaviour
         }
     }
 
-    public void UpdateTrajectory(Vector3 origin, Vector3 direction, BallStats stats)
+    public void UpdateTrajectory(Vector3 origin, Vector3 velocity, BallStats stats)
     {
         if (enabled == false)
         {
             return;
         }
 
-        _trajectoryPredictor.CalculateTrajectory(origin, direction, stats);
+        _trajectoryPredictor.CalculateTrajectory(origin, velocity, stats);
 
         UpdateLine();
     }

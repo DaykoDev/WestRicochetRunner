@@ -12,6 +12,27 @@ public class Bootstrapper : MonoBehaviour
         _compositionRoot.Initialize();
     }
 
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+        {
+            _compositionRoot?.FlushSave();
+        }
+    }
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (hasFocus == false)
+        {
+            _compositionRoot?.FlushSave();
+        }
+    }
+
+    private void OnApplicationQuit()
+    {
+        _compositionRoot?.FlushSave();
+    }
+
     private void OnDestroy()
     {
         _compositionRoot?.Dispose();

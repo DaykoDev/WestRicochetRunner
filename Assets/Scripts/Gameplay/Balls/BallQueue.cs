@@ -23,12 +23,16 @@ public class BallQueue : MonoBehaviour
     public void SetRunModifiers(RunModifiers modifiers)
     {
         if (_runModifiers != null)
+        {
             _runModifiers.Changed -= OnModifiersChanged;
+        }
 
         _runModifiers = modifiers;
 
         if (_runModifiers != null)
+        {
             _runModifiers.Changed += OnModifiersChanged;
+        }
 
         UpdateCapacity();
     }
@@ -38,12 +42,16 @@ public class BallQueue : MonoBehaviour
         ball = null;
 
         if (_availableCount <= 0 || _ballPool == null)
+        {
             return false;
+        }
 
         ball = _ballPool.Get();
 
         if (ball == null)
+        {
             return false;
+        }
 
         _availableCount--;
 
@@ -56,7 +64,9 @@ public class BallQueue : MonoBehaviour
     public void ReleaseBall(Ball ball)
     {
         if (ball != null)
+        {
             _ballPool.Release(ball);
+        }
     }
 
     public void SetCapacity(int newCapacity)
@@ -88,6 +98,8 @@ public class BallQueue : MonoBehaviour
     private void OnDestroy()
     {
         if (_runModifiers != null)
+        {
             _runModifiers.Changed -= OnModifiersChanged;
+        }
     }
 }

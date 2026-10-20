@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public class RunState : IState
 {
@@ -6,18 +7,21 @@ public class RunState : IState
     private readonly Player _player;
     private readonly PlayerHealth _playerHealth;
     private readonly LevelGenerator _levelGenerator;
+    private readonly TrackScroller _trackScroller;
+    private readonly UpgradeService _upgradeService;
 
     private RunContext _context;
     private bool _isRunning;
 
-    public RunState(PlayerProgress playerProgress, Player player, PlayerHealth playerHealth, LevelGenerator levelGenerator)
+    public RunState(PlayerProgress playerProgress, Player player, PlayerHealth playerHealth, LevelGenerator levelGenerator, TrackScroller trackScroller, UpgradeService upgradeService)
     {
         _playerProgress = playerProgress;
         _player = player;
         _playerHealth = playerHealth;
         _levelGenerator = levelGenerator;
+        _trackScroller = trackScroller;
+        _upgradeService = upgradeService;
     }
-
 
     public event Action Entered;
     public event Action Exited;
@@ -26,6 +30,10 @@ public class RunState : IState
 
     public void Enter()
     {
+        Time.timeScale = 1f;
+
+        _trackScroller.ResetPosition();
+
         _isRunning = true;
         CreateRunContext();
 
@@ -41,9 +49,8 @@ public class RunState : IState
     public void Exit()
     {
         _isRunning = false;
-        StopRunSystems();
-        _levelGenerator.ClearLevel();
-        DestroyRunContext();
+        _trackScroller.StopScrolling();
+        _player.SetControlEnabled(false);
 
         Exited?.Invoke();
     }
@@ -51,7 +58,9 @@ public class RunState : IState
     public void RequestWin()
     {
         if (_isRunning == false)
+        {
             return;
+        }
 
         Won?.Invoke();
     }
@@ -59,30 +68,35 @@ public class RunState : IState
     public void RequestLose()
     {
         if (_isRunning == false)
+        {
             return;
+        }
 
         Lost?.Invoke();
     }
 
-    private void StartRunSystems()
+    public void ClearRun()
     {
-        _player.SetControlEnabled(true);
+        _isRunning = false;
+        _player.SetControlEnabled(false);
+
+        _levelGenerator.ClearLevel();
+        _trackScroller.ResetPosition();
+
+        _context = null;
     }
 
-    private void StopRunSystems()
+    private void StartRunSystems()
     {
-        _player.SetControlEnabled(false);
+        _trackScroller.StartScrolling(_player.ForwardSpeed);
+        _player.SetControlEnabled(true);
     }
 
     private void CreateRunContext()
     {
         RunModifiers modifiers = new RunModifiers();
+        _upgradeService.ApplyPermanentUpgrades(modifiers);
 
         _context = new RunContext(_playerProgress.CurrentLevel, _playerProgress.CurrentLevelSeed, modifiers);
-    }
-
-    private void DestroyRunContext()
-    {
-        _context = null;
     }
 }

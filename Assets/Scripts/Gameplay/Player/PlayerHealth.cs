@@ -22,13 +22,17 @@ public class PlayerHealth : MonoBehaviour
     public void TakeDamage(int damage)
     {
         if (_isDead || damage <= 0)
+        {
             return;
+        }
 
         CurrentHealth = Mathf.Max(0, CurrentHealth - damage);
         HealthChanged?.Invoke(CurrentHealth, MaxHealth);
 
         if (CurrentHealth == 0)
+        {
             Die();
+        }
     }
 
     public void ResetHealth()
@@ -41,7 +45,9 @@ public class PlayerHealth : MonoBehaviour
     private void Die()
     {
         if (_isDead)
+        {
             return;
+        }
 
         _isDead = true;
         Died?.Invoke();

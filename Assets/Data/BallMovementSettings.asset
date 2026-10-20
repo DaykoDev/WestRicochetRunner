@@ -12,11 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01bad8c8c350a73498ba4a7155771d55, type: 3}
   m_Name: BallMovementSettings
   m_EditorClassIdentifier: 
+  _forwardBoundaryDistance: 16
+  _backwardBoundaryDistance: 3
   _radius: 0.25
   _collisionOffset: 0.01
   _collisionMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 320
   _castBufferSize: 16
   _minBounceAngle: 25
   _maxCollisionsPerStep: 5

@@ -14,7 +14,7 @@ public class FinishTrigger : MonoBehaviour
             return;
         }
 
-        if (other.GetComponentInParent<Player>() == null)
+        if (other.GetComponent<Player>() == null)
         {
             return;
         }

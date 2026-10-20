@@ -1,4 +1,3 @@
-
 using UnityEngine;
 
 public class PlayerMover : MonoBehaviour
@@ -12,6 +11,8 @@ public class PlayerMover : MonoBehaviour
     private Vector3 _startPosition;
     private Quaternion _startRotation;
 
+    public float ForwardSpeed => _forwardSpeed;
+
     private void Update()
     {
         if (_isMovementEnabled == false)
@@ -19,7 +20,6 @@ public class PlayerMover : MonoBehaviour
             return;
         }
 
-        MoveForward();
         MoveLaterally();
     }
 
@@ -45,11 +45,6 @@ public class PlayerMover : MonoBehaviour
     public void SetTargetX(float targetX)
     {
         _targetX = targetX;
-    }
-
-    private void MoveForward()
-    {
-        transform.position += Vector3.forward * (_forwardSpeed * Time.deltaTime);
     }
 
     private void MoveLaterally()

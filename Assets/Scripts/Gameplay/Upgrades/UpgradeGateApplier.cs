@@ -20,7 +20,7 @@ public class UpgradeGateApplier : MonoBehaviour
             return;
         }
 
-        if (other.GetComponentInParent<Player>() == null)
+        if (other.GetComponent<Player>() == null)
         {
             return;
         }

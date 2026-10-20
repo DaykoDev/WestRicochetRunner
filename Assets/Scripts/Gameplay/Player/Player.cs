@@ -10,6 +10,8 @@ public class Player : MonoBehaviour
 
     private bool _isControlEnabled;
 
+    public float ForwardSpeed => _mover.ForwardSpeed;
+
     private void Awake()
     {
         float initialX = transform.position.x;

@@ -7,6 +7,7 @@ public class RunModifiers
 
     public float FireRateBonus { get; private set; }
     public float BallSpeedBonus { get; private set; }
+    public float BallDamageBonus { get; private set; }
 
     public float FireRateMultiplier => 1f + FireRateBonus;
     public float BallSpeedMultiplier => 1f + BallSpeedBonus;
@@ -16,27 +17,25 @@ public class RunModifiers
 
     public void Apply(UpgradeType type, float value)
     {
-        if (value <= 0f || float.IsNaN(value) || float.IsInfinity(value))
+        if (IsValidPositive(value) == false)
+        {
             return;
+        }
 
         switch (type)
         {
             case UpgradeType.BallCount:
                 BallCountBonus = AddBonus(BallCountBonus, value);
                 break;
-
             case UpgradeType.FireRate:
-                FireRateBonus += value / 100f;
+                FireRateBonus = AddPositive(FireRateBonus, value / 100f);
                 break;
-
             case UpgradeType.BallSpeed:
-                BallSpeedBonus += value / 100f;
+                BallSpeedBonus = AddPositive(BallSpeedBonus, value / 100f);
                 break;
-
             case UpgradeType.BounceCount:
                 BounceCountBonus = AddBonus(BounceCountBonus, value);
                 break;
-
             default:
                 return;
         }
@@ -44,9 +43,54 @@ public class RunModifiers
         Changed?.Invoke();
     }
 
+    public void AddBallDamageBonus(float value)
+    {
+        if (IsValidPositive(value) == false)
+        {
+            return;
+        }
+
+        BallDamageBonus = AddPositive(BallDamageBonus, value);
+        Changed?.Invoke();
+    }
+
+    public void AddIncomeMultiplierBonus(float value)
+    {
+        if (IsValidPositive(value) == false)
+        {
+            return;
+        }
+
+        IncomeMultiplier = AddPositive(IncomeMultiplier, value);
+        Changed?.Invoke();
+    }
+
+    private static bool IsValidPositive(float value)
+    {
+        return value > 0f && !float.IsNaN(value) && !float.IsInfinity(value);
+    }
+
+    private static float AddPositive(float current, float value)
+    {
+        double result = (double)current + value;
+
+        return result >= float.MaxValue ? float.MaxValue : (float)result;
+    }
+
     private static int AddBonus(int current, float value)
     {
-        long increase = (long)Math.Round(value, MidpointRounding.AwayFromZero);
-        return (int)Math.Min(int.MaxValue, (long)current + Math.Max(0L, increase));
+        double increase = Math.Round(value, MidpointRounding.AwayFromZero);
+
+        if (increase <= 0d)
+        {
+            return current;
+        }
+
+        if (increase >= int.MaxValue - (double)current)
+        {
+            return int.MaxValue;
+        }
+
+        return current + (int)increase;
     }
 }

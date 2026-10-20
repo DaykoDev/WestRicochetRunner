@@ -9,13 +9,14 @@ public class TrajectoryPredictor : MonoBehaviour
     [SerializeField] private BallMovementSettings _movementSettings;
 
     [Header("Trajectory")]
-    [SerializeField, Min(0.1f)] private float _maxDistance = 50f;
+    [SerializeField, Min(0.1f)] private float _maxDistance = 30f;
 
     private RaycastHit[] _raycastHits;
     private Vector3[] _trajectoryPoints;
 
     public int PointCount { get; private set; }
-    public int MaxPointCount => PreviewBounceCount + 2;
+    public int MaxPointCount =>
+        PreviewBounceCount + 2;
 
     private void Awake()
     {
@@ -23,29 +24,28 @@ public class TrajectoryPredictor : MonoBehaviour
         _trajectoryPoints = new Vector3[MaxPointCount];
     }
 
-    public int CalculateTrajectory(Vector3 origin, Vector3 direction, BallStats stats)
+    public int CalculateTrajectory(Vector3 origin, Vector3 velocity, BallStats stats)
     {
         PointCount = 0;
+        float speed = velocity.magnitude;
 
-        if (enabled == false || direction.sqrMagnitude < Mathf.Epsilon)
+        if (enabled == false || speed < Mathf.Epsilon)
         {
             return PointCount;
         }
 
         int maxBounces = Mathf.Min(stats.MaxBounces, PreviewBounceCount);
-
-        direction.Normalize();
-
+        Vector3 direction = velocity / speed;
+        Vector3 simulationOrigin = origin;
         float remainingDistance = _maxDistance;
         int bounceCount = 0;
 
-        _trajectoryPoints[PointCount] = origin;
-        PointCount++;
+        _trajectoryPoints[PointCount++] = origin;
 
         while (remainingDistance > 0f && PointCount < _trajectoryPoints.Length)
         {
             bool hasHit = BallCollisionQuery.SphereCast(
-                origin,
+                simulationOrigin,
                 _movementSettings.Radius,
                 direction,
                 remainingDistance,
@@ -57,16 +57,15 @@ public class TrajectoryPredictor : MonoBehaviour
 
             if (hasHit == false)
             {
-                _trajectoryPoints[PointCount++] = origin + direction * remainingDistance;
-
+                _trajectoryPoints[PointCount++] = simulationOrigin + direction * remainingDistance;
                 break;
             }
 
-            Vector3 hitCenter = origin + direction * hit.distance;
+            float traveledDistance = Mathf.Max(0f, hit.distance);
+            Vector3 hitCenter = simulationOrigin + direction * traveledDistance;
 
             _trajectoryPoints[PointCount++] = hitCenter;
-
-            remainingDistance = Mathf.Max(0f, remainingDistance - hit.distance);
+            remainingDistance = Mathf.Max(0f, remainingDistance - traveledDistance);
 
             if (bounceCount >= maxBounces)
             {
@@ -76,9 +75,7 @@ public class TrajectoryPredictor : MonoBehaviour
             direction = BallRicochet.CalculateDirection(direction, normal, _movementSettings.MinBounceAngle);
 
             float offset = _movementSettings.CollisionOffset;
-
-            origin = hitCenter + normal * offset;
-
+            simulationOrigin = hitCenter + normal * offset;
             remainingDistance = Mathf.Max(0f, remainingDistance - offset);
 
             bounceCount++;
