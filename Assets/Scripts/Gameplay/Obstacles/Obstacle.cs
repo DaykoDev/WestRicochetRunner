@@ -1,31 +1,28 @@
 using System;
 using UnityEngine;
 
-public abstract class Obstacle : MonoBehaviour, IDamageable
+public abstract class Obstacle : MonoBehaviour, IDamageable, IPoolable<Obstacle>
 {
     [Header("Obstacle Settings")]
     [SerializeField, Min(1)] private int _baseHP = 10;
     [SerializeField, Min(0f)] private float _prefabCoinMultiplier = 1f;
     [SerializeField, Min(1)] private int _contactDamage = 1;
 
-    private float _maxHealth;
-    private float _currentHealth;
+    private int _maxHealth;
+    private int _currentHealth;
     private int _income;
     private bool _isDestroyed;
 
     public int ContactDamage => _contactDamage;
-    public float MaxHealth => _maxHealth;
-    public float CurrentHealth => _currentHealth;
+    public int MaxHealth => _maxHealth;
+    public int CurrentHealth => _currentHealth;
     public int Income => _income;
     public bool IsDestroyed => _isDestroyed;
 
-    public event Action<float, float> HealthChanged;
+    public event Action<int, int> HealthChanged;
     public event Action<Obstacle> Destroyed;
-
-    protected virtual void Awake()
-    {
-        Initialize(_baseHP, Mathf.RoundToInt(_baseHP * _prefabCoinMultiplier));
-    }
+    public event Action<Obstacle> Died;
+    public event Action<Obstacle> ReturnedToPool;
 
     public void ConfigureForLevel(int level, ObstacleSection section, float incomeMultiplier, ObstacleHealthCalculator healthCalculator, IncomeCalculator incomeCalculator)
     {
@@ -41,9 +38,9 @@ public abstract class Obstacle : MonoBehaviour, IDamageable
         Initialize(targetHP, income);
     }
 
-    private void Initialize(float maxHealth, int income)
+    private void Initialize(int maxHealth, int income)
     {
-        _maxHealth = Mathf.Max(1f, maxHealth);
+        _maxHealth = Mathf.Max(1, maxHealth);
         _currentHealth = _maxHealth;
         _income = Mathf.Max(0, income);
         _isDestroyed = false;
@@ -51,20 +48,31 @@ public abstract class Obstacle : MonoBehaviour, IDamageable
         HealthChanged?.Invoke(_currentHealth, _maxHealth);
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(int damage)
     {
-        if (_isDestroyed || damage <= 0f)
+        if (_isDestroyed || damage <= 0)
         {
             return;
         }
 
-        _currentHealth = Mathf.Max(0f, _currentHealth - damage);
+        _currentHealth = Mathf.Max(0, _currentHealth - damage);
         HealthChanged?.Invoke(_currentHealth, _maxHealth);
 
-        if (_currentHealth <= 0f)
+        if (_currentHealth <= 0)
         {
             Die();
         }
+    }
+
+    public void ReleaseWithoutReward()
+    {
+        if (_isDestroyed)
+        {
+            return;
+        }
+
+        _isDestroyed = true;
+        Died?.Invoke(this);
     }
 
     private void Die()
@@ -75,12 +83,17 @@ public abstract class Obstacle : MonoBehaviour, IDamageable
         }
 
         _isDestroyed = true;
+        OnDied();
         Destroyed?.Invoke(this);
-        OnDestroyed();
-        Destroy(gameObject);
+        Died?.Invoke(this);
     }
 
-    protected virtual void OnDestroyed()
+    protected virtual void OnDied()
     {
+    }
+
+    public void OnReturnedToPool()
+    {
+        ReturnedToPool?.Invoke(this);
     }
 }

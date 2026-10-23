@@ -36,4 +36,24 @@ public class GameStateMachine
         _currentState = nextState;
         _currentState.Enter();
     }
+
+    public void Enter<TState, TPayload>(TPayload payload) where TState : class, IPayloadedState<TPayload>
+    {
+        Type stateType = typeof(TState);
+
+        if (_currentState is TState)
+        {
+            return;
+        }
+
+        if (_states.TryGetValue(stateType, out IState nextState) == false)
+        {
+            throw new InvalidOperationException($"State {stateType.Name} is not registered.");
+        }
+
+        _currentState?.Exit();
+
+        _currentState = nextState;
+        ((IPayloadedState<TPayload>)_currentState).Enter(payload);
+    }
 }

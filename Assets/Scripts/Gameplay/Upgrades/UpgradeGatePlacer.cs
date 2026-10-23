@@ -64,9 +64,11 @@ public class UpgradeGatePlacer : MonoBehaviour
             return;
         }
 
-        int minCount = Mathf.Clamp(_minGates, 1, points.Count);
-        int maxCount = Mathf.Clamp(_maxGates, minCount, points.Count);
+        int minCount = Mathf.Clamp(_minGates, 1, maxPossible);
+        int maxCount = Mathf.Clamp(_maxGates, minCount, maxPossible);
         int gateCount = random.Next(minCount, maxCount + 1);
+
+        var spawnedGates = new List<UpgradeGateApplier>();
 
         for (int i = 0; i < gateCount; i++)
         {
@@ -85,6 +87,17 @@ public class UpgradeGatePlacer : MonoBehaviour
             }
 
             applier.SetRunModifiers(modifiers);
+            spawnedGates.Add(applier);
+        }
+
+        if (spawnedGates.Count > 1)
+        {
+            UpgradeGateGroup group = sectionRoot.gameObject.AddComponent<UpgradeGateGroup>();
+
+            foreach (UpgradeGateApplier gate in spawnedGates)
+            {
+                group.Register(gate);
+            }
         }
     }
 

@@ -12,12 +12,13 @@ public class ObstacleFactory : MonoBehaviour
         [SerializeField, Min(1)] private int _weight = 1;
         [SerializeField] private bool _allowSafe = true;
         [SerializeField] private bool _allowChallenge = true;
+        [SerializeField] private bool _isWide;
 
         public Obstacle Prefab => _prefab;
 
-        public bool IsAvailable(int level, ObstacleSection section)
+        public bool IsAvailable(int level, ObstacleSection section, bool wide)
         {
-            if (_prefab == null || level < _minLevel || _weight <= 0)
+            if (_prefab == null || level < _minLevel || _weight <= 0 || _isWide != wide)
             {
                 return false;
             }
@@ -28,6 +29,14 @@ public class ObstacleFactory : MonoBehaviour
         public int Weight => _weight;
     }
 
+    [Header("Pooling")]
+    [SerializeField] private Transform _poolContainer;
+    [SerializeField, Min(0)] private int _prewarmPerType = 5;
+    [SerializeField, Min(1)] private int _maxPerType = 30;
+    [SerializeField] private EffectPool _explosionEffectPool;
+
+    private readonly Dictionary<Obstacle, ComponentPool<Obstacle>> _pools = new();
+
     [Header("Obstacle Prefabs")]
     [SerializeField] private ObstacleEntry[] _entries;
 
@@ -36,9 +45,38 @@ public class ObstacleFactory : MonoBehaviour
     [SerializeField] private IncomeCalculator _incomeCalculator;
     [SerializeField] private RunRewardCollector _rewardCollector;
 
-    private readonly List<ObstacleEntry> _candidates = new();
+    [SerializeField] private Camera _camera;
 
-    public Obstacle Create(int level, ObstacleSection section, Vector3 position, Quaternion rotation, Transform parent, float incomeMultiplier, System.Random random)
+    [Header("Cleanup")]
+    [SerializeField] private LayerMask _obstacleMask;
+    [SerializeField, Min(4)] private int _cleanupBufferSize = 32;
+
+    private readonly List<ObstacleEntry> _candidates = new();
+    private Collider[] _cleanupBuffer;
+
+    private void Awake()
+    {
+        if (_poolContainer == null)
+        {
+            _poolContainer = transform;
+        }
+
+        foreach (ObstacleEntry entry in _entries)
+        {
+            if (entry.Prefab == null || _pools.ContainsKey(entry.Prefab))
+            {
+                continue;
+            }
+
+            ComponentPool<Obstacle> pool = new ComponentPool<Obstacle>(entry.Prefab, _poolContainer, _prewarmPerType, _maxPerType, OnObstacleCreated);
+            pool.Prewarm(_prewarmPerType);
+            _pools.Add(entry.Prefab, pool);
+        }
+
+        _cleanupBuffer = new Collider[_cleanupBufferSize];
+    }
+
+    public Obstacle Create(int level, ObstacleSection section, Vector3 position, Quaternion rotation, Transform parent, float incomeMultiplier, System.Random random, bool wide)
     {
         if (_healthCalculator == null || _incomeCalculator == null)
         {
@@ -51,7 +89,7 @@ public class ObstacleFactory : MonoBehaviour
 
         foreach (ObstacleEntry entry in _entries)
         {
-            if (entry.IsAvailable(level, section) == false)
+            if (entry.IsAvailable(level, section, wide) == false)
             {
                 continue;
             }
@@ -84,7 +122,10 @@ public class ObstacleFactory : MonoBehaviour
             return null;
         }
 
-        Obstacle obstacle = Instantiate(selected.Prefab, position, rotation, parent);
+        ComponentPool<Obstacle> pool = _pools[selected.Prefab];
+        Obstacle obstacle = pool.Get();
+        obstacle.transform.SetParent(parent);
+        obstacle.transform.SetPositionAndRotation(position, rotation);
         obstacle.ConfigureForLevel(level, section, incomeMultiplier, _healthCalculator, _incomeCalculator);
 
         if (_rewardCollector != null)
@@ -95,11 +136,52 @@ public class ObstacleFactory : MonoBehaviour
         return obstacle;
     }
 
+    public int ReleaseObstaclesNear(Vector3 center, float radius)
+    {
+        int hitCount = Physics.OverlapSphereNonAlloc(
+            center,
+            radius,
+            _cleanupBuffer,
+            _obstacleMask,
+            QueryTriggerInteraction.Ignore);
+
+        int releasedCount = 0;
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            Obstacle obstacle = _cleanupBuffer[i].GetComponentInParent<Obstacle>();
+
+            if (obstacle == null || obstacle.IsDestroyed)
+            {
+                continue;
+            }
+
+            obstacle.ReleaseWithoutReward();
+            releasedCount++;
+        }
+
+        return releasedCount;
+    }
+
     public void BeginRun()
     {
         if (_rewardCollector != null)
         {
             _rewardCollector.BeginRun();
+        }
+    }
+
+    private void OnObstacleCreated(Obstacle obstacle)
+    {
+        if (obstacle is DynamiteBarrel dynamiteBarrel)
+        {
+            if (_explosionEffectPool == null)
+            {
+                Debug.LogError("Explosion effect pool is not assigned.", this);
+                return;
+            }
+
+            dynamiteBarrel.SetExplosionPool(_explosionEffectPool);
         }
     }
 }

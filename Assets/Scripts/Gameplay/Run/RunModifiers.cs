@@ -7,7 +7,7 @@ public class RunModifiers
 
     public float FireRateBonus { get; private set; }
     public float BallSpeedBonus { get; private set; }
-    public float BallDamageBonus { get; private set; }
+    public int BallDamageBonus { get; private set; }
 
     public float FireRateMultiplier => 1f + FireRateBonus;
     public float BallSpeedMultiplier => 1f + BallSpeedBonus;
@@ -43,14 +43,14 @@ public class RunModifiers
         Changed?.Invoke();
     }
 
-    public void AddBallDamageBonus(float value)
+    public void AddBallDamageBonus(int value)
     {
-        if (IsValidPositive(value) == false)
+        if (value <= 0)
         {
             return;
         }
 
-        BallDamageBonus = AddPositive(BallDamageBonus, value);
+        BallDamageBonus = AddBonus(BallDamageBonus, value);
         Changed?.Invoke();
     }
 

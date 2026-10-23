@@ -21,6 +21,11 @@ public class PermanentUpgradeSettings : ScriptableObject
 
     [SerializeField] private Definition[] _definitions;
 
+    [Header("Cost Growth")]
+    [SerializeField, Min(1f)] private float _costGrowth = 1.25f;
+
+    public float CostGrowth => _costGrowth;
+
     public bool TryGetDefinition(PermanentUpgradeType type, out Definition definition)
     {
         if (_definitions != null)

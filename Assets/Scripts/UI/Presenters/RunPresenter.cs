@@ -6,25 +6,40 @@ public class RunPresenter : IDisposable
     private readonly PlayerHealth _playerHealth;
     private readonly PlayerProgress _playerProgress;
     private readonly Wallet _wallet;
+    private readonly TrackScroller _trackScroller;
+    private readonly LevelGenerator _levelGenerator;
+    private readonly BallQueue _ballQueue;
 
-    public RunPresenter(RunScreen screen, PlayerHealth playerHealth, PlayerProgress playerProgress, Wallet wallet)
+    public RunPresenter(RunScreen screen, PlayerHealth playerHealth, PlayerProgress playerProgress, Wallet wallet, TrackScroller trackScroller, LevelGenerator levelGenerator, BallQueue ballQueue)
     {
         _screen = screen;
         _playerHealth = playerHealth;
         _playerProgress = playerProgress;
         _wallet = wallet;
+        _trackScroller = trackScroller;
+        _levelGenerator = levelGenerator;
+        _ballQueue = ballQueue;
 
+        _screen.TutorialDismissed += OnTutorialDismissed;
+        _screen.SettingsClicked += OnSettingsClicked;
         _playerHealth.HealthChanged += OnHealthChanged;
         _playerProgress.LevelChanged += OnLevelChanged;
         _wallet.BalanceChanged += OnBalanceChanged;
+        _trackScroller.DistanceChanged += OnDistanceChanged;
+        _ballQueue.AvailableCountChanged += OnAvailableCountChanged;
     }
+
+    public event Action SettingsRequested;
 
     public void HandleStateEntered()
     {
+        _screen.SetTutorialVisible(_playerProgress.IsTutorialCompleted == false);
         _screen.Show();
         _screen.SetHealth(_playerHealth.CurrentHealth, _playerHealth.MaxHealth);
         _screen.SetLevel(_playerProgress.CurrentLevel);
         _screen.SetCoins(_wallet.Balance);
+        _screen.SetProgress(0f);
+        _screen.SetBallCount(_ballQueue.AvailableCount, _ballQueue.Capacity);
     }
 
     public void HandleStateExited()
@@ -34,9 +49,23 @@ public class RunPresenter : IDisposable
 
     public void Dispose()
     {
+        _screen.TutorialDismissed -= OnTutorialDismissed;
+        _screen.SettingsClicked -= OnSettingsClicked;
         _playerHealth.HealthChanged -= OnHealthChanged;
         _playerProgress.LevelChanged -= OnLevelChanged;
         _wallet.BalanceChanged -= OnBalanceChanged;
+        _trackScroller.DistanceChanged -= OnDistanceChanged;
+        _ballQueue.AvailableCountChanged -= OnAvailableCountChanged;
+    }
+
+    private void OnTutorialDismissed()
+    {
+        _playerProgress.CompleteTutorial();
+    }
+
+    private void OnSettingsClicked()
+    {
+        SettingsRequested?.Invoke();
     }
 
     private void OnHealthChanged(int currentHealth, int maxHealth)
@@ -52,5 +81,16 @@ public class RunPresenter : IDisposable
     private void OnBalanceChanged(int balance)
     {
         _screen.SetCoins(balance);
+    }
+
+    private void OnDistanceChanged(float distance)
+    {
+        float length = _levelGenerator.TrackLength;
+        _screen.SetProgress(length > 0f ? distance / length : 0f);
+    }
+
+    private void OnAvailableCountChanged(int available, int capacity)
+    {
+        _screen.SetBallCount(available, capacity);
     }
 }

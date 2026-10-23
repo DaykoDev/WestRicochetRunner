@@ -5,11 +5,11 @@ public class ObstaclePlacer : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private ObstacleFactory _obstacleFactory;
-    [SerializeField] private ObstaclePlacementSettings _placementSettings;
+    [SerializeField] private DifficultyTiersSettings _difficultyTiersSettings;
 
     public int PlaceObstacles(Transform sectionRoot, int level, TrackSectionType sectionType, float incomeMultiplier, int levelSeed, int sectionIndex)
     {
-        if (sectionRoot == null || _obstacleFactory == null || _placementSettings == null)
+        if (sectionRoot == null || _obstacleFactory == null || _difficultyTiersSettings == null)
         {
             Debug.LogError("ObstaclePlacer references are missing.", this);
             return 0;
@@ -44,7 +44,7 @@ public class ObstaclePlacer : MonoBehaviour
         }
 
         var random = new System.Random(CreateSeed(levelSeed, sectionIndex));
-        float density = Mathf.Clamp01(_placementSettings.GetSpawnDensity(sectionType, level));
+        float density = Mathf.Clamp01(_difficultyTiersSettings.GetSpawnDensity(sectionType, level));
         int targetCount = Mathf.Clamp(Mathf.CeilToInt(points.Count * density), 0, points.Count);
 
         for (int i = points.Count - 1; i > 0; i--)
@@ -54,6 +54,26 @@ public class ObstaclePlacer : MonoBehaviour
         }
 
         int placedCount = 0;
+
+        if (spawnPoints.WidePoints != null)
+        {
+            foreach (Transform widePoint in spawnPoints.WidePoints)
+            {
+                if (widePoint == null || random.NextDouble() > density)
+                {
+                    continue;
+                }
+
+                Obstacle wideObstacle = _obstacleFactory.Create(
+                    level, obstacleSection, widePoint.position, widePoint.rotation,
+                    sectionRoot, incomeMultiplier, random, true);
+
+                if (wideObstacle != null)
+                {
+                    placedCount++;
+                }
+            }
+        }
 
         for (int i = 0; i < targetCount; i++)
         {
@@ -66,7 +86,8 @@ public class ObstaclePlacer : MonoBehaviour
                 point.rotation,
                 sectionRoot,
                 incomeMultiplier,
-                random
+                random,
+                false
             );
 
             if (obstacle != null)

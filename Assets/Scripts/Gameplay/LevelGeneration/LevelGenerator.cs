@@ -10,16 +10,24 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] private ObstaclePlacer _obstaclePlacer;
     [SerializeField] private UpgradeGatePlacer _upgradeGatePlacer;
 
-    [Header("Level Length")]
-    [SerializeField, Min(1)] private int _earlyChallengeBlocks = 1;
-    [SerializeField, Min(1)] private int _midChallengeBlocks = 2;
-    [SerializeField, Min(1)] private int _highChallengeBlocks = 3;
+    [SerializeField] private DifficultyTiersSettings _difficultyTiers;
 
     private SectionSequenceBuilder _sequenceBuilder;
     private readonly List<GameObject> _spawnedSections = new();
     private readonly List<FinishTrigger> _finishTriggers = new();
 
+    private Vector3 _buildAnchorPosition;
+    private Quaternion _buildAnchorRotation;
+
     public event Action Finished;
+
+    public float TrackLength { get; private set; }
+
+    private void Awake()
+    {
+        _buildAnchorPosition = transform.position;
+        _buildAnchorRotation = transform.rotation;
+    }
 
     public void BuildLevel(int level, int seed, RunModifiers modifiers)
     {
@@ -41,7 +49,7 @@ public class LevelGenerator : MonoBehaviour
 
         try
         {
-            sequence = _sequenceBuilder.Build(level, seed, GetChallengeBlockCount(level));
+            sequence = _sequenceBuilder.Build(level, seed, _difficultyTiers.GetChallengeBlockCount(level));
         }
         catch (ArgumentOutOfRangeException exception)
         {
@@ -57,8 +65,10 @@ public class LevelGenerator : MonoBehaviour
         ClearLevel();
         _obstaclePlacer.BeginRun();
 
-        Vector3 nextPosition = transform.position;
-        Quaternion nextRotation = transform.rotation;
+        Vector3 nextPosition = _buildAnchorPosition;
+        Quaternion nextRotation = _buildAnchorRotation;
+
+        float trackLength = 0f;
 
         for (int i = 0; i < sequence.Count; i++)
         {
@@ -101,9 +111,13 @@ public class LevelGenerator : MonoBehaviour
 
             _obstaclePlacer.PlaceObstacles(instance.transform, level, section.Type, modifiers != null ? modifiers.IncomeMultiplier : 1f, seed, i);
 
+            trackLength += Vector3.Distance(nextPosition, anchors.EndAnchor.position);
+
             nextPosition = anchors.EndAnchor.position;
             nextRotation = anchors.EndAnchor.rotation;
         }
+
+        TrackLength = trackLength;
     }
 
     public void ClearLevel()
@@ -127,21 +141,7 @@ public class LevelGenerator : MonoBehaviour
         }
 
         _spawnedSections.Clear();
-    }
-
-    private int GetChallengeBlockCount(int level)
-    {
-        if (level <= 3)
-        {
-            return _earlyChallengeBlocks;
-        }
-
-        if (level <= 15)
-        {
-            return _midChallengeBlocks;
-        }
-
-        return _highChallengeBlocks;
+        TrackLength = 0f;
     }
 
     private static void AlignSection(Transform sectionRoot, Transform startAnchor, Vector3 targetPosition, Quaternion targetRotation)

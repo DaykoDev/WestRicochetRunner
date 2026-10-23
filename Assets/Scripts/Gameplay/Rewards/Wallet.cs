@@ -34,6 +34,17 @@ public class Wallet : MonoBehaviour
         BalanceChanged?.Invoke(Balance);
     }
 
+    public void Remove(int amount)
+    {
+        if (amount <= 0)
+        {
+            return;
+        }
+
+        Balance = Math.Max(0, Balance - amount);
+        BalanceChanged?.Invoke(Balance);
+    }
+
     public bool TrySpend(int amount)
     {
         if (amount <= 0 || Balance < amount)

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class MainMenuScreen : MonoBehaviour
@@ -20,7 +19,12 @@ public class MainMenuScreen : MonoBehaviour
         public TMP_Text LevelText => _levelText;
         public TMP_Text CostText => _costText;
 
-        [NonSerialized] public UnityAction ClickHandler;
+        public event Action<PermanentUpgradeType> PurchaseRequested;
+
+        public void HandleButtonClicked()
+        {
+            PurchaseRequested?.Invoke(_type);
+        }
     }
 
     [Header("Progress")]
@@ -29,6 +33,8 @@ public class MainMenuScreen : MonoBehaviour
 
     [Header("Buttons")]
     [SerializeField] private Button _startButton;
+    [SerializeField] private Button _coinsRewardButton;
+    [SerializeField] private Button _settingsButton;
 
     [Header("Permanent Upgrades")]
     [SerializeField] private UpgradePurchaseView[] _upgradeViews;
@@ -36,6 +42,8 @@ public class MainMenuScreen : MonoBehaviour
     private readonly Dictionary<PermanentUpgradeType, UpgradePurchaseView> _views = new();
 
     public event Action StartClicked;
+    public event Action CoinsRewardClicked;
+    public event Action SettingsClicked;
     public event Action<PermanentUpgradeType> UpgradePurchaseRequested;
 
     private void Awake()
@@ -59,38 +67,37 @@ public class MainMenuScreen : MonoBehaviour
             }
 
             _views.Add(view.Type, view);
-            view.ClickHandler = () => UpgradePurchaseRequested?.Invoke(view.Type);
         }
     }
 
     private void OnEnable()
     {
-        if (_startButton != null)
-        {
-            _startButton.onClick.AddListener(OnStartButtonClicked);
-        }
+        _startButton.onClick.AddListener(OnStartClicked);
+        _coinsRewardButton.onClick.AddListener(OnCoinsRewardClicked);
+        _settingsButton.onClick.AddListener(OnSettingsClicked);
 
         foreach (UpgradePurchaseView view in _views.Values)
         {
-            if (view.Button != null && view.ClickHandler != null)
+            if (view.Button != null)
             {
-                view.Button.onClick.AddListener(view.ClickHandler);
+                view.Button.onClick.AddListener(view.HandleButtonClicked);
+                view.PurchaseRequested += OnUpgradePurchaseRequested;
             }
         }
     }
 
     private void OnDisable()
     {
-        if (_startButton != null)
-        {
-            _startButton.onClick.RemoveListener(OnStartButtonClicked);
-        }
+        _startButton.onClick.RemoveListener(OnStartClicked);
+        _coinsRewardButton.onClick.RemoveListener(OnCoinsRewardClicked);
+        _settingsButton.onClick.RemoveListener(OnSettingsClicked);
 
         foreach (UpgradePurchaseView view in _views.Values)
         {
-            if (view.Button != null && view.ClickHandler != null)
+            if (view.Button != null)
             {
-                view.Button.onClick.RemoveListener(view.ClickHandler);
+                view.Button.onClick.RemoveListener(view.HandleButtonClicked);
+                view.PurchaseRequested -= OnUpgradePurchaseRequested;
             }
         }
     }
@@ -168,8 +175,23 @@ public class MainMenuScreen : MonoBehaviour
         }
     }
 
-    private void OnStartButtonClicked()
+    private void OnUpgradePurchaseRequested(PermanentUpgradeType type)
+    {
+        UpgradePurchaseRequested?.Invoke(type);
+    }
+
+    private void OnStartClicked()
     {
         StartClicked?.Invoke();
+    }
+
+    private void OnCoinsRewardClicked()
+    {
+        CoinsRewardClicked?.Invoke();
+    }
+
+    private void OnSettingsClicked()
+    {
+        SettingsClicked?.Invoke();
     }
 }

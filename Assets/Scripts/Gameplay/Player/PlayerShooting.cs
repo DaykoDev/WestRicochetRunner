@@ -53,4 +53,11 @@ public class PlayerShooting : MonoBehaviour
         _ballLauncher.SetRunModifiers(modifiers);
         _autoShooter.SetRunModifiers(modifiers);
     }
+
+    public void ResetRun()
+    {
+        SetControlEnabled(false);
+        _autoShooter.SetRunModifiers(null);
+        _ballLauncher.ResetRun();
+    }
 }

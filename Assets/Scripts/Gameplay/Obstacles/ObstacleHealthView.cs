@@ -6,7 +6,6 @@ public class ObstacleHealthView : MonoBehaviour
     [Header("References")]
     [SerializeField] private Obstacle _obstacle;
     [SerializeField] private TMP_Text _healthText;
-    [SerializeField] private Camera _camera;
 
     [Header("Display")]
     [SerializeField] private Vector3 _localOffset = new Vector3(0f, 1.5f, 0f);
@@ -18,10 +17,6 @@ public class ObstacleHealthView : MonoBehaviour
             _obstacle = GetComponentInParent<Obstacle>();
         }
 
-        if (_camera == null)
-        {
-            _camera = Camera.main;
-        }
 
         if (_obstacle == null || _healthText == null)
         {
@@ -52,13 +47,13 @@ public class ObstacleHealthView : MonoBehaviour
         }
     }
 
-    private void OnHealthChanged(float currentHealth, float maxHealth)
+    private void OnHealthChanged(int currentHealth, int maxHealth)
     {
         Refresh();
     }
 
     private void Refresh()
     {
-        _healthText.text = Mathf.CeilToInt(_obstacle.CurrentHealth).ToString();
+        _healthText.text = _obstacle.CurrentHealth.ToString();
     }
 }

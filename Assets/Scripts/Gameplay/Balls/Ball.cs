@@ -9,13 +9,12 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
     [Header("Lifetime")]
     [SerializeField, Min(0.1f)] private float _maxLifetime = 5f;
 
-    [Header("Return Animation")]
-    [SerializeField] private BallReturnVisual _returnVisual;
-    [SerializeField, Min(0.1f)] private float _returnDuration = 1f;
+    [Header("Explosion")]
+    [SerializeField] private GameObject _visualRoot;
+    [SerializeField, Min(0.1f)] private float _explosionDuration = 1f;
 
-    private Transform _returnTarget;
-    private Vector3 _returnStartPosition;
-    private float _returnTimer;
+    private EffectPool _effectPool;
+    private float _explosionTimer;
     private bool _isReturning;
 
     private RaycastHit[] _hits;
@@ -30,17 +29,18 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
     private float _lifetimeTimer;
     private int _bounceCount;
     private bool _isActive;
+    private IDamageable _lastDamaged;
 
     public int LaunchId { get; private set; }
 
     public event Action<Ball> Died;
     public event Action<Ball> ReturnedToPool;
+    public event Action<Vector3> Ricocheted;
 
     public bool IsActive => _isActive;
 
     private void Awake()
     {
-        _camera = Camera.main;
         _hits = new RaycastHit[_movementSettings.CastBufferSize];
         _gateHits = new Collider[_movementSettings.CastBufferSize];
     }
@@ -49,7 +49,7 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
     {
         if (_isReturning)
         {
-            UpdateReturnAnimation();
+            UpdateExplosion();
             return;
         }
 
@@ -78,25 +78,40 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         Move(distance);
     }
 
-    public bool Launch(Vector3 position, Vector3 velocity, BallStats stats, Transform returnTarget)
+    public void SetCamera(Camera camera)
+    {
+        _camera = camera;
+    }
+
+    public void SetEffectPool(EffectPool effectPool)
+    {
+        _effectPool = effectPool;
+    }
+
+    public bool Launch(Vector3 position, Vector3 velocity, BallStats stats)
     {
         if (enabled == false || velocity.sqrMagnitude < Mathf.Epsilon || stats.Speed <= 0f)
         {
             return false;
         }
 
-        _returnVisual?.ResetVisual();
-
-        _returnTarget = returnTarget;
         _isReturning = false;
-        _returnTimer = 0f;
+        _explosionTimer = 0f;
+
+        if (_visualRoot != null)
+        {
+            _visualRoot.SetActive(true);
+        }
+
         _stats = stats;
 
         _stats.MaxBounces = Mathf.Clamp(_stats.MaxBounces, 0, _movementSettings.MaxSupportedBounces);
 
         _effectiveSpeed = velocity.magnitude;
         _direction = velocity.normalized;
+        FaceDirection();
         _bounceCount = 0;
+        _lastDamaged = null;
         _lifetimeTimer = _maxLifetime;
         _pendingDistance = 0f;
         _isActive = true;
@@ -110,12 +125,9 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
 
     public void OnReturnedToPool()
     {
-        _returnVisual?.ResetVisual();
 
         _isActive = false;
         _isReturning = false;
-        _returnTarget = null;
-        _returnTimer = 0f;
         _lifetimeTimer = 0f;
         _pendingDistance = 0f;
         _effectiveSpeed = 0f;
@@ -164,9 +176,16 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
 
             IDamageable damageable = hit.collider.GetComponentInParent<IDamageable>();
 
-            damageable?.TakeDamage(_stats.Damage);
+            if (damageable != null && ReferenceEquals(damageable, _lastDamaged) == false)
+            {
+                damageable.TakeDamage(_stats.Damage);
+            }
+
+            _lastDamaged = damageable;
 
             _direction = BallRicochet.CalculateDirection(_direction, normal, _movementSettings.MinBounceAngle);
+            FaceDirection();
+            Ricocheted?.Invoke(transform.position);
 
             float offset = _movementSettings.CollisionOffset;
             transform.position += normal * offset;
@@ -208,28 +227,31 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
 
         _isActive = false;
         _isReturning = true;
-        _returnVisual?.SetReturning();
+
+        PlayExplosion();
 
         _pendingDistance = 0f;
-        _returnTimer = 0f;
-        _returnStartPosition = transform.position;
+        _explosionTimer = 0f;
     }
 
-    private void UpdateReturnAnimation()
+    private void PlayExplosion()
     {
-        if (_returnTarget == null)
+        if (_visualRoot != null)
         {
-            CompleteReturn();
-            return;
+            _visualRoot.SetActive(false);
         }
 
-        _returnTimer += Time.deltaTime;
-        float progress = Mathf.Clamp01(_returnTimer / _returnDuration);
-        float easedProgress = Mathf.SmoothStep(0f, 1f, progress);
+        if (_effectPool != null)
+        {
+            _effectPool.Get().PlayAt(transform.position);
+        }
+    }
 
-        transform.position = Vector3.Lerp(_returnStartPosition, _returnTarget.position, easedProgress);
+    private void UpdateExplosion()
+    {
+        _explosionTimer += Time.fixedDeltaTime;
 
-        if (progress >= 1f)
+        if (_explosionTimer >= _explosionDuration)
         {
             CompleteReturn();
         }
@@ -261,6 +283,14 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
 
             UpgradeGateCharger charger = _gateHits[i].GetComponentInParent<UpgradeGateCharger>();
             charger?.TryCharge(this);
+        }
+    }
+
+    private void FaceDirection()
+    {
+        if (_direction.sqrMagnitude > Mathf.Epsilon)
+        {
+            transform.rotation = Quaternion.LookRotation(_direction);
         }
     }
 }

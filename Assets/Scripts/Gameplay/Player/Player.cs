@@ -45,7 +45,6 @@ public class Player : MonoBehaviour
         if (isEnabled == false)
         {
             _lateralCalculator.SetPointerHeld(false);
-
         }
     }
 
@@ -55,6 +54,12 @@ public class Player : MonoBehaviour
 
         _mover.ResetToStart();
         _lateralCalculator.ResetToStart(transform.position.x);
+    }
+
+    public void ClearRun()
+    {
+        SetControlEnabled(false);
+        _playerShooting.ResetRun();
     }
 
     public void SetRunModifiers(RunModifiers modifiers)

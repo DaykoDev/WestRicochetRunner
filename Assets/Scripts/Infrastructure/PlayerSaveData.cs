@@ -9,4 +9,12 @@ public class PlayerSaveData
     public int StartBallCountUpgradeLevel;
     public int BallDamageUpgradeLevel;
     public int IncomeMultiplierUpgradeLevel;
+
+    public bool TutorialCompleted;
+
+    public int BestCompletedLevel;
+
+    public bool SoundEnabled = true;
+    public bool MusicEnabled = true;
+    public bool VibrationEnabled = true;
 }

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class RunState : IState
+public class RunState : IState, IPayloadedState<RunEnterMode>
 {
     private readonly PlayerProgress _playerProgress;
     private readonly Player _player;
@@ -23,6 +23,8 @@ public class RunState : IState
         _upgradeService = upgradeService;
     }
 
+    public RunContext Context => _context;
+
     public event Action Entered;
     public event Action Exited;
     public event Action Won;
@@ -30,17 +32,41 @@ public class RunState : IState
 
     public void Enter()
     {
+        Enter(RunEnterMode.NewRun);
+    }
+
+    public void Enter(RunEnterMode mode)
+    {
+        if (mode == RunEnterMode.Resume)
+        {
+            ResumeRun();
+            return;
+        }
+
+        StartNewRun();
+    }
+
+    private void StartNewRun()
+    {
         Time.timeScale = 1f;
-
         _trackScroller.ResetPosition();
-
         _isRunning = true;
+
         CreateRunContext();
 
         _playerHealth.ResetHealth();
         _player.ResetToStart();
         _player.SetRunModifiers(_context.Modifiers);
         _levelGenerator.BuildLevel(_context.Level, _context.Seed, _context.Modifiers);
+
+        StartRunSystems();
+        Entered?.Invoke();
+    }
+
+    private void ResumeRun()
+    {
+        Time.timeScale = 1f;
+        _isRunning = true;
 
         StartRunSystems();
         Entered?.Invoke();
@@ -78,11 +104,10 @@ public class RunState : IState
     public void ClearRun()
     {
         _isRunning = false;
-        _player.SetControlEnabled(false);
-
+        _trackScroller.StopScrolling();
+        _player.ClearRun();
         _levelGenerator.ClearLevel();
         _trackScroller.ResetPosition();
-
         _context = null;
     }
 

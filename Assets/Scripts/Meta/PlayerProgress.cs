@@ -8,6 +8,8 @@ public class PlayerProgress
     private int _startBallCountUpgradeLevel;
     private int _ballDamageUpgradeLevel;
     private int _incomeMultiplierUpgradeLevel;
+    private bool _isTutorialCompleted;
+    private int _bestCompletedLevel;
 
     public PlayerProgress() : this(null) { }
 
@@ -26,19 +28,45 @@ public class PlayerProgress
         _startBallCountUpgradeLevel = Math.Max(0, saveData.StartBallCountUpgradeLevel);
         _ballDamageUpgradeLevel = Math.Max(0, saveData.BallDamageUpgradeLevel);
         _incomeMultiplierUpgradeLevel = Math.Max(0, saveData.IncomeMultiplierUpgradeLevel);
+        _isTutorialCompleted = saveData.TutorialCompleted;
+        _bestCompletedLevel = Math.Max(0, saveData.BestCompletedLevel);
     }
 
     public int CurrentLevel { get; private set; }
     public int CurrentLevelSeed { get; private set; }
 
+    public bool IsTutorialCompleted => _isTutorialCompleted;
+    public int BestCompletedLevel => _bestCompletedLevel;
+
+    public event Action<int> BestLevelChanged;
+    public event Action TutorialCompleted;
     public event Action<int> LevelChanged;
     public event Action<PermanentUpgradeType, int> UpgradeLevelChanged;
+
+    public void CompleteTutorial()
+    {
+        if (_isTutorialCompleted)
+        {
+            return;
+        }
+
+        _isTutorialCompleted = true;
+        TutorialCompleted?.Invoke();
+    }
 
     public void CompleteCurrentLevel()
     {
         if (CurrentLevel < int.MaxValue)
         {
             CurrentLevel++;
+        }
+
+        int completedLevel = CurrentLevel - 1;
+
+        if (completedLevel > _bestCompletedLevel)
+        {
+            _bestCompletedLevel = completedLevel;
+            BestLevelChanged?.Invoke(_bestCompletedLevel);
         }
 
         CurrentLevelSeed = GenerateSeed();
@@ -100,7 +128,9 @@ public class PlayerProgress
             Coins = Math.Max(0, coins),
             StartBallCountUpgradeLevel = _startBallCountUpgradeLevel,
             BallDamageUpgradeLevel = _ballDamageUpgradeLevel,
-            IncomeMultiplierUpgradeLevel = _incomeMultiplierUpgradeLevel
+            IncomeMultiplierUpgradeLevel = _incomeMultiplierUpgradeLevel,
+            TutorialCompleted = _isTutorialCompleted,
+            BestCompletedLevel = _bestCompletedLevel
         };
     }
 

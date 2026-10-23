@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public class MainMenuState : IState
 {
@@ -9,6 +10,7 @@ public class MainMenuState : IState
 
     public void Enter()
     {
+        Time.timeScale = 1f;
         Entered?.Invoke();
     }
 

@@ -12,7 +12,6 @@ public class PlayerAimer : MonoBehaviour
     [SerializeField] private Transform _firePoint;
 
     public Vector3 FirePointPosition => _firePoint.position;
-    public Transform FirePointTransform => _firePoint;
 
     public Vector3 AimPointPosition
     {

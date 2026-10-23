@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public class UpgradeService : IDisposable
 {
@@ -147,7 +148,7 @@ public class UpgradeService : IDisposable
 
         if (level > 0)
         {
-            modifiers.AddBallDamageBonus(definition.BonusPerLevel * level);
+            modifiers.AddBallDamageBonus(Mathf.RoundToInt(definition.BonusPerLevel * level));
         }
     }
 

@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public class VictoryState : IState
 {
@@ -7,6 +8,7 @@ public class VictoryState : IState
 
     public void Enter()
     {
+        Time.timeScale = 0f;
         Entered?.Invoke();
     }
 

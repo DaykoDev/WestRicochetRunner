@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class TrackScroller : MonoBehaviour
@@ -9,11 +10,15 @@ public class TrackScroller : MonoBehaviour
     private float _speed;
     private bool _isScrolling;
 
+    public float DistanceScrolled { get; private set; }
+
+    public event Action<float> DistanceChanged;
+
     private void Awake()
     {
         if (_scrollRoot == null)
         {
-            Debug.LogError("TrackScroller: Scroll Root is not assigned.", this);
+            Debug.LogError("TrackScroller: scroll root is not assigned.", this);
             enabled = false;
             return;
         }
@@ -29,8 +34,11 @@ public class TrackScroller : MonoBehaviour
             return;
         }
 
-        _scrollRoot.position += Vector3.back * (_speed * Time.fixedDeltaTime);
-        Physics.SyncTransforms();
+        float delta = _speed * Time.fixedDeltaTime;
+        _scrollRoot.position += Vector3.back * delta;
+
+        DistanceScrolled += delta;
+        DistanceChanged?.Invoke(DistanceScrolled);
     }
 
     public void StartScrolling(float speed)
@@ -48,8 +56,10 @@ public class TrackScroller : MonoBehaviour
     public void ResetPosition()
     {
         StopScrolling();
-
         _scrollRoot.SetPositionAndRotation(_initialPosition, _initialRotation);
         Physics.SyncTransforms();
+
+        DistanceScrolled = 0f;
+        DistanceChanged?.Invoke(DistanceScrolled);
     }
 }

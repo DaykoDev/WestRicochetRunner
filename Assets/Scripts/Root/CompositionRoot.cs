@@ -12,22 +12,32 @@ public class CompositionRoot
     private Wallet _wallet;
     private SaveService _saveService;
     private UpgradeService _upgradeService;
-    private TrackScroller _trackScroller;
+    private SettingsService _settingsService;
+
+    private AdsService _adsService;
+    private IAdsService _adsProvider;
+    private ILeaderboardService _leaderboardService;
+    private SecondChanceFlow _secondChanceFlow;
+    private RewardedMultiplierFlow _multiplierFlow;
+    private RewardedCoinsFlow _coinsFlow;
 
     private BootstrapState _bootstrapState;
     private MainMenuState _mainMenuState;
     private RunState _runState;
     private VictoryState _victoryState;
     private DefeatState _defeatState;
+    private PausedState _pausedState;
 
     private MainMenuPresenter _mainMenuPresenter;
     private RunPresenter _runPresenter;
     private VictoryPresenter _victoryPresenter;
     private DefeatPresenter _defeatPresenter;
+    private SettingsPresenter _settingsPresenter;
 
     private bool _isInitializing;
     private bool _isInitialized;
     private bool _isDisposed;
+    private bool _settingsPauseContext;
 
     public CompositionRoot(SceneReferences sceneReferences)
     {
@@ -84,6 +94,11 @@ public class CompositionRoot
             _defeatPresenter?.Dispose();
             _runPresenter?.Dispose();
             _upgradeService?.Dispose();
+
+            if (_adsProvider is IDisposable disposableAds)
+            {
+                disposableAds.Dispose();
+            }
         }
         else
         {
@@ -101,6 +116,12 @@ public class CompositionRoot
         _isInitializing = false;
 
         _playerProgress = new PlayerProgress(saveData);
+
+        _settingsService = new SettingsService(
+            saveData == null || saveData.SoundEnabled,
+            saveData == null || saveData.MusicEnabled,
+            saveData == null || saveData.VibrationEnabled);
+
         _wallet = _sceneReferences.Wallet;
 
         if (_wallet == null)
@@ -114,8 +135,26 @@ public class CompositionRoot
             _playerProgress,
             _wallet,
             _sceneReferences.PermanentUpgradeSettings,
-            new UpgradeCostCalculator()
+            new UpgradeCostCalculator(_sceneReferences.PermanentUpgradeSettings.CostGrowth)
         );
+
+        _playerHealth = _sceneReferences.PlayerHealth;
+
+        _adsProvider = CreateAdsProvider();
+        _leaderboardService = CreateLeaderboardProvider();
+        _adsService = new AdsService(_adsProvider, _sceneReferences.AdsConfig);
+
+        _secondChanceFlow = new SecondChanceFlow(
+            _adsService,
+            _sceneReferences.ObstacleFactory,
+            _sceneReferences.Player,
+            _playerHealth,
+            _sceneReferences.AdsConfig.SecondChanceClearRadius);
+        _multiplierFlow = new RewardedMultiplierFlow(
+            _adsService, _wallet, _sceneReferences.RunRewardCollector,
+            _sceneReferences.AdsConfig.VictoryCoinsMultiplier);
+        _coinsFlow = new RewardedCoinsFlow(
+            _adsService, _wallet, _sceneReferences.AdsConfig.MenuRewardCoins);
 
         CreateStates();
         CreateStateMachine();
@@ -136,7 +175,6 @@ public class CompositionRoot
     {
         _bootstrapState = new BootstrapState();
         _mainMenuState = new MainMenuState();
-        _playerHealth = _sceneReferences.Player.GetComponent<PlayerHealth>();
         _runState = new RunState(
             _playerProgress,
             _sceneReferences.Player,
@@ -147,6 +185,7 @@ public class CompositionRoot
         );
         _victoryState = new VictoryState();
         _defeatState = new DefeatState();
+        _pausedState = new PausedState();
     }
 
     private void CreateStateMachine()
@@ -157,7 +196,8 @@ public class CompositionRoot
             _mainMenuState,
             _runState,
             _victoryState,
-            _defeatState
+            _defeatState,
+            _pausedState
         };
 
         _stateMachine = new GameStateMachine(states);
@@ -165,10 +205,11 @@ public class CompositionRoot
 
     private void CreatePresenters()
     {
-        _mainMenuPresenter = new MainMenuPresenter(_sceneReferences.MainMenuScreen, _upgradeService);
-        _runPresenter = new RunPresenter(_sceneReferences.RunScreen, _playerHealth, _playerProgress, _wallet);
-        _victoryPresenter = new VictoryPresenter(_sceneReferences.VictoryScreen);
-        _defeatPresenter = new DefeatPresenter(_sceneReferences.DefeatScreen);
+        _mainMenuPresenter = new MainMenuPresenter(_sceneReferences.MainMenuScreen, _upgradeService, _coinsFlow);
+        _runPresenter = new RunPresenter(_sceneReferences.RunScreen, _playerHealth, _playerProgress, _wallet, _sceneReferences.TrackScroller, _sceneReferences.LevelGenerator, _sceneReferences.BallQueue);
+        _victoryPresenter = new VictoryPresenter(_sceneReferences.VictoryScreen, _sceneReferences.RunRewardCollector, _multiplierFlow);
+        _defeatPresenter = new DefeatPresenter(_sceneReferences.DefeatScreen, _secondChanceFlow);
+        _settingsPresenter = new SettingsPresenter(_sceneReferences.SettingsScreen, _settingsService);
     }
 
     private void SubscribeToStateEvents()
@@ -180,16 +221,31 @@ public class CompositionRoot
         _sceneReferences.LevelGenerator.Finished += OnLevelFinished;
         _playerProgress.LevelChanged += OnProgressChanged;
         _playerProgress.UpgradeLevelChanged += OnUpgradeLevelChanged;
-        _wallet.BalanceChanged += OnWalletBalanceChanged;
+        _playerProgress.TutorialCompleted += OnTutorialCompleted;
+        _playerProgress.BestLevelChanged += OnBestLevelChanged;
 
         _mainMenuState.Entered += _mainMenuPresenter.HandleStateEntered;
         _mainMenuState.Exited += _mainMenuPresenter.HandleStateExited;
         _runState.Entered += _runPresenter.HandleStateEntered;
+        _runState.Entered += OnRunEntered;
+        _secondChanceFlow.SecondChanceGranted += OnSecondChanceGranted;
         _runState.Exited += _runPresenter.HandleStateExited;
         _victoryState.Entered += _victoryPresenter.HandleStateEntered;
         _victoryState.Exited += _victoryPresenter.HandleStateExited;
         _defeatState.Entered += _defeatPresenter.HandleStateEntered;
         _defeatState.Exited += _defeatPresenter.HandleStateExited;
+
+        _multiplierFlow.BonusGranted += OnVictoryBonusGranted;
+
+        _runPresenter.SettingsRequested += OnRunSettingsRequested;
+        _mainMenuPresenter.SettingsRequested += OnMenuSettingsRequested;
+        _pausedState.Entered += OnPausedStateEntered;
+        _pausedState.Exited += OnPausedStateExited;
+        _settingsPresenter.CloseRequested += OnSettingsCloseRequested;
+        _settingsPresenter.ExitToMenuRequested += OnSettingsExitToMenuRequested;
+        _settingsService.SoundEnabledChanged += OnSettingsChanged;
+        _settingsService.MusicEnabledChanged += OnSettingsChanged;
+        _settingsService.VibrationEnabledChanged += OnSettingsChanged;
     }
 
     private void UnsubscribeFromStateEvents()
@@ -201,16 +257,31 @@ public class CompositionRoot
         _sceneReferences.LevelGenerator.Finished -= OnLevelFinished;
         _playerProgress.LevelChanged -= OnProgressChanged;
         _playerProgress.UpgradeLevelChanged -= OnUpgradeLevelChanged;
-        _wallet.BalanceChanged -= OnWalletBalanceChanged;
+        _playerProgress.TutorialCompleted -= OnTutorialCompleted;
+        _playerProgress.BestLevelChanged -= OnBestLevelChanged;
 
         _mainMenuState.Entered -= _mainMenuPresenter.HandleStateEntered;
         _mainMenuState.Exited -= _mainMenuPresenter.HandleStateExited;
         _runState.Entered -= _runPresenter.HandleStateEntered;
+        _runState.Entered -= OnRunEntered;
+        _secondChanceFlow.SecondChanceGranted -= OnSecondChanceGranted;
         _runState.Exited -= _runPresenter.HandleStateExited;
         _victoryState.Entered -= _victoryPresenter.HandleStateEntered;
         _victoryState.Exited -= _victoryPresenter.HandleStateExited;
         _defeatState.Entered -= _defeatPresenter.HandleStateEntered;
         _defeatState.Exited -= _defeatPresenter.HandleStateExited;
+
+        _multiplierFlow.BonusGranted -= OnVictoryBonusGranted;
+
+        _runPresenter.SettingsRequested -= OnRunSettingsRequested;
+        _mainMenuPresenter.SettingsRequested -= OnMenuSettingsRequested;
+        _pausedState.Entered -= OnPausedStateEntered;
+        _pausedState.Exited -= OnPausedStateExited;
+        _settingsPresenter.CloseRequested -= OnSettingsCloseRequested;
+        _settingsPresenter.ExitToMenuRequested -= OnSettingsExitToMenuRequested;
+        _settingsService.SoundEnabledChanged -= OnSettingsChanged;
+        _settingsService.MusicEnabledChanged -= OnSettingsChanged;
+        _settingsService.VibrationEnabledChanged -= OnSettingsChanged;
     }
 
     private void SubscribeToPresenterEvents()
@@ -218,6 +289,7 @@ public class CompositionRoot
         _mainMenuPresenter.StartRequested += OnStartRequested;
         _victoryPresenter.MainMenuRequested += OnVictoryMainMenuRequested;
         _defeatPresenter.MainMenuRequested += OnDefeatMainMenuRequested;
+        _defeatPresenter.RestartRequested += OnDefeatRestartRequested;
     }
 
     private void UnsubscribeFromPresenterEvents()
@@ -225,16 +297,20 @@ public class CompositionRoot
         _mainMenuPresenter.StartRequested -= OnStartRequested;
         _victoryPresenter.MainMenuRequested -= OnVictoryMainMenuRequested;
         _defeatPresenter.MainMenuRequested -= OnDefeatMainMenuRequested;
+        _defeatPresenter.RestartRequested -= OnDefeatRestartRequested;
     }
 
     private void SaveCurrentProgress()
     {
-        if (_saveService == null || _playerProgress == null || _wallet == null)
+        if (_saveService == null || _playerProgress == null || _wallet == null || _settingsService == null)
         {
             return;
         }
 
         PlayerSaveData data = _playerProgress.CreateSaveData(_wallet.Balance);
+        data.SoundEnabled = _settingsService.SoundEnabled;
+        data.MusicEnabled = _settingsService.MusicEnabled;
+        data.VibrationEnabled = _settingsService.VibrationEnabled;
         _saveService.Save(data);
     }
 
@@ -250,9 +326,10 @@ public class CompositionRoot
         _saveService?.Flush();
     }
 
-    private void OnWalletBalanceChanged(int balance)
+    private void OnTutorialCompleted()
     {
         SaveCurrentProgress();
+        _saveService?.Flush();
     }
 
     private void OnPlayerDied() => _runState.RequestLose();
@@ -262,24 +339,115 @@ public class CompositionRoot
 
     private void OnRunWon()
     {
-        Time.timeScale = 0f;
         _playerProgress.CompleteCurrentLevel();
         _stateMachine.Enter<VictoryState>();
     }
 
     private void OnRunLost()
     {
-        Time.timeScale = 0f;
         _stateMachine.Enter<DefeatState>();
+        SaveCurrentProgress();
+        _saveService?.Flush();
+    }
+
+    private void OnRunEntered()
+    {
+        _secondChanceFlow.SetContext(_runState.Context);
+    }
+
+    private void OnSecondChanceGranted()
+    {
+        _stateMachine.Enter<RunState, RunEnterMode>(RunEnterMode.Resume);
+    }
+
+    private void OnVictoryBonusGranted(int bonus)
+    {
+        ReturnToMainMenu();
     }
 
     private void OnVictoryMainMenuRequested() => ReturnToMainMenu();
     private void OnDefeatMainMenuRequested() => ReturnToMainMenu();
 
+    private void OnDefeatRestartRequested()
+    {
+        _runState.ClearRun();
+        _stateMachine.Enter<RunState>();
+    }
+
+    private void OnRunSettingsRequested() => _stateMachine.Enter<PausedState>();
+
+    private void OnMenuSettingsRequested()
+    {
+        _settingsPauseContext = false;
+        _settingsPresenter.Show(false);
+    }
+
+    private void OnPausedStateEntered()
+    {
+        _settingsPauseContext = true;
+        _settingsPresenter.Show(true);
+    }
+
+    private void OnPausedStateExited()
+    {
+        _settingsPauseContext = false;
+        _settingsPresenter.Hide();
+    }
+
+    private void OnSettingsCloseRequested()
+    {
+        if (_settingsPauseContext)
+        {
+            _stateMachine.Enter<RunState, RunEnterMode>(RunEnterMode.Resume);
+        }
+        else
+        {
+            _settingsPresenter.Hide();
+        }
+    }
+
+    private void OnSettingsExitToMenuRequested()
+    {
+        _wallet.Remove(_sceneReferences.RunRewardCollector.CollectedThisRun);
+        SaveCurrentProgress();
+        _saveService?.Flush();
+        ReturnToMainMenu();
+    }
+
+    private void OnSettingsChanged(bool enabled)
+    {
+        SaveCurrentProgress();
+        _saveService?.Flush();
+    }
+
     private void ReturnToMainMenu()
     {
-        Time.timeScale = 1f;
+        _adsService.TryShowInterstitial();
+
         _runState.ClearRun();
         _stateMachine.Enter<MainMenuState>();
+    }
+
+    private IAdsService CreateAdsProvider()
+    {
+#if UNITY_WEBGL && !UNITY_EDITOR && YANDEX_GAMES
+    return new YandexAdsService();
+#else
+        return new EditorAdsService();
+#endif
+    }
+
+    private void OnBestLevelChanged(int bestLevel)
+    {
+        _leaderboardService.SubmitScore(bestLevel);
+    }
+
+    private ILeaderboardService CreateLeaderboardProvider()
+    {
+#if UNITY_WEBGL && !UNITY_EDITOR && YANDEX_GAMES
+        return new YandexLeaderboardService();
+#else
+        return new EditorLeaderboardService();
+#endif
     }
 }

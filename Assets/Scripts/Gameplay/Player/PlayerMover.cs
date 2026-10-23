@@ -51,7 +51,8 @@ public class PlayerMover : MonoBehaviour
     {
         Vector3 currentPosition = transform.position;
 
-        float newX = Mathf.Lerp(currentPosition.x, _targetX, _lateralSmoothness * Time.deltaTime);
+        float damping = 1f - Mathf.Exp(-_lateralSmoothness * Time.deltaTime);
+        float newX = Mathf.Lerp(currentPosition.x, _targetX, damping);
 
         transform.position = new Vector3(newX, currentPosition.y, currentPosition.z);
     }

@@ -14,14 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _definitions:
   - _type: 0
-    _baseCost: 10
+    _baseCost: 100
     _maxLevel: 10
     _bonusPerLevel: 1
   - _type: 1
-    _baseCost: 15
+    _baseCost: 100
     _maxLevel: 0
     _bonusPerLevel: 1
   - _type: 2
-    _baseCost: 10
+    _baseCost: 100
     _maxLevel: 20
     _bonusPerLevel: 0.1
+  _costGrowth: 1.25

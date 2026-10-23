@@ -4,21 +4,26 @@ public class MainMenuPresenter : IDisposable
 {
     private readonly MainMenuScreen _screen;
     private readonly UpgradeService _upgradeService;
+    private readonly RewardedCoinsFlow _coinsFlow;
 
-    public event Action StartRequested;
-
-    public MainMenuPresenter(MainMenuScreen screen, UpgradeService upgradeService)
+    public MainMenuPresenter(MainMenuScreen screen, UpgradeService upgradeService, RewardedCoinsFlow coinsFlow)
     {
         _screen = screen;
         _upgradeService = upgradeService;
+        _coinsFlow = coinsFlow;
 
         _screen.StartClicked += OnStartClicked;
         _screen.UpgradePurchaseRequested += OnUpgradePurchaseRequested;
+        _screen.CoinsRewardClicked += OnCoinsRewardClicked;
+        _screen.SettingsClicked += OnSettingsClicked;
 
         _upgradeService.LevelChanged += OnLevelChanged;
         _upgradeService.BalanceChanged += OnBalanceChanged;
         _upgradeService.UpgradeLevelChanged += OnUpgradeLevelChanged;
     }
+
+    public event Action StartRequested;
+    public event Action SettingsRequested;
 
     public void HandleStateEntered()
     {
@@ -37,6 +42,8 @@ public class MainMenuPresenter : IDisposable
     {
         _screen.StartClicked -= OnStartClicked;
         _screen.UpgradePurchaseRequested -= OnUpgradePurchaseRequested;
+        _screen.CoinsRewardClicked -= OnCoinsRewardClicked;
+        _screen.SettingsClicked -= OnSettingsClicked;
 
         _upgradeService.LevelChanged -= OnLevelChanged;
         _upgradeService.BalanceChanged -= OnBalanceChanged;
@@ -68,6 +75,16 @@ public class MainMenuPresenter : IDisposable
     private void OnStartClicked()
     {
         StartRequested?.Invoke();
+    }
+
+    private void OnCoinsRewardClicked()
+    {
+        _coinsFlow.Request();
+    }
+
+    private void OnSettingsClicked()
+    {
+        SettingsRequested?.Invoke();
     }
 
     private void OnLevelChanged(int level)

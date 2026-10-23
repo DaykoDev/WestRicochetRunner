@@ -7,17 +7,15 @@ public class BallPool : MonoBehaviour
     [SerializeField, Min(1)] private int _initialSize = 3;
     [SerializeField, Min(1)] private int _maxSize = 50;
 
+    [SerializeField] private Camera _camera;
+    [SerializeField] private EffectPool _effectPool;
+    [SerializeField] private RicochetFeedback _ricochetFeedback;
+
     private ComponentPool<Ball> _pool;
 
     private void Awake()
     {
-        _pool = new ComponentPool<Ball>(
-            _ballPrefab,
-            transform,
-            _initialSize,
-            _maxSize);
-
-        _pool.Prewarm(_initialSize);
+        _pool = new ComponentPool<Ball>(_ballPrefab, transform, _initialSize, _maxSize, OnBallCreated);
     }
 
     public Ball Get()
@@ -33,5 +31,12 @@ public class BallPool : MonoBehaviour
     public void ResetPool()
     {
         _pool?.Reset();
+    }
+
+    private void OnBallCreated(Ball ball)
+    {
+        ball.SetCamera(_camera);
+        ball.SetEffectPool(_effectPool);
+        _ricochetFeedback.Register(ball);
     }
 }

@@ -10,11 +10,7 @@ public class ComponentPool<T> where T : Component
     private readonly ObjectPool<T> _pool;
     private readonly List<T> _activeObjects = new();
 
-    public ComponentPool(
-        T prefab,
-        Transform container,
-        int capacity = 20,
-        int maxSize = 50)
+    public ComponentPool(T prefab, Transform container, int capacity = 20, int maxSize = 50, Action<T> onCreated = null)
     {
         if (container == null)
         {
@@ -42,7 +38,12 @@ public class ComponentPool<T> where T : Component
         _container = container;
 
         _pool = new ObjectPool<T>(
-            createFunc: () => UnityEngine.Object.Instantiate(_prefab, _container),
+            createFunc: () =>
+            {
+                T instance = UnityEngine.Object.Instantiate(_prefab, _container);
+                onCreated?.Invoke(instance);
+                return instance;
+            },
             actionOnGet: obj => obj.gameObject.SetActive(true),
             actionOnRelease: obj =>
             {

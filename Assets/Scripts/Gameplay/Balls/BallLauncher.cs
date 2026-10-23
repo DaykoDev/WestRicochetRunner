@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class BallLauncher : MonoBehaviour
@@ -10,6 +11,7 @@ public class BallLauncher : MonoBehaviour
     [SerializeField] private BallStats _ballStats;
 
     private RunModifiers _runModifiers;
+
 
     public BallStats CurrentStats
     {
@@ -29,6 +31,8 @@ public class BallLauncher : MonoBehaviour
             return stats;
         }
     }
+
+    public event Action Fired;
 
     public void SetRunModifiers(RunModifiers modifiers)
     {
@@ -62,11 +66,13 @@ public class BallLauncher : MonoBehaviour
 
         Vector3 velocity = GetLaunchVelocity(out BallStats stats);
 
-        if (ball.Launch(_playerAimer.FirePointPosition, velocity, stats, _playerAimer.FirePointTransform) == false)
+        if (ball.Launch(_playerAimer.FirePointPosition, velocity, stats) == false)
         {
             _ballQueue.ReleaseBall(ball);
             return false;
         }
+
+        Fired?.Invoke();
 
         return true;
     }
@@ -74,5 +80,11 @@ public class BallLauncher : MonoBehaviour
     public void SetBallStats(BallStats stats)
     {
         _ballStats = stats;
+    }
+
+    public void ResetRun()
+    {
+        _runModifiers = null;
+        _ballQueue.ResetQueue();
     }
 }

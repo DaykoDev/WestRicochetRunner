@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class BallQueue : MonoBehaviour
@@ -13,6 +14,8 @@ public class BallQueue : MonoBehaviour
     public int Capacity => _currentCapacity;
     public int AvailableCount => _availableCount;
     public bool HasAvailableBall => _availableCount > 0;
+
+    public event Action<int, int> AvailableCountChanged;
 
     private void Awake()
     {
@@ -54,6 +57,7 @@ public class BallQueue : MonoBehaviour
         }
 
         _availableCount--;
+        AvailableCountChanged?.Invoke(_availableCount, _currentCapacity);
 
         ball.ReturnedToPool -= OnBallReturnedToPool;
         ball.ReturnedToPool += OnBallReturnedToPool;
@@ -69,6 +73,14 @@ public class BallQueue : MonoBehaviour
         }
     }
 
+    public void ResetQueue()
+    {
+        SetRunModifiers(null);
+        _ballPool?.ResetPool();
+        _availableCount = _currentCapacity;
+        AvailableCountChanged?.Invoke(_availableCount, _currentCapacity);
+    }
+
     public void SetCapacity(int newCapacity)
     {
         newCapacity = Mathf.Max(1, newCapacity);
@@ -76,6 +88,7 @@ public class BallQueue : MonoBehaviour
         int difference = newCapacity - _currentCapacity;
         _currentCapacity = newCapacity;
         _availableCount = Mathf.Clamp(_availableCount + difference, 0, _currentCapacity);
+        AvailableCountChanged?.Invoke(_availableCount, _currentCapacity);
     }
 
     private void UpdateCapacity()
@@ -93,6 +106,7 @@ public class BallQueue : MonoBehaviour
     {
         ball.ReturnedToPool -= OnBallReturnedToPool;
         _availableCount = Mathf.Min(_availableCount + 1, _currentCapacity);
+        AvailableCountChanged?.Invoke(_availableCount, _currentCapacity);
     }
 
     private void OnDestroy()
