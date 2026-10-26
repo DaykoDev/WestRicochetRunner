@@ -5,7 +5,12 @@ public class RunRewardCollector : MonoBehaviour
 {
     [SerializeField] private Wallet _wallet;
 
+    [Header("Level Completion")]
+    [SerializeField] private CompletionRewardCalculator _completionRewardCalculator;
+
     private readonly HashSet<Obstacle> _registeredObstacles = new();
+
+    private bool _completionRewardGranted;
 
     public int CollectedThisRun { get; private set; }
 
@@ -42,6 +47,32 @@ public class RunRewardCollector : MonoBehaviour
         {
             obstacle.Destroyed += OnObstacleDestroyed;
         }
+    }
+
+    public void GrantCompletionReward(int completedLevel)
+    {
+        if (_completionRewardGranted)
+        {
+            return;
+        }
+
+        _completionRewardGranted = true;
+
+        if (_completionRewardCalculator == null)
+        {
+            Debug.LogError("CompletionRewardCalculator is not assigned.", this);
+            return;
+        }
+
+        int reward = _completionRewardCalculator.Calculate(completedLevel);
+
+        if (reward <= 0 || _wallet == null)
+        {
+            return;
+        }
+
+        _wallet.Add(reward);
+        CollectedThisRun += reward;
     }
 
     private void OnObstacleDestroyed(Obstacle obstacle)

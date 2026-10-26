@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01bad8c8c350a73498ba4a7155771d55, type: 3}
   m_Name: BallMovementSettings
   m_EditorClassIdentifier: 
-  _radius: 0.25
+  _radius: 0.2
   _collisionOffset: 0.01
   _collisionMask:
     serializedVersion: 2
     m_Bits: 832
   _castBufferSize: 16
-  _minBounceAngle: 25
+  _minBounceAngle: 20
   _maxCollisionsPerStep: 5
   _maxSupportedBounces: 16
   _upgradeGateMask:

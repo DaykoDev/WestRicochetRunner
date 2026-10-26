@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87c95281a4c4cce4ab95e51c83530129, type: 3}
   m_Name: DifficultyTiersSettings
   m_EditorClassIdentifier: 
-  _earlyMaxLevel: 3
-  _midMaxLevel: 15
+  _earlyMaxLevel: 10
+  _midMaxLevel: 20
   _earlyChallengeBlocks: 1
   _midChallengeBlocks: 2
   _highChallengeBlocks: 3

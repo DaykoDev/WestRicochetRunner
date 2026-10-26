@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+[RequireComponent(typeof(BallReturnFeedback))]
 public class Ball : MonoBehaviour, IPoolable<Ball>
 {
     [Header("Settings")]
@@ -9,16 +10,16 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
     [Header("Lifetime")]
     [SerializeField, Min(0.1f)] private float _maxLifetime = 5f;
 
-    [Header("Explosion")]
-    [SerializeField] private GameObject _visualRoot;
-    [SerializeField, Min(0.1f)] private float _explosionDuration = 1f;
+    [Header("Return")]
+    [SerializeField, Min(0.1f)] private float _returnDelay = 1f;
 
-    private EffectPool _effectPool;
-    private float _explosionTimer;
-    private bool _isReturning;
+    private BallReturnFeedback _returnFeedback;
+    private BallGateInteraction _gateInteraction;
 
     private RaycastHit[] _hits;
-    private Collider[] _gateHits;
+
+    private float _returnTimer;
+    private bool _isReturning;
 
     private BallStats _stats;
     private Vector3 _direction;
@@ -42,14 +43,15 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
     private void Awake()
     {
         _hits = new RaycastHit[_movementSettings.CastBufferSize];
-        _gateHits = new Collider[_movementSettings.CastBufferSize];
+        _gateInteraction = new BallGateInteraction(_movementSettings);
+        _returnFeedback = GetComponent<BallReturnFeedback>();
     }
 
     private void FixedUpdate()
     {
         if (_isReturning)
         {
-            UpdateExplosion();
+            UpdateReturnDelay();
             return;
         }
 
@@ -85,7 +87,7 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
 
     public void SetEffectPool(EffectPool effectPool)
     {
-        _effectPool = effectPool;
+        _returnFeedback.SetEffectPool(effectPool);
     }
 
     public bool Launch(Vector3 position, Vector3 velocity, BallStats stats)
@@ -96,12 +98,9 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         }
 
         _isReturning = false;
-        _explosionTimer = 0f;
+        _returnTimer = 0f;
 
-        if (_visualRoot != null)
-        {
-            _visualRoot.SetActive(true);
-        }
+        _returnFeedback.Restore();
 
         _stats = stats;
 
@@ -109,12 +108,13 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
 
         _effectiveSpeed = velocity.magnitude;
         _direction = velocity.normalized;
-        FaceDirection();
         _bounceCount = 0;
         _lastDamaged = null;
         _lifetimeTimer = _maxLifetime;
         _pendingDistance = 0f;
         _isActive = true;
+
+        FaceDirection();
 
         transform.position = position;
 
@@ -161,15 +161,25 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
                 Vector3 startPosition = transform.position;
                 Vector3 endPosition = startPosition + _direction * remainingDistance;
 
-                ChargeGatesAlongSegment(startPosition, endPosition);
+                _gateInteraction.ChargeAlongSegment(this, startPosition, endPosition);
+
                 transform.position = endPosition;
+                return;
+            }
+
+            bool hasNoMovementProgress = hit.distance <= BallCollisionQuery.ContactEpsilon;
+
+            if (hasNoMovementProgress && collisionCount > 0)
+            {
+                _pendingDistance = 0f;
                 return;
             }
 
             float traveledDistance = Mathf.Max(0f, hit.distance);
             Vector3 hitCenter = transform.position + _direction * traveledDistance;
 
-            ChargeGatesAlongSegment(transform.position, hitCenter);
+            _gateInteraction.ChargeAlongSegment(this, transform.position, hitCenter);
+
             transform.position = hitCenter;
 
             remainingDistance -= traveledDistance;
@@ -187,16 +197,24 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
             FaceDirection();
             Ricocheted?.Invoke(transform.position);
 
-            float offset = _movementSettings.CollisionOffset;
-            transform.position += normal * offset;
-            remainingDistance = Mathf.Max(0f, remainingDistance - offset);
+            float separation = BallCollisionQuery.GetSeparationDistance(hit, _movementSettings);
+
+            transform.position += normal * separation;
+
+            remainingDistance = Mathf.Max(0f, remainingDistance - separation);
 
             _bounceCount++;
             collisionCount++;
 
-            if (_bounceCount >= _stats.MaxBounces)
+            if (_bounceCount > _stats.MaxBounces)
             {
                 BeginReturn();
+                return;
+            }
+
+            if (hasNoMovementProgress)
+            {
+                _pendingDistance = 0f;
                 return;
             }
         }
@@ -228,30 +246,17 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         _isActive = false;
         _isReturning = true;
 
-        PlayExplosion();
+        _returnFeedback.Play(transform.position);
 
         _pendingDistance = 0f;
-        _explosionTimer = 0f;
+        _returnTimer = 0f;
     }
 
-    private void PlayExplosion()
+    private void UpdateReturnDelay()
     {
-        if (_visualRoot != null)
-        {
-            _visualRoot.SetActive(false);
-        }
+        _returnTimer += Time.fixedDeltaTime;
 
-        if (_effectPool != null)
-        {
-            _effectPool.Get().PlayAt(transform.position);
-        }
-    }
-
-    private void UpdateExplosion()
-    {
-        _explosionTimer += Time.fixedDeltaTime;
-
-        if (_explosionTimer >= _explosionDuration)
+        if (_returnTimer >= _returnDelay)
         {
             CompleteReturn();
         }
@@ -261,29 +266,6 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
     {
         _isReturning = false;
         Died?.Invoke(this);
-    }
-
-    private void ChargeGatesAlongSegment(Vector3 start, Vector3 end)
-    {
-        int hitCount = Physics.OverlapCapsuleNonAlloc(
-            start,
-            end,
-            _movementSettings.Radius,
-            _gateHits,
-            _movementSettings.UpgradeGateMask,
-            QueryTriggerInteraction.Collide
-        );
-
-        for (int i = 0; i < hitCount; i++)
-        {
-            if (_gateHits[i] == null)
-            {
-                continue;
-            }
-
-            UpgradeGateCharger charger = _gateHits[i].GetComponentInParent<UpgradeGateCharger>();
-            charger?.TryCharge(this);
-        }
     }
 
     private void FaceDirection()

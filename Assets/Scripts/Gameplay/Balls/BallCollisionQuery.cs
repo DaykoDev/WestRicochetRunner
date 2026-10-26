@@ -2,6 +2,10 @@ using UnityEngine;
 
 public static class BallCollisionQuery
 {
+    public const float ContactEpsilon = 0.0001f;
+
+    private const float NormalEpsilon = 0.000001f;
+
     public static bool SphereCast(
         Vector3 origin,
         float radius,
@@ -12,8 +16,15 @@ public static class BallCollisionQuery
         out RaycastHit closestHit,
         out Vector3 collisionNormal)
     {
-        closestHit = default(RaycastHit);
+        closestHit = default;
         collisionNormal = Vector3.zero;
+
+        if (direction.sqrMagnitude < Mathf.Epsilon)
+        {
+            return false;
+        }
+
+        direction.Normalize();
 
         int hitCount = Physics.SphereCastNonAlloc(
             origin,
@@ -22,8 +33,7 @@ public static class BallCollisionQuery
             results,
             distance,
             collisionMask,
-            QueryTriggerInteraction.Ignore
-        );
+            QueryTriggerInteraction.Ignore);
 
         if (hitCount <= 0)
         {
@@ -56,17 +66,15 @@ public static class BallCollisionQuery
 
         closestHit = results[closestIndex];
 
-        Vector3 hitCenter = origin + direction * closestHit.distance;
+        Vector3 normal = closestHit.normal;
 
-        Vector3 normal = hitCenter - closestHit.point;
-
-        if (normal.sqrMagnitude > 0.000001f)
+        if (normal.sqrMagnitude >= NormalEpsilon)
         {
             normal.Normalize();
         }
         else
         {
-            normal = closestHit.normal.normalized;
+            normal = -direction;
         }
 
         if (Vector3.Dot(direction, normal) > 0f)
@@ -75,7 +83,16 @@ public static class BallCollisionQuery
         }
 
         collisionNormal = normal;
-
         return true;
+    }
+
+    public static float GetSeparationDistance(RaycastHit hit, BallMovementSettings settings)
+    {
+        if (hit.distance <= ContactEpsilon)
+        {
+            return settings.Radius + settings.CollisionOffset;
+        }
+
+        return settings.CollisionOffset;
     }
 }

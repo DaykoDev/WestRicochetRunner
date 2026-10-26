@@ -15,6 +15,8 @@ public class RewardedCoinsFlow
         _rewardCoins = rewardCoins;
     }
 
+    public event Action<int> RewardGranted;
+
     public void Request()
     {
         if (_requestInFlight || _adsService.IsBusy)
@@ -30,6 +32,8 @@ public class RewardedCoinsFlow
     {
         _requestInFlight = false;
         _wallet.Add(_rewardCoins);
+
+        RewardGranted?.Invoke(_rewardCoins);
     }
 
     private void OnAdError()

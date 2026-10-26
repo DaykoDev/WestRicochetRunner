@@ -1,18 +1,22 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class SceneReferences : MonoBehaviour
 {
+    [Header("UI")]
     [SerializeField] private MainMenuScreen _mainMenuScreen;
     [SerializeField] private RunScreen _runScreen;
     [SerializeField] private VictoryScreen _victoryScreen;
     [SerializeField] private DefeatScreen _defeatScreen;
     [SerializeField] private SettingsScreen _settingsScreen;
 
+    [Header("Player")]
     [SerializeField] private Player _player;
     [SerializeField] private PlayerHealth _playerHealth;
 
+    [Header("Gameplay")]
     [SerializeField] private LevelGenerator _levelGenerator;
     [SerializeField] private TrackScroller _trackScroller;
     [SerializeField] private BallQueue _ballQueue;
@@ -21,7 +25,10 @@ public class SceneReferences : MonoBehaviour
     [SerializeField] private RunRewardCollector _runRewardCollector;
     [SerializeField] private ObstacleFactory _obstacleFactory;
 
+    [Header("Services")]
     [SerializeField] private AdsConfig _adsConfig;
+
+    [SerializeField] private AudioMixer _audioMixer;
 
     public MainMenuScreen MainMenuScreen => _mainMenuScreen;
     public RunScreen RunScreen => _runScreen;
@@ -42,97 +49,49 @@ public class SceneReferences : MonoBehaviour
 
     public AdsConfig AdsConfig => _adsConfig;
 
+    public AudioMixer AudioMixer => _audioMixer;
+
     public bool TryValidate(out string errorMessage)
     {
         List<string> errors = new List<string>();
 
-        if (_mainMenuScreen == null)
+        ValidateReference(_mainMenuScreen, nameof(_mainMenuScreen), errors);
+        ValidateReference(_runScreen, nameof(_runScreen), errors);
+        ValidateReference(_victoryScreen, nameof(_victoryScreen), errors);
+        ValidateReference(_defeatScreen, nameof(_defeatScreen), errors);
+        ValidateReference(_settingsScreen, nameof(_settingsScreen), errors);
+
+        ValidateReference(_player, nameof(_player), errors);
+        ValidateReference(_playerHealth, nameof(_playerHealth), errors);
+
+        ValidateReference(_levelGenerator, nameof(_levelGenerator), errors);
+        ValidateReference(_trackScroller, nameof(_trackScroller), errors);
+        ValidateReference(_ballQueue, nameof(_ballQueue), errors);
+        ValidateReference(_wallet, nameof(_wallet), errors);
+        ValidateReference(_permanentUpgradeSettings, nameof(_permanentUpgradeSettings), errors);
+        ValidateReference(_runRewardCollector, nameof(_runRewardCollector), errors);
+        ValidateReference(_obstacleFactory, nameof(_obstacleFactory), errors);
+
+        ValidateReference(_adsConfig, nameof(_adsConfig), errors);
+
+        ValidateReference(_audioMixer, nameof(_audioMixer), errors);
+
+        if (errors.Count == 0)
         {
-            errors.Add($"{nameof(_mainMenuScreen)} is not assigned.");
+            errorMessage = string.Empty;
+            return true;
         }
 
-        if (_runScreen == null)
+        errorMessage = "SceneReferences has invalid configuration:" + Environment.NewLine + "- " + string.Join(Environment.NewLine + "- ", errors);
+
+        return false;
+    }
+
+    private static void ValidateReference(UnityEngine.Object reference, string referenceName, List<string> errors)
+    {
+        if (reference == null)
         {
-            errors.Add($"{nameof(_runScreen)} is not assigned.");
+            errors.Add($"{referenceName} is not assigned.");
         }
-
-        if (_victoryScreen == null)
-        {
-            errors.Add($"{nameof(_victoryScreen)} is not assigned.");
-        }
-
-        if (_defeatScreen == null)
-        {
-            errors.Add($"{nameof(_defeatScreen)} is not assigned.");
-        }
-
-        if (_settingsScreen == null)
-        {
-            errors.Add($"{nameof(_settingsScreen)} is not assigned.");
-        }
-
-        if (_player == null)
-        {
-            errors.Add($"{nameof(_player)} is not assigned.");
-        }
-
-        if (_playerHealth == null)
-        {
-            errors.Add($"{nameof(_player)} is not assigned.");
-        }
-
-        if (_levelGenerator == null)
-        {
-            errors.Add($"{nameof(_levelGenerator)} is not assigned.");
-        }
-
-        if (_trackScroller == null)
-        {
-            errors.Add($"{nameof(_trackScroller)} is not assigned.");
-        }
-
-        if (_ballQueue == null)
-        {
-            errors.Add($"{nameof(_ballQueue)} is not assigned.");
-        }
-
-        if (_wallet == null)
-        {
-            errors.Add($"{nameof(_wallet)} is not assigned.");
-        }
-
-        if (_permanentUpgradeSettings == null)
-        {
-            errors.Add($"{nameof(_permanentUpgradeSettings)} is not assigned.");
-        }
-
-        if (_runRewardCollector == null)
-        {
-            errors.Add($"{nameof(_runRewardCollector)} is not assigned.");
-        }
-
-        if (_obstacleFactory == null)
-        {
-            errors.Add($"{nameof(_obstacleFactory)} is not assigned.");
-        }
-
-        if (_adsConfig == null)
-        {
-            errors.Add($"{nameof(_adsConfig)} is not assigned.");
-        }
-
-        if (errors.Count > 0)
-        {
-            errorMessage =
-                "SceneReferences has invalid configuration:" +
-                Environment.NewLine +
-                "- " +
-                string.Join(Environment.NewLine + "- ", errors);
-
-            return false;
-        }
-
-        errorMessage = string.Empty;
-        return true;
     }
 }

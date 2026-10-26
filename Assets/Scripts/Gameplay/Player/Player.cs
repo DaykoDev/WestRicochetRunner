@@ -1,12 +1,15 @@
 using UnityEngine;
 
+[RequireComponent(typeof(PlayerInputReader))]
+[RequireComponent(typeof(PlayerLateralCalculator))]
+[RequireComponent(typeof(PlayerMover))]
+[RequireComponent(typeof(PlayerShooting))]
 public class Player : MonoBehaviour
 {
-    [Header("References")]
-    [SerializeField] private PlayerInputReader _inputReader;
-    [SerializeField] private PlayerLateralCalculator _lateralCalculator;
-    [SerializeField] private PlayerMover _mover;
-    [SerializeField] private PlayerShooting _playerShooting;
+    private PlayerInputReader _inputReader;
+    private PlayerLateralCalculator _lateralCalculator;
+    private PlayerMover _mover;
+    private PlayerShooting _playerShooting;
 
     private bool _isControlEnabled;
 
@@ -14,6 +17,11 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
+        _inputReader = GetComponent<PlayerInputReader>();
+        _lateralCalculator = GetComponent<PlayerLateralCalculator>();
+        _mover = GetComponent<PlayerMover>();
+        _playerShooting = GetComponent<PlayerShooting>();
+
         float initialX = transform.position.x;
 
         _lateralCalculator.Initialize(initialX);

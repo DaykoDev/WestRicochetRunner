@@ -38,7 +38,7 @@ public class RunPresenter : IDisposable
         _screen.SetHealth(_playerHealth.CurrentHealth, _playerHealth.MaxHealth);
         _screen.SetLevel(_playerProgress.CurrentLevel);
         _screen.SetCoins(_wallet.Balance);
-        _screen.SetProgress(0f);
+        UpdateProgress();
         _screen.SetBallCount(_ballQueue.AvailableCount, _ballQueue.Capacity);
     }
 
@@ -85,8 +85,16 @@ public class RunPresenter : IDisposable
 
     private void OnDistanceChanged(float distance)
     {
+        UpdateProgress();
+    }
+
+    private void UpdateProgress()
+    {
         float length = _levelGenerator.TrackLength;
-        _screen.SetProgress(length > 0f ? distance / length : 0f);
+
+        float progress = length > 0f ? _trackScroller.DistanceScrolled / length : 0f;
+
+        _screen.SetProgress(progress);
     }
 
     private void OnAvailableCountChanged(int available, int capacity)

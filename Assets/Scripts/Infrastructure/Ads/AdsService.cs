@@ -16,9 +16,7 @@ public class AdsService
 
     public bool IsBusy => _provider.IsBusy;
 
-    public bool CanShowInterstitial =>
-        _provider.IsBusy == false &&
-        Time.unscaledTime - _lastInterstitialTime >= _config.InterstitialCooldownSeconds;
+    public bool CanShowInterstitial => _provider.IsBusy == false && Time.unscaledTime - _lastInterstitialTime >= _config.InterstitialCooldownSeconds;
 
     private Action _pendingRewarded;
 

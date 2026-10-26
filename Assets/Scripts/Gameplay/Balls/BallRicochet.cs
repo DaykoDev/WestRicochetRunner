@@ -35,7 +35,7 @@ public static class BallRicochet
 
         if (angleToNormal > maxAngleToNormal)
         {
-            Vector3 tangent = Vector3.ProjectOnPlane(reflectedDirection, normal);
+            Vector3 tangent = Vector3.ProjectOnPlane(incomingDirection, normal);
 
             if (tangent.sqrMagnitude > Mathf.Epsilon)
             {

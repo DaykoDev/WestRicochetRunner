@@ -98,7 +98,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _spriteRenderer: {fileID: 772098941440529646}
-  _worldSize: 0.4
+  _worldSize: 0.3
   _cameraOffset: 0.05
 --- !u!1 &2027440100763305529
 GameObject:
@@ -131,6 +131,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8087044507881963856}
+  - {fileID: 8404830259668831844}
   m_Father: {fileID: 4156996014416632813}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6618337525860395036
@@ -275,15 +276,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4156996014416632813}
-  - component: {fileID: 7095650059029208776}
   - component: {fileID: 6848102673632357094}
-  - component: {fileID: 7755017054552544585}
+  - component: {fileID: 7095650059029208776}
   - component: {fileID: 5685529236181244119}
   - component: {fileID: 249730241037024366}
+  - component: {fileID: 8821160970118854192}
   - component: {fileID: 3804134562913816212}
   - component: {fileID: 7947931748992267323}
   - component: {fileID: 4115643986576849663}
-  - component: {fileID: 8821160970118854192}
   - component: {fileID: 2779638638215049714}
   - component: {fileID: 6985774476780848647}
   - component: {fileID: 7329731539764678884}
@@ -292,6 +292,7 @@ GameObject:
   - component: {fileID: 5130931049788276967}
   - component: {fileID: 9222122360359950060}
   - component: {fileID: 7878801299817672530}
+  - component: {fileID: 1041741462834212401}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -320,18 +321,6 @@ Transform:
   - {fileID: 254465779249635532}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7095650059029208776
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5445897826059135013}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d83e7affcc763a4aafaaa72236932c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &6848102673632357094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -344,11 +333,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d407081c92a2cff44895aa617537cd92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _inputReader: {fileID: 7755017054552544585}
-  _lateralCalculator: {fileID: 5685529236181244119}
-  _mover: {fileID: 249730241037024366}
-  _playerShooting: {fileID: 8821160970118854192}
---- !u!114 &7755017054552544585
+--- !u!114 &7095650059029208776
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -387,8 +372,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b2e2721663ca0e42af1748fb192909b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _forwardSpeed: 3
+  _forwardSpeed: 2.5
   _lateralSmoothness: 15
+--- !u!114 &8821160970118854192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5445897826059135013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472178a2dad0e8d4a8bcbe7c911f3cb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _camera: {fileID: 6341611185553956429}
+  _ballLauncher: {fileID: 711966024168838794}
+  _autoShooter: {fileID: 4115643986576849663}
+  _playerAimer: {fileID: 3804134562913816212}
+  _aimPointVisual: {fileID: 5374506600018681205}
+  _trajectoryRenderer: {fileID: 8445104152854158481}
 --- !u!114 &3804134562913816212
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -401,7 +404,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3467913d8a942e64e9ea7bc49fe80d1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _aimDistance: 2
+  _aimDistance: 1
   _aimHeight: 0
   _trackCenterX: 0
   _firePoint: {fileID: 8404830259668831844}
@@ -433,24 +436,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _ballLauncher: {fileID: 711966024168838794}
   _fireInterval: 0.5
---- !u!114 &8821160970118854192
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5445897826059135013}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 472178a2dad0e8d4a8bcbe7c911f3cb6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _camera: {fileID: 6341611185553956429}
-  _ballLauncher: {fileID: 711966024168838794}
-  _autoShooter: {fileID: 4115643986576849663}
-  _playerAimer: {fileID: 3804134562913816212}
-  _aimPointVisual: {fileID: 5374506600018681205}
-  _trajectoryRenderer: {fileID: 8445104152854158481}
 --- !u!65 &2779638638215049714
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -600,7 +585,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    m_ImpulseDuration: 0.05
+    m_ImpulseDuration: 0.15
     m_ImpulseType: 0
     m_DissipationRate: 0.25
     m_RawSignal: {fileID: 0}
@@ -631,7 +616,7 @@ MonoBehaviour:
     m_DissipationMode: 2
     m_DissipationDistance: 100
     m_PropagationSpeed: 343
-  m_DefaultVelocity: {x: 0, y: -1, z: 0}
+  m_DefaultVelocity: {x: 0, y: -0.05, z: 0}
 --- !u!114 &9222122360359950060
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -660,6 +645,59 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _ballLauncher: {fileID: 711966024168838794}
   _impulseSource: {fileID: 5130931049788276967}
+--- !u!114 &1041741462834212401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5445897826059135013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 180ecf9b41d478f468eb3e9083753217, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ImpulseDefinition:
+    m_ImpulseChannel: 1
+    m_ImpulseShape: 2
+    m_CustomImpulseShape:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_ImpulseDuration: 0.1
+    m_ImpulseType: 0
+    m_DissipationRate: 0.25
+    m_RawSignal: {fileID: 0}
+    m_AmplitudeGain: 1
+    m_FrequencyGain: 1
+    m_RepeatMode: 0
+    m_Randomize: 1
+    m_TimeEnvelope:
+      m_AttackShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      m_DecayShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      m_AttackTime: 0
+      m_SustainTime: 0.2
+      m_DecayTime: 0.7
+      m_ScaleWithImpact: 1
+      m_HoldForever: 0
+    m_ImpactRadius: 100
+    m_DirectionMode: 0
+    m_DissipationMode: 2
+    m_DissipationDistance: 100
+    m_PropagationSpeed: 343
+  m_DefaultVelocity: {x: 0, y: -0.03, z: 0}
 --- !u!1 &5711019477131834702
 GameObject:
   m_ObjectHideFlags: 0
@@ -688,7 +726,7 @@ Transform:
   m_GameObject: {fileID: 5711019477131834702}
   serializedVersion: 2
   m_LocalRotation: {x: 0.46174863, y: 0.000027551883, z: -0.00003129458, w: 0.8870109}
-  m_LocalPosition: {x: -0.00019977169, y: 7.6915207, z: -1.7357631}
+  m_LocalPosition: {x: -0.00019977172, y: 7.6915207, z: -1.2357635}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -812,11 +850,11 @@ Transform:
   m_GameObject: {fileID: 8444920837277337469}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.05974999, z: 0.265}
-  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
+  m_LocalPosition: {x: 0, y: 0.23899996, z: 1.06}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8087044507881963856}
+  m_Father: {fileID: 4722055932427951085}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &9095753265971123931
 GameObject:
@@ -1035,10 +1073,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 4962712504198836, guid: 4d5c869ec91d2c44c9a82dbee2a11e7a, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 8404830259668831844}
+    m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1902353365401686, guid: 4d5c869ec91d2c44c9a82dbee2a11e7a, type: 3}
       insertIndex: -1

@@ -30,6 +30,8 @@ public class RunState : IState, IPayloadedState<RunEnterMode>
     public event Action Won;
     public event Action Lost;
 
+    public event Action Failed;
+
     public void Enter()
     {
         Enter(RunEnterMode.NewRun);
@@ -57,7 +59,15 @@ public class RunState : IState, IPayloadedState<RunEnterMode>
         _playerHealth.ResetHealth();
         _player.ResetToStart();
         _player.SetRunModifiers(_context.Modifiers);
-        _levelGenerator.BuildLevel(_context.Level, _context.Seed, _context.Modifiers);
+
+        bool isLevelBuilt = _levelGenerator.BuildLevel(_context.Level, _context.Seed, _context.Modifiers);
+
+        if (isLevelBuilt == false)
+        {
+            _isRunning = false;
+            Failed?.Invoke();
+            return;
+        }
 
         StartRunSystems();
         Entered?.Invoke();

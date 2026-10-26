@@ -16,5 +16,4 @@ public class PlayerSaveData
 
     public bool SoundEnabled = true;
     public bool MusicEnabled = true;
-    public bool VibrationEnabled = true;
 }

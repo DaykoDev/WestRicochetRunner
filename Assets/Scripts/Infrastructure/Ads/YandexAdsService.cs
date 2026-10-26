@@ -10,10 +10,12 @@ public class YandexAdsService : IAdsService, IDisposable
     private Action _onRewardedError;
 
     public bool IsBusy => YG2.nowAdsShow;
+    private bool _rewardGranted;
 
     public YandexAdsService()
     {
         YG2.onCloseInterAdv += OnCloseInterAdv;
+        YG2.onCloseRewardedAdv += OnRewardedClosed;
         YG2.onErrorInterAdv += OnErrorInterAdv;
         YG2.onErrorRewardedAdv += OnErrorRewardedAdv;
     }
@@ -21,6 +23,7 @@ public class YandexAdsService : IAdsService, IDisposable
     public void Dispose()
     {
         YG2.onCloseInterAdv -= OnCloseInterAdv;
+        YG2.onCloseRewardedAdv -= OnRewardedClosed;
         YG2.onErrorInterAdv -= OnErrorInterAdv;
         YG2.onErrorRewardedAdv -= OnErrorRewardedAdv;
     }
@@ -46,6 +49,7 @@ public class YandexAdsService : IAdsService, IDisposable
             return;
         }
 
+        _rewardGranted = false;
         _onRewarded = onRewarded;
         _onRewardedError = onError;
         YG2.RewardedAdvShow(placement, OnRewardGranted);
@@ -53,7 +57,21 @@ public class YandexAdsService : IAdsService, IDisposable
 
     private void OnRewardGranted()
     {
+        _rewardGranted = true;
+
         Action callback = _onRewarded;
+        ClearRewarded();
+        callback?.Invoke();
+    }
+
+    private void OnRewardedClosed()
+    {
+        if (_rewardGranted)
+        {
+            return;
+        }
+
+        Action callback = _onRewardedError;
         ClearRewarded();
         callback?.Invoke();
     }

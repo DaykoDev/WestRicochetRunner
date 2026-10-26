@@ -117,7 +117,11 @@ public class ComponentPool<T> where T : Component
         {
             T obj = _activeObjects[i];
 
-            if (obj != null)
+            if (obj == null)
+            {
+                _activeObjects.RemoveAt(i);
+            }
+            else
             {
                 Release(obj);
             }

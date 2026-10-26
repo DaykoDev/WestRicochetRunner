@@ -26,11 +26,6 @@ public sealed class YandexCloudProgressStorage : IProgressStorage
         }
 
         YG2.saves.ProgressJson = JsonUtility.ToJson(data);
-
-        if (YG2.isSDKEnabled)
-        {
-            YG2.SaveProgress();
-        }
     }
 
     public void Flush()

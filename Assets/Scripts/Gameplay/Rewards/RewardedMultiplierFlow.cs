@@ -11,8 +11,6 @@ public class RewardedMultiplierFlow
     private bool _isUsed;
     private bool _requestInFlight;
 
-    public event Action<int> BonusGranted;
-
     public RewardedMultiplierFlow(AdsService adsService, Wallet wallet, RunRewardCollector rewardCollector, float multiplier)
     {
         _adsService = adsService;
@@ -21,8 +19,9 @@ public class RewardedMultiplierFlow
         _multiplier = multiplier;
     }
 
-    public bool CanApply =>
-        _isUsed == false && _requestInFlight == false;
+    public bool CanApply => _isUsed == false && _requestInFlight == false;
+
+    public event Action<int> BonusGranted;
 
     public void Reset()
     {
