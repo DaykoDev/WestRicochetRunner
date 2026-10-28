@@ -1,9 +1,7 @@
 using System;
 using UnityEngine;
 
-[CreateAssetMenu(
-    fileName = "CompletionRewardCalculator",
-    menuName = "Game/Calculators/Completion Reward")]
+[CreateAssetMenu(fileName = "CompletionRewardCalculator", menuName = "Game/Calculators/Completion Reward")]
 public sealed class CompletionRewardCalculator : ScriptableObject
 {
     [SerializeField, Min(0)] private int _baseReward = 10;
@@ -26,8 +24,6 @@ public sealed class CompletionRewardCalculator : ScriptableObject
             return int.MaxValue;
         }
 
-        return Math.Max(
-            0,
-            (int)Math.Round(reward, MidpointRounding.AwayFromZero));
+        return Math.Max(0, (int)Math.Round(reward, MidpointRounding.AwayFromZero));
     }
 }

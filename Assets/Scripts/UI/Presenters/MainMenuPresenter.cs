@@ -20,6 +20,8 @@ public class MainMenuPresenter : IDisposable
         _upgradeService.LevelChanged += OnLevelChanged;
         _upgradeService.BalanceChanged += OnBalanceChanged;
         _upgradeService.UpgradeLevelChanged += OnUpgradeLevelChanged;
+
+        _coinsFlow.AvailabilityChanged += OnCoinsRewardAvailabilityChanged;
     }
 
     public event Action StartRequested;
@@ -30,6 +32,8 @@ public class MainMenuPresenter : IDisposable
         _screen.Show();
         _screen.SetLevel(_upgradeService.CurrentLevel);
         _screen.SetCoins(_upgradeService.Balance);
+
+        OnCoinsRewardAvailabilityChanged();
         RefreshAllUpgradeViews();
     }
 
@@ -48,6 +52,8 @@ public class MainMenuPresenter : IDisposable
         _upgradeService.LevelChanged -= OnLevelChanged;
         _upgradeService.BalanceChanged -= OnBalanceChanged;
         _upgradeService.UpgradeLevelChanged -= OnUpgradeLevelChanged;
+
+        _coinsFlow.AvailabilityChanged -= OnCoinsRewardAvailabilityChanged;
     }
 
     private void RefreshAllUpgradeViews()
@@ -101,5 +107,10 @@ public class MainMenuPresenter : IDisposable
     {
         _screen.SetCoins(balance);
         RefreshAllUpgradeViews();
+    }
+
+    private void OnCoinsRewardAvailabilityChanged()
+    {
+        _screen.SetCoinsRewardAvailable(_coinsFlow.CanRequest);
     }
 }

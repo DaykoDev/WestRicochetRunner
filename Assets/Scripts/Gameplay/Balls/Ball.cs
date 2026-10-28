@@ -13,6 +13,8 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
     [Header("Return")]
     [SerializeField, Min(0.1f)] private float _returnDelay = 1f;
 
+    [SerializeField, Range(0f, 0.5f)] private float _returnEffectMinViewportY = 0.15f;
+
     private BallReturnFeedback _returnFeedback;
     private BallGateInteraction _gateInteraction;
 
@@ -62,7 +64,7 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
 
         if (IsOutsideScreen())
         {
-            BeginReturn();
+            BeginReturn(false);
             return;
         }
 
@@ -236,7 +238,7 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         return viewportPosition.z < 0f || viewportPosition.y < 0f;
     }
 
-    private void BeginReturn()
+    private void BeginReturn(bool allowEffect = true)
     {
         if (_isActive == false || _isReturning)
         {
@@ -246,7 +248,9 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         _isActive = false;
         _isReturning = true;
 
-        _returnFeedback.Play(transform.position);
+        bool shouldPlayEffect = allowEffect && CanPlayReturnEffect();
+
+        _returnFeedback.Play(transform.position, shouldPlayEffect);
 
         _pendingDistance = 0f;
         _returnTimer = 0f;
@@ -274,5 +278,21 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         {
             transform.rotation = Quaternion.LookRotation(_direction);
         }
+    }
+
+    private bool CanPlayReturnEffect()
+    {
+        if (_camera == null)
+        {
+            return true;
+        }
+
+        Vector3 viewportPosition = _camera.WorldToViewportPoint(transform.position);
+
+        return viewportPosition.z > 0f &&
+            viewportPosition.x >= 0f &&
+            viewportPosition.x <= 1f &&
+            viewportPosition.y >= _returnEffectMinViewportY &&
+            viewportPosition.y <= 1f;
     }
 }

@@ -7,6 +7,12 @@ public class PooledEffect : MonoBehaviour
     [SerializeField, Min(0.1f)] private float _lifetime = 1f;
 
     private EffectPool _pool;
+    private WaitForSeconds _delay;
+
+    private void Awake()
+    {
+        _delay = new WaitForSeconds(_lifetime);
+    }
 
     public void SetPool(EffectPool pool)
     {
@@ -22,7 +28,7 @@ public class PooledEffect : MonoBehaviour
 
     private IEnumerator ReleaseAfterLifetime()
     {
-        yield return new WaitForSeconds(_lifetime);
+        yield return _delay;
         _pool?.Release(this);
     }
 }

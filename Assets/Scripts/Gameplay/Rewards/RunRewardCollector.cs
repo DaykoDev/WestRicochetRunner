@@ -34,6 +34,7 @@ public class RunRewardCollector : MonoBehaviour
 
         _registeredObstacles.Clear();
         CollectedThisRun = 0;
+        _completionRewardGranted = false;
     }
 
     public void RegisterObstacle(Obstacle obstacle)

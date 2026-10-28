@@ -1,6 +1,6 @@
 using System;
 
-public class SecondChanceFlow
+public class SecondChanceFlow : IDisposable
 {
     private readonly AdsService _adsService;
     private readonly ObstacleFactory _obstacleFactory;
@@ -9,9 +9,10 @@ public class SecondChanceFlow
     private readonly float _clearRadius;
 
     private RunContext _context;
-    private bool _requestInFlight;
+    private RunContext _requestContext;
 
-    public event Action SecondChanceGranted;
+    private bool _requestInFlight;
+    private int _activeRequestId;
 
     public SecondChanceFlow(AdsService adsService, ObstacleFactory obstacleFactory, Player player, PlayerHealth playerHealth, float clearRadius)
     {
@@ -27,10 +28,15 @@ public class SecondChanceFlow
         _context.SecondChanceUsed == false &&
         _requestInFlight == false;
 
+    public event Action SecondChanceGranted;
+    public event Action AvailabilityChanged;
+
     public void SetContext(RunContext context)
     {
+        Cancel();
+
         _context = context;
-        _requestInFlight = false;
+        AvailabilityChanged?.Invoke();
     }
 
     public void Request()
@@ -41,20 +47,85 @@ public class SecondChanceFlow
         }
 
         _requestInFlight = true;
-        _adsService.ShowRewarded(AdsPlacements.SecondChance, OnRewarded, OnAdError);
+        _requestContext = _context;
+
+        bool isStarted = _adsService.ShowRewarded(AdsPlacements.SecondChance, OnRewarded, OnAdError, out _activeRequestId);
+
+        if (isStarted == false)
+        {
+            CompleteRequest();
+        }
+
+        AvailabilityChanged?.Invoke();
     }
 
-    private void OnRewarded()
+    public void Cancel()
     {
-        _requestInFlight = false;
-        _context.UseSecondChance();
+        if (_requestInFlight == false)
+        {
+            return;
+        }
+
+        _adsService.CancelRewarded(_activeRequestId);
+        CompleteRequest();
+
+        AvailabilityChanged?.Invoke();
+    }
+
+    public void Dispose()
+    {
+        Cancel();
+        _context = null;
+    }
+
+    private void OnRewarded(int requestId)
+    {
+        if (IsActiveRequest(requestId) == false)
+        {
+            return;
+        }
+
+        RunContext requestContext = _requestContext;
+        CompleteRequest();
+
+        bool isContextValid = requestContext != null && ReferenceEquals(requestContext, _context) && requestContext.SecondChanceUsed == false;
+
+        if (isContextValid == false)
+        {
+            AvailabilityChanged?.Invoke();
+            return;
+        }
+
+        requestContext.UseSecondChance();
+
         _obstacleFactory.ReleaseObstaclesNear(_player.transform.position, _clearRadius);
+
         _playerHealth.ResetHealth();
+
+        AvailabilityChanged?.Invoke();
         SecondChanceGranted?.Invoke();
     }
 
-    private void OnAdError()
+    private void OnAdError(int requestId)
+    {
+        if (IsActiveRequest(requestId) == false)
+        {
+            return;
+        }
+
+        CompleteRequest();
+        AvailabilityChanged?.Invoke();
+    }
+
+    private bool IsActiveRequest(int requestId)
+    {
+        return _requestInFlight && _activeRequestId == requestId;
+    }
+
+    private void CompleteRequest()
     {
         _requestInFlight = false;
+        _activeRequestId = 0;
+        _requestContext = null;
     }
 }

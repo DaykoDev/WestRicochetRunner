@@ -128,6 +128,11 @@ public class MainMenuScreen : MonoBehaviour
         }
     }
 
+    public void SetCoinsRewardAvailable(bool isAvailable)
+    {
+        _coinsRewardButton.interactable = isAvailable;
+    }
+
     public void SetUpgradeInfo(PermanentUpgradeType type, int level, int maxLevel, int nextCost, bool canPurchase)
     {
         if (_views.TryGetValue(type, out UpgradePurchaseView view) == false)

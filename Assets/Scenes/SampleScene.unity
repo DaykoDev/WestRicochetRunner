@@ -5146,7 +5146,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _wallet: {fileID: 796848496}
-  _completionReward: 10
+  _completionRewardCalculator: {fileID: 11400000, guid: 5c0564c692ea31f4283d20a7aefb6119, type: 2}
 --- !u!4 &796848498
 Transform:
   m_ObjectHideFlags: 0
@@ -5200,7 +5200,7 @@ MonoBehaviour:
     _allowSafe: 1
     _allowChallenge: 1
   - _prefab: {fileID: 9070641162431345758, guid: b641652c251f13b46acb2de5c32a0e51, type: 3}
-    _minLevel: 6
+    _minLevel: 12
     _weight: 2
     _allowSafe: 1
     _allowChallenge: 1
@@ -7791,6 +7791,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1222873482}
   m_CullTransparentMesh: 1
+--- !u!20 &1224887783 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 6341611185553956429, guid: 82d8d45526851ea4ea2d62f8f88eba2b, type: 3}
+  m_PrefabInstance: {fileID: 8253630987456014394}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1227161459 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4575452960449438, guid: f877ba9d08fd65b4c9a2195c29d46043, type: 3}
@@ -8335,8 +8340,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -10444,7 +10449,7 @@ MonoBehaviour:
   _ballPrefab: {fileID: -6449485763794371315, guid: 5405b2d62e1f7e04497fa085bf66a846, type: 3}
   _initialSize: 3
   _maxSize: 15
-  _camera: {fileID: 0}
+  _camera: {fileID: 1224887783}
   _effectPool: {fileID: 1780814647}
   _ricochetFeedback: {fileID: 1871289813}
 --- !u!4 &1586402301

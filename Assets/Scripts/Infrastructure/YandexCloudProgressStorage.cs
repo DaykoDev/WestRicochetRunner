@@ -2,12 +2,20 @@ using System;
 using UnityEngine;
 using YG;
 
-public sealed class YandexCloudProgressStorage : IProgressStorage
+public sealed class YandexCloudProgressStorage : IProgressStorage, IDisposable
 {
+    private bool _isSubscribed;
+    private bool _isDisposed;
+
     private Action<PlayerSaveData> _pendingLoad;
 
     public void Load(Action<PlayerSaveData> onCompleted)
     {
+        if (_isDisposed)
+        {
+            return;
+        }
+
         if (YG2.isSDKEnabled)
         {
             onCompleted?.Invoke(ReadSave());
@@ -15,12 +23,12 @@ public sealed class YandexCloudProgressStorage : IProgressStorage
         }
 
         _pendingLoad = onCompleted;
-        YG2.onGetSDKData += OnSdkDataReceived;
+        SubscribeToSdkData();
     }
 
     public void Save(PlayerSaveData data)
     {
-        if (data == null)
+        if (_isDisposed || data == null)
         {
             return;
         }
@@ -30,18 +38,61 @@ public sealed class YandexCloudProgressStorage : IProgressStorage
 
     public void Flush()
     {
-        if (YG2.isSDKEnabled)
+        if (_isDisposed || YG2.isSDKEnabled == false)
         {
-            YG2.SaveProgress();
+            return;
         }
+
+        YG2.SaveProgress();
+    }
+
+    public void Dispose()
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        _isDisposed = true;
+
+        UnsubscribeFromSdkData();
+        _pendingLoad = null;
+    }
+
+    private void SubscribeToSdkData()
+    {
+        if (_isSubscribed)
+        {
+            return;
+        }
+
+        YG2.onGetSDKData += OnSdkDataReceived;
+        _isSubscribed = true;
+    }
+
+    private void UnsubscribeFromSdkData()
+    {
+        if (_isSubscribed == false)
+        {
+            return;
+        }
+
+        YG2.onGetSDKData -= OnSdkDataReceived;
+        _isSubscribed = false;
     }
 
     private void OnSdkDataReceived()
     {
-        YG2.onGetSDKData -= OnSdkDataReceived;
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        UnsubscribeFromSdkData();
 
         Action<PlayerSaveData> callback = _pendingLoad;
         _pendingLoad = null;
+
         callback?.Invoke(ReadSave());
     }
 
@@ -61,6 +112,7 @@ public sealed class YandexCloudProgressStorage : IProgressStorage
         catch (Exception exception)
         {
             Debug.LogError($"Failed to read cloud save: {exception.Message}");
+
             return null;
         }
     }

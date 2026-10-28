@@ -13,6 +13,8 @@ public class DefeatPresenter : IDisposable
         _screen.MainMenuClicked += OnMainMenuClicked;
         _screen.RestartClicked += OnRestartClicked;
         _screen.SecondChanceClicked += OnSecondChanceClicked;
+
+        _secondChanceFlow.AvailabilityChanged += OnSecondChanceAvailabilityChanged;
     }
 
     public event Action MainMenuRequested;
@@ -21,11 +23,12 @@ public class DefeatPresenter : IDisposable
     public void HandleStateEntered()
     {
         _screen.Show();
-        _screen.SetSecondChanceAvailable(_secondChanceFlow.CanOffer);
+        OnSecondChanceAvailabilityChanged();
     }
 
     public void HandleStateExited()
     {
+        _secondChanceFlow.Cancel();
         _screen.Hide();
     }
 
@@ -34,6 +37,8 @@ public class DefeatPresenter : IDisposable
         _screen.MainMenuClicked -= OnMainMenuClicked;
         _screen.RestartClicked -= OnRestartClicked;
         _screen.SecondChanceClicked -= OnSecondChanceClicked;
+
+        _secondChanceFlow.AvailabilityChanged -= OnSecondChanceAvailabilityChanged;
     }
 
     private void OnMainMenuClicked()
@@ -49,5 +54,10 @@ public class DefeatPresenter : IDisposable
     private void OnSecondChanceClicked()
     {
         _secondChanceFlow.Request();
+    }
+
+    private void OnSecondChanceAvailabilityChanged()
+    {
+        _screen.SetSecondChanceAvailable(_secondChanceFlow.CanOffer);
     }
 }

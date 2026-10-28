@@ -1,43 +1,103 @@
 using System;
 
-public class RewardedCoinsFlow
+public class RewardedCoinsFlow : IDisposable
 {
     private readonly AdsService _adsService;
     private readonly Wallet _wallet;
-    private readonly int _rewardCoins;
+    private readonly PlayerProgress _playerProgress;
+    private readonly MenuCoinsRewardCalculator _rewardCalculator;
 
     private bool _requestInFlight;
+    private int _activeRequestId;
+    private int _requestedReward;
 
-    public RewardedCoinsFlow(AdsService adsService, Wallet wallet, int rewardCoins)
+    public RewardedCoinsFlow(AdsService adsService, Wallet wallet, PlayerProgress playerProgress, MenuCoinsRewardCalculator rewardCalculator)
     {
         _adsService = adsService;
         _wallet = wallet;
-        _rewardCoins = rewardCoins;
+        _playerProgress = playerProgress;
+        _rewardCalculator = rewardCalculator;
     }
 
+    public bool CanRequest => _requestInFlight == false && _adsService.IsBusy == false;
+
     public event Action<int> RewardGranted;
+    public event Action AvailabilityChanged;
 
     public void Request()
     {
-        if (_requestInFlight || _adsService.IsBusy)
+        if (CanRequest == false)
         {
             return;
         }
 
         _requestInFlight = true;
-        _adsService.ShowRewarded(AdsPlacements.MenuCoins, OnRewarded, OnAdError);
+        _requestedReward = _rewardCalculator.Calculate(_playerProgress.CurrentLevel);
+
+        bool isStarted = _adsService.ShowRewarded(AdsPlacements.MenuCoins, OnRewarded, OnAdError, out _activeRequestId);
+
+        if (isStarted == false)
+        {
+            CompleteRequest();
+        }
+
+        AvailabilityChanged?.Invoke();
     }
 
-    private void OnRewarded()
+    public void Cancel()
     {
-        _requestInFlight = false;
-        _wallet.Add(_rewardCoins);
+        if (_requestInFlight == false)
+        {
+            return;
+        }
 
-        RewardGranted?.Invoke(_rewardCoins);
+        _adsService.CancelRewarded(_activeRequestId);
+        CompleteRequest();
+
+        AvailabilityChanged?.Invoke();
     }
 
-    private void OnAdError()
+    public void Dispose()
+    {
+        Cancel();
+    }
+
+    private void OnRewarded(int requestId)
+    {
+        if (IsActiveRequest(requestId) == false)
+        {
+            return;
+        }
+
+        int reward = _requestedReward;
+        CompleteRequest();
+
+        _wallet.Add(reward);
+
+        AvailabilityChanged?.Invoke();
+        RewardGranted?.Invoke(reward);
+    }
+
+    private void OnAdError(int requestId)
+    {
+        if (IsActiveRequest(requestId) == false)
+        {
+            return;
+        }
+
+        CompleteRequest();
+        AvailabilityChanged?.Invoke();
+    }
+
+    private bool IsActiveRequest(int requestId)
+    {
+        return _requestInFlight && _activeRequestId == requestId;
+    }
+
+    private void CompleteRequest()
     {
         _requestInFlight = false;
+        _activeRequestId = 0;
+        _requestedReward = 0;
     }
 }

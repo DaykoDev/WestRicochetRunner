@@ -1,12 +1,14 @@
 using System;
 using UnityEngine;
 
-public class AdsService
+public class AdsService : IDisposable
 {
     private readonly IAdsService _provider;
     private readonly AdsConfig _config;
 
     private float _lastInterstitialTime = float.NegativeInfinity;
+    private int _lastRewardedRequestId;
+    private int _activeRewardedRequestId;
 
     public AdsService(IAdsService provider, AdsConfig config)
     {
@@ -18,7 +20,8 @@ public class AdsService
 
     public bool CanShowInterstitial => _provider.IsBusy == false && Time.unscaledTime - _lastInterstitialTime >= _config.InterstitialCooldownSeconds;
 
-    private Action _pendingRewarded;
+    private Action<int> _pendingRewarded;
+    private Action<int> _pendingError;
 
     public void TryShowInterstitial()
     {
@@ -31,24 +34,75 @@ public class AdsService
         _provider.ShowInterstitial(null, null);
     }
 
-    public void ShowRewarded(string placement, Action onRewarded, Action onError)
+    public bool ShowRewarded(string placement, Action<int> onRewarded, Action<int> onError, out int requestId)
     {
-        if (_provider.IsBusy)
+        requestId = 0;
+
+        if(_activeRewardedRequestId != 0 || _provider.IsBusy)
         {
-            onError?.Invoke();
+            return false;
+        }
+
+        requestId = ++_lastRewardedRequestId;
+
+        _activeRewardedRequestId = requestId;
+        _pendingRewarded = onRewarded;
+        _pendingError = onError;
+
+        _provider.ShowRewarded(placement, OnProviderRewarded, OnProviderError);
+
+        return true;
+    }
+
+    public void CancelRewarded(int requestId)
+    {
+        if (requestId == 0 || requestId != _activeRewardedRequestId)
+        {
             return;
         }
 
-        _pendingRewarded = onRewarded;
-        _provider.ShowRewarded(placement, OnProviderRewarded, onError);
+        ClearRewardedRequest();
+    }
+
+    public void Dispose()
+    {
+        ClearRewardedRequest();
     }
 
     private void OnProviderRewarded()
     {
-        _lastInterstitialTime = Time.unscaledTime;
+        if (_activeRewardedRequestId == 0)
+        {
+            return;
+        }
 
-        Action callback = _pendingRewarded;
+        int requestId = _activeRewardedRequestId;
+        Action<int> callback = _pendingRewarded;
+
+        ClearRewardedRequest();
+
+        _lastInterstitialTime = Time.unscaledTime;
+        callback?.Invoke(requestId);
+    }
+
+    private void OnProviderError()
+    {
+        if (_activeRewardedRequestId == 0)
+        {
+            return;
+        }
+
+        int requestId = _activeRewardedRequestId;
+        Action<int> callback = _pendingError;
+
+        ClearRewardedRequest();
+        callback?.Invoke(requestId);
+    }
+
+    private void ClearRewardedRequest()
+    {
+        _activeRewardedRequestId = 0;
         _pendingRewarded = null;
-        callback?.Invoke();
+        _pendingError = null;
     }
 }

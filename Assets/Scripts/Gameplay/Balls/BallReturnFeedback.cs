@@ -19,14 +19,14 @@ public sealed class BallReturnFeedback : MonoBehaviour
         }
     }
 
-    public void Play(Vector3 position)
+    public void Play(Vector3 position, bool playEffect)
     {
         if (_visualRoot != null)
         {
             _visualRoot.SetActive(false);
         }
 
-        if (_effectPool != null)
+        if (playEffect && _effectPool != null)
         {
             _effectPool.Get().PlayAt(position);
         }

@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _interstitialCooldownSeconds: 90
   _victoryCoinsMultiplier: 2
-  _menuRewardCoins: 100
+  _menuCoinsRewardCalculator: {fileID: 11400000, guid: 697bab45bfaa7a04483375e99958f84d, type: 2}
   _secondChanceClearRadius: 12

@@ -64,7 +64,7 @@ public sealed class ObstacleGrid : MonoBehaviour
             return;
         }
 
-        Vector2Int newSize = new Vector2Int(
+        Vector2Int newSize = new(
             Mathf.Max(0, Mathf.FloorToInt(bounds.size.x / _cellSize)),
             Mathf.Max(0, Mathf.FloorToInt(bounds.size.z / _cellSize))
         );

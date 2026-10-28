@@ -15,6 +15,8 @@ public class VictoryPresenter : IDisposable
         _screen.MainMenuClicked += OnMainMenuClicked;
         _screen.MultiplyClicked += OnMultiplyClicked;
         _multiplierFlow.BonusGranted += OnBonusGranted;
+
+        _multiplierFlow.AvailabilityChanged += OnMultiplierAvailabilityChanged;
     }
 
     public event Action MainMenuRequested;
@@ -23,12 +25,14 @@ public class VictoryPresenter : IDisposable
     {
         _screen.SetCollectedCoins(_rewardCollector.CollectedThisRun);
         _multiplierFlow.Reset();
-        _screen.SetMultiplyAvailable(true);
+
         _screen.Show();
+        OnMultiplierAvailabilityChanged();
     }
 
     public void HandleStateExited()
     {
+        _multiplierFlow.Cancel();
         _screen.Hide();
     }
 
@@ -37,6 +41,8 @@ public class VictoryPresenter : IDisposable
         _screen.MainMenuClicked -= OnMainMenuClicked;
         _screen.MultiplyClicked -= OnMultiplyClicked;
         _multiplierFlow.BonusGranted -= OnBonusGranted;
+
+        _multiplierFlow.AvailabilityChanged -= OnMultiplierAvailabilityChanged;
     }
 
     private void OnMainMenuClicked()
@@ -53,5 +59,10 @@ public class VictoryPresenter : IDisposable
     {
         _screen.SetCollectedCoins(_rewardCollector.CollectedThisRun + bonus);
         _screen.SetMultiplyAvailable(false);
+    }
+
+    private void OnMultiplierAvailabilityChanged()
+    {
+        _screen.SetMultiplyAvailable(_multiplierFlow.CanApply);
     }
 }
