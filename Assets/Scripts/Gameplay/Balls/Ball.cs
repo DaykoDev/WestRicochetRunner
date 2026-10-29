@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 
 [RequireComponent(typeof(BallReturnFeedback))]
+[RequireComponent(typeof(BallRicochetVisual))]
 public class Ball : MonoBehaviour, IPoolable<Ball>
 {
     [Header("Settings")]
@@ -15,7 +16,10 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
 
     [SerializeField, Range(0f, 0.5f)] private float _returnEffectMinViewportY = 0.15f;
 
+    [Header("Ricochet")]
+    private BallRicochetVisual _ricochetVisual;
     private BallReturnFeedback _returnFeedback;
+
     private BallGateInteraction _gateInteraction;
 
     private RaycastHit[] _hits;
@@ -34,6 +38,8 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
     private bool _isActive;
     private IDamageable _lastDamaged;
 
+    private float _launchSpeed;
+
     public int LaunchId { get; private set; }
 
     public event Action<Ball> Died;
@@ -47,6 +53,7 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         _hits = new RaycastHit[_movementSettings.CastBufferSize];
         _gateInteraction = new BallGateInteraction(_movementSettings);
         _returnFeedback = GetComponent<BallReturnFeedback>();
+        _ricochetVisual = GetComponent<BallRicochetVisual>();
     }
 
     private void FixedUpdate()
@@ -108,7 +115,11 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
 
         _stats.MaxBounces = Mathf.Clamp(_stats.MaxBounces, 0, _movementSettings.MaxSupportedBounces);
 
-        _effectiveSpeed = velocity.magnitude;
+        _launchSpeed = velocity.magnitude;
+        _effectiveSpeed = _launchSpeed;
+
+        _ricochetVisual.ResetVisual();
+
         _direction = velocity.normalized;
         _bounceCount = 0;
         _lastDamaged = null;
@@ -133,6 +144,7 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         _lifetimeTimer = 0f;
         _pendingDistance = 0f;
         _effectiveSpeed = 0f;
+        _launchSpeed = 0f;
         _bounceCount = 0;
         _direction = Vector3.zero;
         _stats = default;
@@ -197,6 +209,16 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
 
             _direction = BallRicochet.CalculateDirection(_direction, normal, _movementSettings.MinBounceAngle);
             FaceDirection();
+
+            _bounceCount++;
+            collisionCount++;
+
+            float maxSpeed = _launchSpeed * _movementSettings.MaxSpeedMultiplierAfterRicochet;
+
+            _effectiveSpeed = Mathf.Min(_effectiveSpeed * _movementSettings.SpeedMultiplierAfterRicochet, maxSpeed);
+
+            _ricochetVisual.OnRicochet();
+
             Ricocheted?.Invoke(transform.position);
 
             float separation = BallCollisionQuery.GetSeparationDistance(hit, _movementSettings);
@@ -204,9 +226,6 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
             transform.position += normal * separation;
 
             remainingDistance = Mathf.Max(0f, remainingDistance - separation);
-
-            _bounceCount++;
-            collisionCount++;
 
             if (_bounceCount > _stats.MaxBounces)
             {

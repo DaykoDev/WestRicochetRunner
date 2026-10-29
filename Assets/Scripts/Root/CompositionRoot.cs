@@ -118,6 +118,16 @@ public sealed class CompositionRoot : IDisposable
         _isInitializing = false;
     }
 
+    public void ResetAllSave()
+    {
+        _meta.Progress.ResetProgress();
+        _meta.Wallet.ResetBalance();
+
+        PlayerSaveData resetData = _meta.Progress.CreateSaveData(_meta.Wallet.Balance);
+
+        _saveService.Save(resetData);
+    }
+
     private void OnProgressLoaded(PlayerSaveData saveData)
     {
         if (_isDisposed || _isInitialized)

@@ -33,7 +33,8 @@ public sealed class RunComposition : IDisposable
             sceneReferences.PlayerHealth,
             sceneReferences.LevelGenerator,
             sceneReferences.TrackScroller,
-            meta.Upgrades);
+            meta.Upgrades,
+            sceneReferences.RunRewardCollector);
 
         VictoryState = new VictoryState();
         DefeatState = new DefeatState();

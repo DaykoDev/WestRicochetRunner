@@ -34,6 +34,7 @@ public class ObstacleFactory : MonoBehaviour
     [SerializeField, Min(0)] private int _prewarmPerType = 5;
     [SerializeField, Min(1)] private int _maxPerType = 30;
     [SerializeField] private EffectPool _explosionEffectPool;
+    [SerializeField] private EffectPool _obstacleDestructionEffectPool;
 
     [Header("Obstacle Prefabs")]
     [SerializeField] private ObstacleEntry[] _entries;
@@ -179,6 +180,13 @@ public class ObstacleFactory : MonoBehaviour
 
     private void OnObstacleCreated(Obstacle obstacle)
     {
+        ObstacleVisualFeedback visualFeedback = obstacle.GetComponent<ObstacleVisualFeedback>();
+
+        if (visualFeedback != null)
+        {
+            visualFeedback.SetDestructionEffectPool(_obstacleDestructionEffectPool);
+        }
+
         if (obstacle is DynamiteBarrel dynamiteBarrel)
         {
             if (_explosionEffectPool == null)

@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -29,7 +30,11 @@ public class MainMenuScreen : MonoBehaviour
 
     [Header("Progress")]
     [SerializeField] private TMP_Text _levelText;
+
+    [Header("Coins")]
     [SerializeField] private TMP_Text _coinsText;
+    [SerializeField, Range(0f, 1f)] private float _coinsPunchStrength = 0.2f;
+    [SerializeField, Min(0.02f)] private float _coinsPunchDuration = 0.18f;
 
     [Header("Buttons")]
     [SerializeField] private Button _startButton;
@@ -40,6 +45,9 @@ public class MainMenuScreen : MonoBehaviour
     [SerializeField] private UpgradePurchaseView[] _upgradeViews;
 
     private readonly Dictionary<PermanentUpgradeType, UpgradePurchaseView> _views = new();
+
+    private int _previousCoins;
+    private bool _isCoinsInitialized;
 
     public event Action StartClicked;
     public event Action CoinsRewardClicked;
@@ -122,10 +130,29 @@ public class MainMenuScreen : MonoBehaviour
 
     public void SetCoins(int coins)
     {
-        if (_coinsText != null)
+        if (_coinsText == null)
         {
-            _coinsText.text = $"Coins: {coins}";
+            return;
         }
+
+        bool shouldAnimate = _isCoinsInitialized && coins != _previousCoins;
+
+        _coinsText.text = coins.ToString();
+
+        _previousCoins = coins;
+        _isCoinsInitialized = true;
+
+        if (shouldAnimate == false)
+        {
+            return;
+        }
+
+        Transform target = _coinsText.transform;
+
+        target.DOKill();
+        target.localScale = Vector3.one;
+
+        target.DOPunchScale(Vector3.one * _coinsPunchStrength, _coinsPunchDuration);
     }
 
     public void SetCoinsRewardAvailable(bool isAvailable)
@@ -170,7 +197,7 @@ public class MainMenuScreen : MonoBehaviour
             }
             else
             {
-                view.CostText.text = $"Cost: {nextCost}";
+                view.CostText.text = $"{nextCost}";
             }
         }
 

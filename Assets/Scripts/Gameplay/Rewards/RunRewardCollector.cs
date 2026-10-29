@@ -5,6 +5,9 @@ public class RunRewardCollector : MonoBehaviour
 {
     [SerializeField] private Wallet _wallet;
 
+    [Header("Currency Drops")]
+    [SerializeField] private CurrencyDropSpawner _dropSpawner;
+
     [Header("Level Completion")]
     [SerializeField] private CompletionRewardCalculator _completionRewardCalculator;
 
@@ -20,21 +23,41 @@ public class RunRewardCollector : MonoBehaviour
         {
             Debug.LogError("Wallet is not assigned.", this);
         }
+
+        if (_dropSpawner == null)
+        {
+            Debug.LogError("CurrencyDropSpawner is not assigned.", this);
+        }
+    }
+
+    private void OnEnable()
+    {
+        if (_dropSpawner != null)
+        {
+            _dropSpawner.Collected += OnDropCollected;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_dropSpawner != null)
+        {
+            _dropSpawner.Collected -= OnDropCollected;
+        }
     }
 
     public void BeginRun()
     {
-        foreach (Obstacle obstacle in _registeredObstacles)
-        {
-            if (obstacle != null)
-            {
-                obstacle.Destroyed -= OnObstacleDestroyed;
-            }
-        }
+        UnregisterAllObstacles();
+        _dropSpawner?.ReleaseAll();
 
-        _registeredObstacles.Clear();
         CollectedThisRun = 0;
         _completionRewardGranted = false;
+    }
+
+    public void ClearPickups()
+    {
+        _dropSpawner?.ReleaseAll();
     }
 
     public void RegisterObstacle(Obstacle obstacle)
@@ -67,13 +90,7 @@ public class RunRewardCollector : MonoBehaviour
 
         int reward = _completionRewardCalculator.Calculate(completedLevel);
 
-        if (reward <= 0 || _wallet == null)
-        {
-            return;
-        }
-
-        _wallet.Add(reward);
-        CollectedThisRun += reward;
+        GrantReward(reward);
     }
 
     private void OnObstacleDestroyed(Obstacle obstacle)
@@ -83,16 +100,37 @@ public class RunRewardCollector : MonoBehaviour
 
         int reward = obstacle.Income;
 
-        if (reward <= 0 || _wallet == null)
+        if (reward <= 0)
         {
             return;
         }
 
-        _wallet.Add(reward);
-        CollectedThisRun += reward;
+        if (_dropSpawner == null)
+        {
+            GrantReward(reward);
+            return;
+        }
+
+        _dropSpawner.Spawn(reward, obstacle.transform.position);
     }
 
-    private void OnDestroy()
+    private void OnDropCollected(int amount)
+    {
+        GrantReward(amount);
+    }
+
+    private void GrantReward(int amount)
+    {
+        if (amount <= 0 || _wallet == null)
+        {
+            return;
+        }
+
+        _wallet.Add(amount);
+        CollectedThisRun += amount;
+    }
+
+    private void UnregisterAllObstacles()
     {
         foreach (Obstacle obstacle in _registeredObstacles)
         {
@@ -103,5 +141,10 @@ public class RunRewardCollector : MonoBehaviour
         }
 
         _registeredObstacles.Clear();
+    }
+
+    private void OnDestroy()
+    {
+        UnregisterAllObstacles();
     }
 }

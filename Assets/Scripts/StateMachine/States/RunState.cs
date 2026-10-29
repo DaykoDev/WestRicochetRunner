@@ -9,11 +9,12 @@ public class RunState : IState, IPayloadedState<RunEnterMode>
     private readonly LevelGenerator _levelGenerator;
     private readonly TrackScroller _trackScroller;
     private readonly UpgradeService _upgradeService;
+    private readonly RunRewardCollector _rewardCollector;
 
     private RunContext _context;
     private bool _isRunning;
 
-    public RunState(PlayerProgress playerProgress, Player player, PlayerHealth playerHealth, LevelGenerator levelGenerator, TrackScroller trackScroller, UpgradeService upgradeService)
+    public RunState(PlayerProgress playerProgress, Player player, PlayerHealth playerHealth, LevelGenerator levelGenerator, TrackScroller trackScroller, UpgradeService upgradeService, RunRewardCollector rewardCollector)
     {
         _playerProgress = playerProgress;
         _player = player;
@@ -21,6 +22,7 @@ public class RunState : IState, IPayloadedState<RunEnterMode>
         _levelGenerator = levelGenerator;
         _trackScroller = trackScroller;
         _upgradeService = upgradeService;
+        _rewardCollector = rewardCollector;
     }
 
     public RunContext Context => _context;
@@ -116,6 +118,7 @@ public class RunState : IState, IPayloadedState<RunEnterMode>
         _isRunning = false;
         _trackScroller.StopScrolling();
         _player.ClearRun();
+        _rewardCollector.ClearPickups();
         _levelGenerator.ClearLevel();
         _trackScroller.ResetPosition();
         _context = null;

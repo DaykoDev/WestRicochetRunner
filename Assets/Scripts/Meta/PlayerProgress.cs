@@ -3,7 +3,7 @@ using System;
 public class PlayerProgress
 {
     private const int StartingLevel = 1;
-    private readonly Random _random = new Random();
+    private readonly Random _random = new();
 
     private int _startBallCountUpgradeLevel;
     private int _ballDamageUpgradeLevel;
@@ -132,6 +132,34 @@ public class PlayerProgress
             TutorialCompleted = _isTutorialCompleted,
             BestCompletedLevel = _bestCompletedLevel
         };
+    }
+
+    public void ResetProgress()
+    {
+        CurrentLevel = StartingLevel;
+        CurrentLevelSeed = GenerateSeed();
+
+        _startBallCountUpgradeLevel = 0;
+        _ballDamageUpgradeLevel = 0;
+        _incomeMultiplierUpgradeLevel = 0;
+
+        _isTutorialCompleted = false;
+        _bestCompletedLevel = 0;
+
+        BestLevelChanged?.Invoke(_bestCompletedLevel);
+        LevelChanged?.Invoke(CurrentLevel);
+
+        UpgradeLevelChanged?.Invoke(
+            PermanentUpgradeType.StartBallCount,
+            _startBallCountUpgradeLevel);
+
+        UpgradeLevelChanged?.Invoke(
+            PermanentUpgradeType.BallDamage,
+            _ballDamageUpgradeLevel);
+
+        UpgradeLevelChanged?.Invoke(
+            PermanentUpgradeType.IncomeMultiplier,
+            _incomeMultiplierUpgradeLevel);
     }
 
     private int GenerateSeed()

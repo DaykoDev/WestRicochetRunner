@@ -8,7 +8,11 @@ public class RunScreen : MonoBehaviour
 {
     [Header("Progress")]
     [SerializeField] private TMP_Text _levelText;
+
+    [Header("Coins")]
     [SerializeField] private TMP_Text _coinsText;
+    [SerializeField, Range(0f, 1f)] private float _coinsPunchStrength = 0.2f;
+    [SerializeField, Min(0.02f)] private float _coinsPunchDuration = 0.18f;
 
     [Header("Health")]
     [SerializeField] private Image[] _healthIcons;
@@ -30,6 +34,9 @@ public class RunScreen : MonoBehaviour
 
     private float _tutorialTimer;
     private bool _isTutorialCounting;
+
+    private int _previousCoins;
+    private bool _isCoinsInitialized;
 
     public event Action TutorialDismissed;
     public event Action SettingsClicked;
@@ -117,10 +124,29 @@ public class RunScreen : MonoBehaviour
 
     public void SetCoins(int coins)
     {
-        if (_coinsText != null)
+        if (_coinsText == null)
         {
-            _coinsText.text = $"Coins: {coins}";
+            return;
         }
+
+        bool shouldAnimate = _isCoinsInitialized && coins != _previousCoins;
+
+        _coinsText.text = coins.ToString();
+
+        _previousCoins = coins;
+        _isCoinsInitialized = true;
+
+        if (shouldAnimate == false)
+        {
+            return;
+        }
+
+        Transform target = _coinsText.transform;
+
+        target.DOKill();
+        target.localScale = Vector3.one;
+
+        target.DOPunchScale(Vector3.one * _coinsPunchStrength, _coinsPunchDuration);
     }
 
     public void SetProgress(float progress)

@@ -37,4 +37,21 @@ public class Bootstrapper : MonoBehaviour
     {
         _compositionRoot?.Dispose();
     }
+
+#if UNITY_EDITOR
+    [ContextMenu("Debug/Reset All Save")]
+    private void ResetAllSave()
+    {
+        if (Application.isPlaying == false || _compositionRoot == null)
+        {
+            Debug.LogWarning("Сброс доступен в Play Mode после создания CompositionRoot.");
+
+            return;
+        }
+
+        _compositionRoot.ResetAllSave();
+
+        Debug.Log("Сохранение полностью сброшено.");
+    }
+#endif
 }

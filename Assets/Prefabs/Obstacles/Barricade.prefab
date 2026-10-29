@@ -69,7 +69,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a46abc54b5aa0c418b6a9e9a5d0858a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _baseHP: 12
+  _baseHP: 10
   _prefabCoinMultiplier: 1
   _contactDamage: 1
   _gridSize: {x: 2, y: 1}

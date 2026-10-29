@@ -18,7 +18,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 832
   _castBufferSize: 16
-  _minBounceAngle: 20
+  _minBounceAngle: 25
+  _speedMultiplierAfterRicochet: 1.12
+  _maxSpeedMultiplierAfterRicochet: 2.5
   _maxCollisionsPerStep: 5
   _maxSupportedBounces: 16
   _upgradeGateMask:

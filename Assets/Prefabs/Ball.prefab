@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3497975469453084228}
   - component: {fileID: -6449485763794371315}
   - component: {fileID: 2644153367570326213}
+  - component: {fileID: 2298175720622963958}
   m_Layer: 0
   m_Name: Ball
   m_TagString: Untagged
@@ -49,6 +50,7 @@ MonoBehaviour:
   _movementSettings: {fileID: 11400000, guid: 903a3aa7087761747bd78d86fd28dfaa, type: 2}
   _maxLifetime: 5
   _returnDelay: 1
+  _returnEffectMinViewportY: 0.15
 --- !u!114 &2644153367570326213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -62,6 +64,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _visualRoot: {fileID: 7328100901227253411}
+--- !u!114 &2298175720622963958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 273437223999965420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abc2b1da9b41f4a4db677c8ab365730a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _ricochetVisualEnabled: 1
+  _visualRenderer: {fileID: 4939397160269918619}
+  _colorPropertyName: _Color
+  _emissionPropertyName: _EmissionColor
+  _defaultColor: {r: 1, g: 1, b: 1, a: 1}
+  _targetRicochetColor: {r: 1, g: 0.87190086, b: 0, a: 1}
+  _colorChangePerRicochet: 0.25
+  _emissionTint: {r: 1, g: 0.7721733, b: 0.019607842, a: 1}
+  _emissionPerRicochet: 0.5
+  _maxEmissionIntensity: 3
 --- !u!1001 &5533152016661342335
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -131,6 +155,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 44cdcd55c8562cc46b31e272eb09fc5b, type: 3}
+--- !u!23 &4939397160269918619 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 596155193559865828, guid: 44cdcd55c8562cc46b31e272eb09fc5b, type: 3}
+  m_PrefabInstance: {fileID: 5533152016661342335}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5296663947973859519 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 380611056441782464, guid: 44cdcd55c8562cc46b31e272eb09fc5b, type: 3}

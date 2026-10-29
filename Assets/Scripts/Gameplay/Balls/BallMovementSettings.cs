@@ -11,6 +11,9 @@ public class BallMovementSettings : ScriptableObject
 
     [Header("Ricochet")]
     [SerializeField, Range(0f, 89f)] private float _minBounceAngle = 25f;
+    [SerializeField, Min(1f)] private float _speedMultiplierAfterRicochet = 1.12f;
+
+    [SerializeField, Min(1f)] private float _maxSpeedMultiplierAfterRicochet = 2.5f;
 
     [Header("Movement")]
     [SerializeField, Min(1)] private int _maxCollisionsPerStep = 5;
@@ -27,6 +30,8 @@ public class BallMovementSettings : ScriptableObject
     public LayerMask CollisionMask => _collisionMask;
     public int CastBufferSize => _castBufferSize;
     public float MinBounceAngle => _minBounceAngle;
+    public float SpeedMultiplierAfterRicochet => _speedMultiplierAfterRicochet;
+    public float MaxSpeedMultiplierAfterRicochet => _maxSpeedMultiplierAfterRicochet;
     public int MaxCollisionsPerStep => _maxCollisionsPerStep;
     public LayerMask UpgradeGateMask => _upgradeGateMask;
 }

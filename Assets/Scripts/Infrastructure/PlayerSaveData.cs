@@ -16,4 +16,16 @@ public class PlayerSaveData
 
     public bool SoundEnabled = true;
     public bool MusicEnabled = true;
+
+    public static PlayerSaveData CreateDefault()
+    {
+        return new PlayerSaveData
+        {
+            CurrentLevel = 1,
+            Coins = 0,
+            StartBallCountUpgradeLevel = 1,
+            BallDamageUpgradeLevel = 1,
+            IncomeMultiplierUpgradeLevel = 1
+        };
+    }
 }

@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5654df7c3c4a444daae271645a714a0, type: 3}
   m_Name: ObstacleHealthCalculator
   m_EditorClassIdentifier: 
-  _safeCoefficient: 0.5
+  _safeCoefficient: 0.75
   _bonusCoefficient: 0.75
-  _challengeCoefficient: 1.5
+  _challengeCoefficient: 1.25
   _growthChangeLevel: 20
   _earlyGrowth: 0.15
   _lateGrowth: 0.1

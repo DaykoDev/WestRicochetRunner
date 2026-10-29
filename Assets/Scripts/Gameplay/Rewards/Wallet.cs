@@ -57,4 +57,12 @@ public class Wallet : MonoBehaviour
 
         return true;
     }
+
+    public void ResetBalance()
+    {
+        Balance = Math.Max(0, _initialBalance);
+        _isInitialized = true;
+
+        BalanceChanged?.Invoke(Balance);
+    }
 }
