@@ -631,8 +631,8 @@ PlayerSettings:
   webGLMemorySize: 16
   webGLExceptionSupport: 2
   webGLNameFilesAsHashes: 0
-  webGLShowDiagnostics: 0
-  webGLDataCaching: 1
+  webGLShowDiagnostics: 1
+  webGLDataCaching: 0
   webGLDebugSymbols: 0
   webGLEmscriptenArgs: 
   webGLModulesDirectory: 
