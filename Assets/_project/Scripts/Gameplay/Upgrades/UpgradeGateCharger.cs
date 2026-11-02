@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -13,7 +14,18 @@ public class UpgradeGateCharger : MonoBehaviour
     [Header("Display")]
     [SerializeField] private TMP_Text _bonusText;
 
+    [Header("Animation")]
+    [SerializeField, Min(0f)] private float _countDuration = 0.12f;
+    [SerializeField, Min(0f)] private float _punchDuration = 0.18f;
+    [SerializeField, Min(0f)] private float _punchScale = 0.25f;
+
     private readonly Dictionary<Ball, int> _lastChargedLaunches = new();
+
+    private Tween _countTween;
+    private Tween _punchTween;
+
+    private Vector3 _initialTextScale;
+    private float _displayedBonus;
 
     public UpgradeType Type => _type;
     public float CurrentBonus { get; private set; }
@@ -21,7 +33,15 @@ public class UpgradeGateCharger : MonoBehaviour
     private void Awake()
     {
         CurrentBonus = Mathf.Clamp(_initialBonus, 0f, _maxBonus);
-        UpdateDisplay();
+
+        _displayedBonus = CurrentBonus;
+
+        if (_bonusText != null)
+        {
+            _initialTextScale = _bonusText.transform.localScale;
+        }
+
+        UpdateText(CurrentBonus);
     }
 
     public void TryCharge(Ball ball)
@@ -37,11 +57,64 @@ public class UpgradeGateCharger : MonoBehaviour
         }
 
         _lastChargedLaunches[ball] = ball.LaunchId;
-        CurrentBonus = Mathf.Min(_maxBonus, CurrentBonus + _bonusPerBall);
-        UpdateDisplay();
+
+        float newBonus = Mathf.Min(_maxBonus, CurrentBonus + _bonusPerBall);
+
+        if (Mathf.Approximately(newBonus, CurrentBonus))
+        {
+            return;
+        }
+
+        CurrentBonus = newBonus;
+        AnimateDisplay();
     }
 
-    private void UpdateDisplay()
+    private void AnimateDisplay()
+    {
+        if (_bonusText == null)
+        {
+            _displayedBonus = CurrentBonus;
+            return;
+        }
+
+        _countTween?.Kill();
+        _punchTween?.Kill();
+
+        Transform textTransform = _bonusText.transform;
+
+        textTransform.localScale = _initialTextScale;
+
+        _countTween = DOVirtual.Float(
+                _displayedBonus,
+                CurrentBonus,
+                _countDuration,
+                value =>
+                {
+                    _displayedBonus = value;
+                    UpdateText(value);
+                })
+            .SetEase(Ease.OutQuad)
+            .OnComplete(() =>
+            {
+                _displayedBonus = CurrentBonus;
+                UpdateText(CurrentBonus);
+                _countTween = null;
+            });
+
+        _punchTween = textTransform
+            .DOPunchScale(
+                Vector3.one * _punchScale,
+                _punchDuration,
+                1,
+                0f)
+            .OnComplete(() =>
+            {
+                textTransform.localScale = _initialTextScale;
+                _punchTween = null;
+            });
+    }
+
+    private void UpdateText(float value)
     {
         if (_bonusText == null)
         {
@@ -50,11 +123,25 @@ public class UpgradeGateCharger : MonoBehaviour
 
         if (_type == UpgradeType.FireRate || _type == UpgradeType.BallSpeed)
         {
-            _bonusText.text = $"+{CurrentBonus:0.#}%";
+            _bonusText.text = $"+{value:0.#}%";
         }
         else
         {
-            _bonusText.text = $"+{Mathf.RoundToInt(CurrentBonus)}";
+            _bonusText.text = $"+{Mathf.RoundToInt(value)}";
+        }
+    }
+
+    private void OnDisable()
+    {
+        _countTween?.Kill();
+        _punchTween?.Kill();
+
+        _countTween = null;
+        _punchTween = null;
+
+        if (_bonusText != null)
+        {
+            _bonusText.transform.localScale = _initialTextScale;
         }
     }
 }

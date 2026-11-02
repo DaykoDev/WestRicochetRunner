@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01bad8c8c350a73498ba4a7155771d55, type: 3}
   m_Name: BallMovementSettings
   m_EditorClassIdentifier: 
-  _radius: 0.2
+  _radius: 0.25
   _collisionOffset: 0.02
   _collisionMask:
     serializedVersion: 2

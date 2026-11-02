@@ -8,6 +8,7 @@ public class PlayerProgress
     private int _startBallCountUpgradeLevel;
     private int _ballDamageUpgradeLevel;
     private int _incomeMultiplierUpgradeLevel;
+    private int _bounceCountUpgradeLevel;
     private bool _isTutorialCompleted;
     private int _bestCompletedLevel;
 
@@ -28,6 +29,7 @@ public class PlayerProgress
         _startBallCountUpgradeLevel = Math.Max(0, saveData.StartBallCountUpgradeLevel);
         _ballDamageUpgradeLevel = Math.Max(0, saveData.BallDamageUpgradeLevel);
         _incomeMultiplierUpgradeLevel = Math.Max(0, saveData.IncomeMultiplierUpgradeLevel);
+        _bounceCountUpgradeLevel = Math.Max(0, saveData.BounceCountUpgradeLevel);
         _isTutorialCompleted = saveData.TutorialCompleted;
         _bestCompletedLevel = Math.Max(0, saveData.BestCompletedLevel);
     }
@@ -83,6 +85,8 @@ public class PlayerProgress
                 return _ballDamageUpgradeLevel;
             case PermanentUpgradeType.IncomeMultiplier:
                 return _incomeMultiplierUpgradeLevel;
+            case PermanentUpgradeType.BounceCount:
+                return _bounceCountUpgradeLevel;
             default:
                 return 0;
         }
@@ -110,6 +114,9 @@ public class PlayerProgress
             case PermanentUpgradeType.IncomeMultiplier:
                 _incomeMultiplierUpgradeLevel = newLevel;
                 break;
+            case PermanentUpgradeType.BounceCount:
+                _bounceCountUpgradeLevel = newLevel;
+                break;
             default:
                 return false;
         }
@@ -129,6 +136,7 @@ public class PlayerProgress
             StartBallCountUpgradeLevel = _startBallCountUpgradeLevel,
             BallDamageUpgradeLevel = _ballDamageUpgradeLevel,
             IncomeMultiplierUpgradeLevel = _incomeMultiplierUpgradeLevel,
+            BounceCountUpgradeLevel = _bounceCountUpgradeLevel,
             TutorialCompleted = _isTutorialCompleted,
             BestCompletedLevel = _bestCompletedLevel
         };
@@ -142,6 +150,7 @@ public class PlayerProgress
         _startBallCountUpgradeLevel = 0;
         _ballDamageUpgradeLevel = 0;
         _incomeMultiplierUpgradeLevel = 0;
+        _bounceCountUpgradeLevel = 0;
 
         _isTutorialCompleted = false;
         _bestCompletedLevel = 0;

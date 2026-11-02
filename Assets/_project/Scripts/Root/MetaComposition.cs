@@ -9,6 +9,8 @@ public sealed class MetaComposition : IDisposable
         Settings = new SettingsService(
             saveData == null || saveData.SoundEnabled,
             saveData == null || saveData.MusicEnabled,
+            saveData?.SoundVolume ?? 1f,
+            saveData?.MusicVolume ?? 1f,
             sceneReferences.AudioMixer);
 
         Wallet = sceneReferences.Wallet;

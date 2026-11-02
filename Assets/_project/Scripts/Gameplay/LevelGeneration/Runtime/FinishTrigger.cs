@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class FinishTrigger : MonoBehaviour
 {
+    [Header("Feedback")]
+    [SerializeField] private FinishCelebration _celebration;
+
     private bool _hasTriggered;
 
     public event Action Reached;
@@ -20,6 +23,9 @@ public class FinishTrigger : MonoBehaviour
         }
 
         _hasTriggered = true;
+
+        _celebration?.Play();
+
         Reached?.Invoke();
     }
 }

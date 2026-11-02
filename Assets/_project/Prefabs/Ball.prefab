@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: -6449485763794371315}
   - component: {fileID: 2644153367570326213}
   - component: {fileID: 2298175720622963958}
+  - component: {fileID: 4578657144933283272}
   m_Layer: 0
   m_Name: Ball
   m_TagString: Untagged
@@ -85,6 +86,27 @@ MonoBehaviour:
   _colorChangePerRicochet: 0.4
   _luminosityPerRicochet: 0.45
   _maxLuminosity: 2
+--- !u!135 &4578657144933283272
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 273437223999965420}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.25
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &5533152016661342335
 PrefabInstance:
   m_ObjectHideFlags: 0

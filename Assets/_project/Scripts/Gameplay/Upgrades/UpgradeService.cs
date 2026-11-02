@@ -50,7 +50,7 @@ public class UpgradeService : IDisposable
 
     public bool CanPurchase(PermanentUpgradeType type)
     {
-        if (TryGetDefinition(type, out PermanentUpgradeSettings.Definition definition) == false)
+        if (TryGetDefinition(type, out PermanentUpgradeSettings.Definition definition) == false || CurrentLevel < definition.UnlockLevel)
         {
             return false;
         }
@@ -68,7 +68,7 @@ public class UpgradeService : IDisposable
 
     public bool TryPurchase(PermanentUpgradeType type)
     {
-        if (TryGetDefinition(type, out PermanentUpgradeSettings.Definition definition) == false)
+        if (TryGetDefinition(type, out PermanentUpgradeSettings.Definition definition) == false || CurrentLevel < definition.UnlockLevel)
         {
             return false;
         }
@@ -107,6 +107,12 @@ public class UpgradeService : IDisposable
         ApplyStartBallCount(modifiers);
         ApplyBallDamage(modifiers);
         ApplyIncomeMultiplier(modifiers);
+        ApplyBounceCount(modifiers);
+    }
+
+    public bool IsUnlocked(PermanentUpgradeType type)
+    {
+        return TryGetDefinition(type, out PermanentUpgradeSettings.Definition definition) && CurrentLevel >= definition.UnlockLevel;
     }
 
     public void Dispose()
@@ -167,6 +173,20 @@ public class UpgradeService : IDisposable
         }
     }
 
+    private void ApplyBounceCount(RunModifiers modifiers)
+    {
+        if (TryGetDefinition(PermanentUpgradeType.BounceCount, out PermanentUpgradeSettings.Definition definition) == false)
+        {
+            return;
+        }
+
+        int level = _playerProgress.GetUpgradeLevel(PermanentUpgradeType.BounceCount);
+
+        if (level > 0)
+        {
+            modifiers.Apply(UpgradeType.BounceCount, definition.BonusPerLevel * level);
+        }
+    }
     private bool TryGetDefinition(PermanentUpgradeType type, out PermanentUpgradeSettings.Definition definition)
     {
         if (_playerProgress != null &&

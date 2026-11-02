@@ -9,8 +9,12 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 350267167003840548, guid: d8e7d682c212c1741adfb76957f48a72, type: 3}
+      propertyPath: _magnetRadius
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 350267167003840548, guid: d8e7d682c212c1741adfb76957f48a72, type: 3}
       propertyPath: _scatterRadius
-      value: 0.9
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8516786005925837427, guid: d8e7d682c212c1741adfb76957f48a72, type: 3}
       propertyPath: m_Name

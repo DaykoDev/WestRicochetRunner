@@ -96,7 +96,8 @@ public class ObstacleFactory : MonoBehaviour
         Vector3 position,
         Quaternion rotation,
         Transform parent,
-        float incomeMultiplier)
+        float incomeMultiplier,
+        float healthMultiplier = 1f)
     {
         if (prefab == null)
         {
@@ -125,7 +126,8 @@ public class ObstacleFactory : MonoBehaviour
             section,
             incomeMultiplier,
             _healthCalculator,
-            _incomeCalculator);
+            _incomeCalculator,
+            healthMultiplier);
 
         if (_rewardCollector != null)
         {

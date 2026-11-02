@@ -21,12 +21,18 @@ public class CameraImpulseOnShot : MonoBehaviour
 
     private void OnEnable()
     {
-        _ballLauncher.Fired += OnFired;
+        if (_ballLauncher != null)
+        {
+            _ballLauncher.Fired += OnFired;
+        }
     }
 
     private void OnDisable()
     {
-        _ballLauncher.Fired -= OnFired;
+        if (_ballLauncher != null)
+        {
+            _ballLauncher.Fired -= OnFired;
+        }
     }
 
     private void OnFired()

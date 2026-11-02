@@ -73,14 +73,14 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.2
     - _GlossyReflections: 1
-    - _Lumin: 0
+    - _Lumin: 0.5
     - _MaxLight: 1
     - _Metallic: 0
     - _MinLight: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Offset: 0
-    - _OtlWidth: 1
+    - _OtlWidth: 1.4
     - _Parallax: 0.02
     - _Segmented: 1
     - _ShnIntense: 0

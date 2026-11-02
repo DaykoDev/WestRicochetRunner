@@ -42,6 +42,7 @@ public class SectionSequenceBuilder
         }
 
         sequence.Add(SelectSection(TrackSectionType.Finish, level, random));
+        sequence.Add(SelectSection(TrackSectionType.FinalBonus, level, random));
 
         return sequence;
     }

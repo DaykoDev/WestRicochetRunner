@@ -2,5 +2,6 @@ public enum PermanentUpgradeType
 {
     StartBallCount,
     BallDamage,
-    IncomeMultiplier
+    IncomeMultiplier,
+    BounceCount
 }

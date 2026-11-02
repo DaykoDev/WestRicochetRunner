@@ -4,5 +4,6 @@ public enum TrackSectionType
     Safe,
     Bonus,
     Challenge,
-    Finish
+    Finish,
+    FinalBonus
 }

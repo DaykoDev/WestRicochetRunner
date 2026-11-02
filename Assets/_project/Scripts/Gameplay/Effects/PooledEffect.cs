@@ -20,16 +20,11 @@ public class PooledEffect : MonoBehaviour
 
         transform.position = position;
 
-        _explosionParticle.Stop(
-            true,
-            ParticleSystemStopBehavior.StopEmittingAndClear);
+        _explosionParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 
         _explosionParticle.Play(true);
 
-        _releaseTween = DOVirtual.DelayedCall(
-                _lifetime,
-                Release)
-            .SetUpdate(true);
+        _releaseTween = DOVirtual.DelayedCall(_lifetime, Release).SetUpdate(true);
     }
 
     private void Release()
@@ -45,9 +40,7 @@ public class PooledEffect : MonoBehaviour
 
         if (_explosionParticle != null)
         {
-            _explosionParticle.Stop(
-                true,
-                ParticleSystemStopBehavior.StopEmittingAndClear);
+            _explosionParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
     }
 }

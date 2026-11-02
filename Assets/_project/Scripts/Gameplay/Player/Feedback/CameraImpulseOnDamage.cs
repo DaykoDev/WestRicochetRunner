@@ -11,6 +11,7 @@ public class CameraImpulseOnDamage : MonoBehaviour
 
     private void OnEnable()
     {
+        _lastHealth = _playerHealth.CurrentHealth;
         _playerHealth.HealthChanged += OnHealthChanged;
     }
 

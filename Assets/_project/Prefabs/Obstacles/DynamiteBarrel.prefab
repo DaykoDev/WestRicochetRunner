@@ -294,7 +294,7 @@ MonoBehaviour:
   _prefabCoinMultiplier: 1
   _contactDamage: 1
   _gridSize: {x: 1, y: 1}
-  _explosionRadius: 2.5
+  _explosionRadius: 4
   _explosionDamage: 6
   _obstacleMask:
     serializedVersion: 2

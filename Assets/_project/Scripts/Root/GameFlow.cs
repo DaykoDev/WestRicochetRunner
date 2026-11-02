@@ -13,6 +13,7 @@ public sealed class GameFlow : IDisposable
     private readonly RunRewardCollector _rewardCollector;
 
     private bool _isDisposed;
+    private bool _isFinalBonusActive;
 
     public GameFlow(
         GameStateMachine stateMachine,
@@ -38,18 +39,26 @@ public sealed class GameFlow : IDisposable
         Subscribe();
     }
 
-    public void EnterMainMenuFromBootstrap()
+    public void EnterInitialState()
     {
+        if (_playerProgress.IsTutorialCompleted == false)
+        {
+            _stateMachine.Enter<RunState>();
+            return;
+        }
+
         _stateMachine.Enter<MainMenuState>();
     }
 
     public void StartRun()
     {
+        ResetFinalBonus();
         _stateMachine.Enter<RunState>();
     }
 
     public void RestartRun()
     {
+        ResetFinalBonus();
         _runState.ClearRun();
         _stateMachine.Enter<RunState>();
     }
@@ -66,6 +75,7 @@ public sealed class GameFlow : IDisposable
 
     public void ReturnToMainMenu()
     {
+        ResetFinalBonus();
         _adsService.TryShowInterstitial();
 
         _runState.ClearRun();
@@ -104,6 +114,7 @@ public sealed class GameFlow : IDisposable
         _runState.Failed += OnRunFailed;
 
         _secondChanceFlow.SecondChanceGranted += OnSecondChanceGranted;
+        _levelGenerator.FinalBonusCompleted += OnFinalBonusCompleted;
     }
 
     private void Unsubscribe()
@@ -116,20 +127,44 @@ public sealed class GameFlow : IDisposable
         _runState.Failed -= OnRunFailed;
 
         _secondChanceFlow.SecondChanceGranted -= OnSecondChanceGranted;
+        _levelGenerator.FinalBonusCompleted -= OnFinalBonusCompleted;
     }
 
     private void OnPlayerDied()
     {
+        if (_isFinalBonusActive)
+        {
+            _runState.RequestWin();
+            return;
+        }
+
         _runState.RequestLose();
     }
 
     private void OnLevelFinished()
     {
+        if (_isFinalBonusActive)
+        {
+            return;
+        }
+
+        _isFinalBonusActive = true;
+        _playerHealth.SetOneHitDeathEnabled(true);
+    }
+
+    private void OnFinalBonusCompleted()
+    {
+        if (_isFinalBonusActive == false)
+        {
+            return;
+        }
+
         _runState.RequestWin();
     }
 
     private void OnRunWon()
     {
+        ResetFinalBonus();
         _rewardCollector.GrantCompletionReward(_playerProgress.CurrentLevel);
         _playerProgress.CompleteCurrentLevel();
         _stateMachine.Enter<VictoryState>();
@@ -149,5 +184,11 @@ public sealed class GameFlow : IDisposable
     private void OnSecondChanceGranted()
     {
         ResumeRun();
+    }
+
+    private void ResetFinalBonus()
+    {
+        _isFinalBonusActive = false;
+        _playerHealth.SetOneHitDeathEnabled(false);
     }
 }

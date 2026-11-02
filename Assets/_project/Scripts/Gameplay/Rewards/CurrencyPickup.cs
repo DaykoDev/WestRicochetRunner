@@ -35,9 +35,6 @@ public sealed class CurrencyPickup : MonoBehaviour
     private Transform _target;
     private Tween _dropTween;
     private Vector3 _initialScale;
-    private Vector3 _dropStart;
-    private Vector3 _dropEnd;
-    private float _dropElapsed;
     private float _currentSpeed;
 
     public int Value { get; private set; }
@@ -47,12 +44,47 @@ public sealed class CurrencyPickup : MonoBehaviour
         _initialScale = transform.localScale;
     }
 
-    public void Launch(
-        CurrencyDropSpawner owner,
-        Transform target,
-        int value,
-        Vector3 position)
+    private void Update()
     {
+        if (_state == MovementState.Inactive || _owner == null || _target == null)
+        {
+            return;
+        }
+
+        float deltaTime = Time.deltaTime;
+
+        if (_rotationSpeed != 0f)
+        {
+            transform.Rotate(Vector3.up, _rotationSpeed * deltaTime, Space.Self);
+        }
+
+        if (_state != MovementState.Attracting && Vector3.Distance(transform.position, GetTargetPosition()) <= _magnetRadius)
+        {
+            BeginAttraction();
+        }
+
+        if (_state == MovementState.Attracting)
+        {
+            UpdateAttraction(deltaTime);
+            return;
+        }
+
+        if (transform.position.z < _target.position.z - _behindPlayerDistance)
+        {
+            Expire();
+        }
+    }
+
+    private void OnDisable()
+    {
+        StopDropAnimation();
+        _state = MovementState.Inactive;
+    }
+
+    public void Launch(CurrencyDropSpawner owner, Transform target, int value, Vector3 position)
+    {
+        StopDropAnimation();
+
         _owner = owner;
         _target = target;
         Value = Mathf.Max(1, value);
@@ -77,41 +109,6 @@ public sealed class CurrencyPickup : MonoBehaviour
             .OnComplete(OnDropCompleted);
     }
 
-    private void Update()
-    {
-        if (_state == MovementState.Inactive || _owner == null || _target == null)
-        {
-            return;
-        }
-
-        float deltaTime = Time.deltaTime;
-
-        if (_rotationSpeed != 0f)
-        {
-            transform.Rotate(
-                Vector3.up,
-                _rotationSpeed * deltaTime,
-                Space.Self);
-        }
-
-        if (_state != MovementState.Attracting &&
-            Vector3.Distance(transform.position, GetTargetPosition()) <= _magnetRadius)
-        {
-            BeginAttraction();
-        }
-
-        if (_state == MovementState.Attracting)
-        {
-            UpdateAttraction(deltaTime);
-            return;
-        }
-
-        if (transform.position.z < _target.position.z - _behindPlayerDistance)
-        {
-            Expire();
-        }
-    }
-
     private void BeginAttraction()
     {
         _state = MovementState.Attracting;
@@ -129,20 +126,12 @@ public sealed class CurrencyPickup : MonoBehaviour
             return;
         }
 
-        _currentSpeed = Mathf.Min(
-            _maxSpeed,
-            _currentSpeed + _acceleration * deltaTime);
+        _currentSpeed = Mathf.Min(_maxSpeed, _currentSpeed + _acceleration * deltaTime);
 
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            targetPosition,
-            _currentSpeed * deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, targetPosition, _currentSpeed * deltaTime);
 
         float distanceRatio = Mathf.Clamp01(distance / _magnetRadius);
-        float scaleMultiplier = Mathf.Lerp(
-            _minimumScale,
-            1f,
-            distanceRatio);
+        float scaleMultiplier = Mathf.Lerp(_minimumScale, 1f, distanceRatio);
 
         transform.localScale = _initialScale * scaleMultiplier;
     }

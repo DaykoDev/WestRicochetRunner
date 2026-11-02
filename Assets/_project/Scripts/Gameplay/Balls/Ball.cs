@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+[RequireComponent(typeof(SphereCollider))]
 [RequireComponent(typeof(BallReturnFeedback))]
 [RequireComponent(typeof(BallRicochetVisual))]
 public class Ball : MonoBehaviour, IPoolable<Ball>
@@ -16,44 +17,52 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
 
     [SerializeField, Range(0f, 0.5f)] private float _returnEffectMinViewportY = 0.15f;
 
-    [Header("Ricochet")]
+    private BallMovement _movement;
+    private BallCollisionResolver _collisionResolver;
+
     private BallRicochetVisual _ricochetVisual;
     private BallReturnFeedback _returnFeedback;
 
-    private BallGateInteraction _gateInteraction;
+    private Camera _camera;
 
-    private RaycastHit[] _hits;
-
+    private float _lifetimeTimer;
     private float _returnTimer;
+
+    private bool _isActive;
     private bool _isReturning;
 
-    private BallStats _stats;
-    private Vector3 _direction;
-    private float _effectiveSpeed;
-    private float _pendingDistance;
-
-    private Camera _camera;
-    private float _lifetimeTimer;
-    private int _bounceCount;
-    private bool _isActive;
-    private IDamageable _lastDamaged;
-
-    private float _launchSpeed;
-
     public int LaunchId { get; private set; }
+
+    public bool IsActive => _isActive;
 
     public event Action<Ball> Died;
     public event Action<Ball> ReturnedToPool;
     public event Action<Vector3> Ricocheted;
 
-    public bool IsActive => _isActive;
-
     private void Awake()
     {
-        _hits = new RaycastHit[_movementSettings.CastBufferSize];
-        _gateInteraction = new BallGateInteraction(_movementSettings);
+        SphereCollider sphereCollider = GetComponent<SphereCollider>();
+
+        _collisionResolver = new BallCollisionResolver(transform, sphereCollider, _movementSettings);
+
+        _movement = new BallMovement(this, transform, _movementSettings, _collisionResolver);
+
+        _movement.Ricocheted += OnMovementRicocheted;
+        _movement.BouncesExhausted += OnBouncesExhausted;
+
         _returnFeedback = GetComponent<BallReturnFeedback>();
         _ricochetVisual = GetComponent<BallRicochetVisual>();
+    }
+
+    private void OnDestroy()
+    {
+        if (_movement == null)
+        {
+            return;
+        }
+
+        _movement.Ricocheted -= OnMovementRicocheted;
+        _movement.BouncesExhausted -= OnBouncesExhausted;
     }
 
     private void FixedUpdate()
@@ -75,18 +84,7 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
             return;
         }
 
-        _lifetimeTimer -= Time.fixedDeltaTime;
-
-        if (_lifetimeTimer <= 0f)
-        {
-            BeginReturn();
-            return;
-        }
-
-        float distance = _effectiveSpeed * Time.fixedDeltaTime + _pendingDistance;
-        _pendingDistance = 0f;
-
-        Move(distance);
+        UpdateLifetime();
     }
 
     public void SetCamera(Camera camera)
@@ -106,155 +104,76 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
             return false;
         }
 
+        transform.position = position;
+
         _isReturning = false;
         _returnTimer = 0f;
 
         _returnFeedback.Restore();
-
-        _stats = stats;
-
-        _stats.MaxBounces = Mathf.Clamp(_stats.MaxBounces, 0, _movementSettings.MaxSupportedBounces);
-
-        _launchSpeed = velocity.magnitude;
-        _effectiveSpeed = _launchSpeed;
-
         _ricochetVisual.ResetVisual();
 
-        _direction = velocity.normalized;
-        _bounceCount = 0;
-        _lastDamaged = null;
+        _movement.Launch(velocity, stats);
+
         _lifetimeTimer = _maxLifetime;
-        _pendingDistance = 0f;
         _isActive = true;
 
         FaceDirection();
 
-        transform.position = position;
-
-        unchecked { LaunchId++; }
+        unchecked
+        {
+            LaunchId++;
+        }
 
         return true;
     }
 
     public void OnReturnedToPool()
     {
+        _movement.Reset();
 
         _isActive = false;
         _isReturning = false;
+
         _lifetimeTimer = 0f;
-        _pendingDistance = 0f;
-        _effectiveSpeed = 0f;
-        _launchSpeed = 0f;
-        _bounceCount = 0;
-        _direction = Vector3.zero;
-        _stats = default;
+        _returnTimer = 0f;
 
         ReturnedToPool?.Invoke(this);
     }
 
-    private void Move(float distance)
+    private void UpdateLifetime()
     {
-        float remainingDistance = distance;
-        int collisionCount = 0;
+        _lifetimeTimer -= Time.fixedDeltaTime;
 
-        while (remainingDistance > 0f && collisionCount < _movementSettings.MaxCollisionsPerStep)
+        if (_lifetimeTimer <= 0f)
         {
-            bool hasHit = BallCollisionQuery.SphereCast(
-                transform.position,
-                _movementSettings.Radius,
-                _direction,
-                remainingDistance,
-                _hits,
-                _movementSettings.CollisionMask,
-                out RaycastHit hit,
-                out Vector3 normal
-            );
-
-            if (hasHit == false)
-            {
-                Vector3 startPosition = transform.position;
-                Vector3 endPosition = startPosition + _direction * remainingDistance;
-
-                _gateInteraction.ChargeAlongSegment(this, startPosition, endPosition);
-
-                transform.position = endPosition;
-                return;
-            }
-
-            bool hasNoMovementProgress = hit.distance <= BallCollisionQuery.ContactEpsilon;
-
-            if (hasNoMovementProgress && collisionCount > 0)
-            {
-                _pendingDistance = 0f;
-                return;
-            }
-
-            float traveledDistance = Mathf.Max(0f, hit.distance);
-            Vector3 hitCenter = transform.position + _direction * traveledDistance;
-
-            _gateInteraction.ChargeAlongSegment(this, transform.position, hitCenter);
-
-            transform.position = hitCenter;
-
-            remainingDistance -= traveledDistance;
-
-            IDamageable damageable = hit.collider.GetComponentInParent<IDamageable>();
-
-            if (damageable != null && ReferenceEquals(damageable, _lastDamaged) == false)
-            {
-                damageable.TakeDamage(_stats.Damage);
-            }
-
-            _lastDamaged = damageable;
-
-            _direction = BallRicochet.CalculateDirection(_direction, normal, _movementSettings.MinBounceAngle);
-            FaceDirection();
-
-            _bounceCount++;
-            collisionCount++;
-
-            float maxSpeed = _launchSpeed * _movementSettings.MaxSpeedMultiplierAfterRicochet;
-
-            _effectiveSpeed = Mathf.Min(_effectiveSpeed * _movementSettings.SpeedMultiplierAfterRicochet, maxSpeed);
-
-            _ricochetVisual.OnRicochet();
-
-            Ricocheted?.Invoke(transform.position);
-
-            float separation = BallCollisionQuery.GetSeparationDistance(hit, _movementSettings);
-
-            transform.position += normal * separation;
-
-            remainingDistance = Mathf.Max(0f, remainingDistance - separation);
-
-            if (_bounceCount > _stats.MaxBounces)
-            {
-                BeginReturn();
-                return;
-            }
-
-            if (hasNoMovementProgress)
-            {
-                _pendingDistance = 0f;
-                return;
-            }
+            BeginReturn();
+            return;
         }
 
-        float maxPendingDistance = _effectiveSpeed * Time.fixedDeltaTime;
-        _pendingDistance = Mathf.Min(remainingDistance, maxPendingDistance);
+        _movement.Tick(Time.fixedDeltaTime);
     }
 
-    private bool IsOutsideScreen()
+    private void OnMovementRicocheted(Vector3 position)
     {
-        if (_camera == null)
+        FaceDirection();
+        _ricochetVisual.OnRicochet();
+
+        Ricocheted?.Invoke(position);
+    }
+
+    private void OnBouncesExhausted()
+    {
+        BeginReturn();
+    }
+
+    private void FaceDirection()
+    {
+        Vector3 direction = _movement.Direction;
+
+        if (direction.sqrMagnitude > Mathf.Epsilon)
         {
-            return false;
-
+            transform.rotation = Quaternion.LookRotation(direction);
         }
-
-        Vector3 viewportPosition = _camera.WorldToViewportPoint(transform.position);
-
-        return viewportPosition.z < 0f || viewportPosition.y < 0f;
     }
 
     private void BeginReturn(bool allowEffect = true)
@@ -267,11 +186,12 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         _isActive = false;
         _isReturning = true;
 
+        _movement.Stop();
+
         bool shouldPlayEffect = allowEffect && CanPlayReturnEffect();
 
         _returnFeedback.Play(transform.position, shouldPlayEffect);
 
-        _pendingDistance = 0f;
         _returnTimer = 0f;
     }
 
@@ -291,12 +211,16 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         Died?.Invoke(this);
     }
 
-    private void FaceDirection()
+    private bool IsOutsideScreen()
     {
-        if (_direction.sqrMagnitude > Mathf.Epsilon)
+        if (_camera == null)
         {
-            transform.rotation = Quaternion.LookRotation(_direction);
+            return false;
         }
+
+        Vector3 viewportPosition = _camera.WorldToViewportPoint(transform.position);
+
+        return viewportPosition.z < 0f || viewportPosition.y < 0f;
     }
 
     private bool CanPlayReturnEffect()
@@ -309,9 +233,9 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         Vector3 viewportPosition = _camera.WorldToViewportPoint(transform.position);
 
         return viewportPosition.z > 0f &&
-            viewportPosition.x >= 0f &&
-            viewportPosition.x <= 1f &&
-            viewportPosition.y >= _returnEffectMinViewportY &&
-            viewportPosition.y <= 1f;
+               viewportPosition.x >= 0f &&
+               viewportPosition.x <= 1f &&
+               viewportPosition.y >= _returnEffectMinViewportY &&
+               viewportPosition.y <= 1f;
     }
 }

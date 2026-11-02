@@ -14,7 +14,7 @@ public sealed class ObstacleVisualFeedback : MonoBehaviour
     [SerializeField] private Transform _destructionEffectOrigin;
 
     [Header("Hit")]
-    [SerializeField] private Color _hitColor = new Color(1f, 0.85f, 0.35f, 1f);
+    [SerializeField] private Color _hitColor = new(1f, 0.85f, 0.35f, 1f);
     [SerializeField, Min(0.02f)] private float _hitDuration = 0.1f;
     [SerializeField, Range(0f, 0.3f)] private float _hitScaleAmount = 0.07f;
 

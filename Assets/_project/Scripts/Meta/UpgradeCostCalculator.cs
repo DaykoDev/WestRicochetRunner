@@ -16,7 +16,9 @@ public class UpgradeCostCalculator
             return 0;
         }
 
-        double cost = definition.BaseCost * Math.Pow(_costGrowth, Math.Max(0, currentLevel));
+        double growth = _costGrowth * definition.CostGrowthMultiplier;
+
+        double cost = definition.BaseCost * Math.Pow(growth, Math.Max(0, currentLevel));
 
         if (double.IsNaN(cost) || double.IsInfinity(cost) || cost >= int.MaxValue)
         {

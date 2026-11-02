@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: MenuCoinsRewardCalculator
   m_EditorClassIdentifier: 
   _baseCoins: 100
-  _levelsPerStep: 10
-  _coinsPerStep: 100
+  _levelsPerStep: 3
+  _coinsPerStep: 50

@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class LevelGenerator : MonoBehaviour
 {
+    [Header("Prepared First Level")]
+    [SerializeField] private TrackSection[] _firstLevelSections;
+
     [Header("Sections")]
     [SerializeField] private TrackSection[] _sections;
     [SerializeField] private Transform _generatedRoot;
@@ -18,8 +21,10 @@ public class LevelGenerator : MonoBehaviour
 
     private Vector3 _buildAnchorPosition;
     private Quaternion _buildAnchorRotation;
+    private Obstacle _finalBonusChest;
 
     public event Action Finished;
+    public event Action FinalBonusCompleted;
 
     public float TrackLength { get; private set; }
 
@@ -31,7 +36,7 @@ public class LevelGenerator : MonoBehaviour
 
     public bool BuildLevel(int level, int seed, RunModifiers modifiers)
     {
-        if (_generatedRoot == null || _obstaclePlacer == null || _upgradeGatePlacer == null)
+        if (_generatedRoot == null || _obstaclePlacer == null || _upgradeGatePlacer == null || _difficultyTiers == null)
         {
             Debug.LogError("LevelGenerator references are missing.", this);
 
@@ -47,24 +52,33 @@ public class LevelGenerator : MonoBehaviour
 
         _sequenceBuilder ??= new SectionSequenceBuilder(_sections);
 
+        bool usePreparedFirstLevel = level == 1 && _firstLevelSections != null && _firstLevelSections.Length > 0;
+
         List<TrackSection> sequence;
 
-        try
+        if (usePreparedFirstLevel)
         {
-            sequence = _sequenceBuilder.Build(level, seed, _difficultyTiers.GetChallengeBlockCount(level));
+            sequence = new List<TrackSection>(_firstLevelSections);
         }
-        catch (ArgumentOutOfRangeException exception)
+        else
         {
-            Debug.LogError($"Invalid level generation arguments: {exception.Message}", this);
+            try
+            {
+                sequence = _sequenceBuilder.Build(level, seed, _difficultyTiers.GetChallengeBlockCount(level));
+            }
+            catch (ArgumentOutOfRangeException exception)
+            {
+                Debug.LogError($"Invalid level generation arguments: {exception.Message}", this);
 
-            return false;
-        }
-        catch (InvalidOperationException exception)
-        {
-            Debug.LogError($"Failed to build level sequence: {exception.Message}", this);
+                return false;
+            }
+            catch (InvalidOperationException exception)
+            {
+                Debug.LogError($"Failed to build level sequence: {exception.Message}", this);
 
-            return false;
-        }
+                return false;
+            }
+        }    
 
         ClearLevel();
         _obstaclePlacer.BeginRun();
@@ -116,9 +130,38 @@ public class LevelGenerator : MonoBehaviour
                 _upgradeGatePlacer.PlaceGates(instance.transform, seed, i, modifiers);
             }
 
-            _obstaclePlacer.PlaceObstacles(instance.transform, level, section.Type, modifiers != null ? modifiers.IncomeMultiplier : 1f, seed, i);
+            float incomeMultiplier = modifiers != null ? modifiers.IncomeMultiplier : 1f;
 
-            trackLength += Vector3.Distance(nextPosition, anchors.EndAnchor.position);
+            if (section.Type == TrackSectionType.FinalBonus)
+            {
+                _finalBonusChest = _obstaclePlacer.PlaceFinalBonus(
+                    instance.transform,
+                    level,
+                    incomeMultiplier);
+
+                if (_finalBonusChest == null)
+                {
+                    ClearLevel();
+                    return false;
+                }
+
+                _finalBonusChest.Destroyed += OnFinalBonusChestDestroyed;
+            }
+            else
+            {
+                _obstaclePlacer.PlaceObstacles(
+                    instance.transform,
+                    level,
+                    section.Type,
+                    incomeMultiplier,
+                    seed,
+                    i);
+            }
+
+            if (section.Type != TrackSectionType.FinalBonus)
+            {
+                trackLength += Vector3.Distance(nextPosition, anchors.EndAnchor.position);
+            }
 
             nextPosition = anchors.EndAnchor.position;
             nextRotation = anchors.EndAnchor.rotation;
@@ -131,6 +174,12 @@ public class LevelGenerator : MonoBehaviour
 
     public void ClearLevel()
     {
+        if (_finalBonusChest != null)
+        {
+            _finalBonusChest.Destroyed -= OnFinalBonusChestDestroyed;
+            _finalBonusChest = null;
+        }
+
         _obstaclePlacer?.ReleaseObstacles();
 
         foreach (FinishTrigger trigger in _finishTriggers)
@@ -173,5 +222,16 @@ public class LevelGenerator : MonoBehaviour
     private void OnFinishReached()
     {
         Finished?.Invoke();
+    }
+
+    private void OnFinalBonusChestDestroyed(Obstacle chest)
+    {
+        if (_finalBonusChest != null)
+        {
+            _finalBonusChest.Destroyed -= OnFinalBonusChestDestroyed;
+            _finalBonusChest = null;
+        }
+
+        FinalBonusCompleted?.Invoke();
     }
 }

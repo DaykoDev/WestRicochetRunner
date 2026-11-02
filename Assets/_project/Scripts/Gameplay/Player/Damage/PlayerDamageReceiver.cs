@@ -31,7 +31,7 @@ public class PlayerDamageReceiver : MonoBehaviour
             return;
         }
 
-        Obstacle obstacle = other.GetComponent<Obstacle>();
+        Obstacle obstacle = other.GetComponentInParent<Obstacle>();
 
         if (obstacle == null || obstacle.IsDestroyed)
         {

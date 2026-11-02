@@ -37,6 +37,8 @@ public class TrackScroller : MonoBehaviour
         float delta = _speed * Time.fixedDeltaTime;
         _scrollRoot.position += Vector3.back * delta;
 
+        Physics.SyncTransforms();
+
         DistanceScrolled += delta;
         DistanceChanged?.Invoke(DistanceScrolled);
     }

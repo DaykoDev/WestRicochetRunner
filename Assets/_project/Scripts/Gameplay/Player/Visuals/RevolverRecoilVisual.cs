@@ -26,13 +26,23 @@ public class RevolverRecoilVisual : MonoBehaviour
 
     private void OnEnable()
     {
-        _ballLauncher.Fired += OnFired;
+        if (_ballLauncher != null)
+        {
+            _ballLauncher.Fired += OnFired;
+        }
     }
 
     private void OnDisable()
     {
-        _ballLauncher.Fired -= OnFired;
-        _recoilRoot.DOKill();
+        if (_ballLauncher != null)
+        {
+            _ballLauncher.Fired -= OnFired;
+        }
+
+        if (_recoilRoot != null)
+        {
+            _recoilRoot.DOKill();
+        }
     }
 
     private void OnFired()

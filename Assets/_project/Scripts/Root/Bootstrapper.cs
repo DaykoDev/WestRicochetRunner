@@ -6,7 +6,7 @@ public class Bootstrapper : MonoBehaviour
 
     private CompositionRoot _compositionRoot;
 
-    private void Awake()
+    private void Start()
     {
         _compositionRoot = new CompositionRoot(_sceneReferences);
         _compositionRoot.Initialize();

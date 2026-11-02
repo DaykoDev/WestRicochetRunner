@@ -61,10 +61,20 @@ public class MainMenuPresenter : IDisposable
         RefreshUpgradeView(PermanentUpgradeType.StartBallCount);
         RefreshUpgradeView(PermanentUpgradeType.BallDamage);
         RefreshUpgradeView(PermanentUpgradeType.IncomeMultiplier);
+        RefreshUpgradeView(PermanentUpgradeType.BounceCount);
     }
 
     private void RefreshUpgradeView(PermanentUpgradeType type)
     {
+        bool isUnlocked = _upgradeService.IsUnlocked(type);
+
+        _screen.SetUpgradeUnlocked(type, isUnlocked);
+
+        if (isUnlocked == false)
+        {
+            return;
+        }
+
         int level = _upgradeService.GetLevel(type);
         int maxLevel = _upgradeService.GetMaxLevel(type);
         int nextCost = _upgradeService.GetNextCost(type);

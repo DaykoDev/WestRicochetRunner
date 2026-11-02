@@ -12,7 +12,7 @@ public class PlayerShooting : MonoBehaviour
 
     private bool _isControlEnabled;
 
-    private void Start()
+    private void Awake()
     {
         SetControlEnabled(false);
     }

@@ -33,7 +33,8 @@ public abstract class Obstacle : MonoBehaviour, IDamageable, IPoolable<Obstacle>
         ObstacleSection section,
         float incomeMultiplier,
         ObstacleHealthCalculator healthCalculator,
-        IncomeCalculator incomeCalculator)
+        IncomeCalculator incomeCalculator,
+        float healthMultiplier = 1f)
     {
         if (healthCalculator == null || incomeCalculator == null)
         {
@@ -41,15 +42,10 @@ public abstract class Obstacle : MonoBehaviour, IDamageable, IPoolable<Obstacle>
             return;
         }
 
-        int targetHP = healthCalculator.Calculate(
-            _baseHP,
-            level,
-            section);
+        int baseTargetHP = healthCalculator.Calculate(_baseHP, level, section);
+        int targetHP = Mathf.Max(1, Mathf.RoundToInt(baseTargetHP * Mathf.Max(0.01f, healthMultiplier)));
 
-        int income = incomeCalculator.Calculate(
-            targetHP,
-            incomeMultiplier,
-            _prefabCoinMultiplier);
+        int income = incomeCalculator.Calculate(targetHP, incomeMultiplier, _prefabCoinMultiplier);
 
         Initialize(targetHP, income);
     }

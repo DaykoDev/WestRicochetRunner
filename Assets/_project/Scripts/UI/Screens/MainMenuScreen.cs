@@ -14,11 +14,13 @@ public class MainMenuScreen : MonoBehaviour
         [SerializeField] private Button _button;
         [SerializeField] private TMP_Text _levelText;
         [SerializeField] private TMP_Text _costText;
+        [SerializeField] private GameObject _root;
 
         public PermanentUpgradeType Type => _type;
         public Button Button => _button;
         public TMP_Text LevelText => _levelText;
         public TMP_Text CostText => _costText;
+        public GameObject Root => _root;
 
         public event Action<PermanentUpgradeType> PurchaseRequested;
 
@@ -181,11 +183,11 @@ public class MainMenuScreen : MonoBehaviour
             }
             else if (maxLevel == 0)
             {
-                view.LevelText.text = $"Level: {level}";
+                view.LevelText.text = $"{level}";
             }
             else
             {
-                view.LevelText.text = $"Level: {level}/{maxLevel}";
+                view.LevelText.text = $"{level}/{maxLevel}";
             }
         }
 
@@ -210,6 +212,19 @@ public class MainMenuScreen : MonoBehaviour
         if (view.Button != null)
         {
             view.Button.interactable = canPurchase;
+        }
+    }
+
+    public void SetUpgradeUnlocked(PermanentUpgradeType type, bool isUnlocked)
+    {
+        if (_views.TryGetValue(type, out UpgradePurchaseView view) == false)
+        {
+            return;
+        }
+
+        if (view.Root != null)
+        {
+            view.Root.SetActive(isUnlocked);
         }
     }
 

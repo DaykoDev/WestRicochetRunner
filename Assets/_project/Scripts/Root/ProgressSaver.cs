@@ -1,7 +1,10 @@
+using DG.Tweening;
 using System;
 
 public sealed class ProgressSaver : IDisposable
 {
+    private const float SettingsSaveDelay = 0.3f;
+
     private readonly SaveService _saveService;
     private readonly PlayerProgress _playerProgress;
     private readonly Wallet _wallet;
@@ -12,6 +15,7 @@ public sealed class ProgressSaver : IDisposable
     private readonly RewardedMultiplierFlow _multiplierFlow;
 
     private bool _isDisposed;
+    private Tween _settingsSaveTween;
 
     public ProgressSaver(
         SaveService saveService,
@@ -44,6 +48,8 @@ public sealed class ProgressSaver : IDisposable
 
         PlayerSaveData data = _playerProgress.CreateSaveData(_wallet.Balance);
 
+        data.SoundVolume = _settingsService.SoundVolume;
+        data.MusicVolume = _settingsService.MusicVolume;
         data.SoundEnabled = _settingsService.SoundEnabled;
         data.MusicEnabled = _settingsService.MusicEnabled;
 
@@ -59,6 +65,10 @@ public sealed class ProgressSaver : IDisposable
         }
 
         _isDisposed = true;
+
+        _settingsSaveTween?.Kill();
+        _settingsSaveTween = null;
+
         Unsubscribe();
     }
 
@@ -68,6 +78,8 @@ public sealed class ProgressSaver : IDisposable
         _playerProgress.UpgradeLevelChanged += OnUpgradeLevelChanged;
         _playerProgress.TutorialCompleted += OnTutorialCompleted;
 
+        _settingsService.SoundVolumeChanged += OnVolumeChanged;
+        _settingsService.MusicVolumeChanged += OnVolumeChanged;
         _settingsService.SoundEnabledChanged += OnSettingChanged;
         _settingsService.MusicEnabledChanged += OnSettingChanged;
 
@@ -84,6 +96,8 @@ public sealed class ProgressSaver : IDisposable
         _playerProgress.UpgradeLevelChanged -= OnUpgradeLevelChanged;
         _playerProgress.TutorialCompleted -= OnTutorialCompleted;
 
+        _settingsService.SoundVolumeChanged -= OnVolumeChanged;
+        _settingsService.MusicVolumeChanged -= OnVolumeChanged;
         _settingsService.SoundEnabledChanged -= OnSettingChanged;
         _settingsService.MusicEnabledChanged -= OnSettingChanged;
 
@@ -107,6 +121,25 @@ public sealed class ProgressSaver : IDisposable
     private void OnTutorialCompleted()
     {
         SaveAndFlush();
+    }
+
+    private void OnVolumeChanged(float volume)
+    {
+        ScheduleSettingsSave();
+    }
+
+    private void ScheduleSettingsSave()
+    {
+        _settingsSaveTween?.Kill();
+
+        _settingsSaveTween = DOVirtual.DelayedCall(
+                SettingsSaveDelay,
+                () =>
+                {
+                    _settingsSaveTween = null;
+                    SaveAndFlush();
+                })
+            .SetUpdate(true);
     }
 
     private void OnSettingChanged(bool isEnabled)

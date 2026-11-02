@@ -11,7 +11,7 @@ public class RicochetFeedback : MonoBehaviour
     [SerializeField] private AudioSource _audioSource;
     [SerializeField] private AudioClip _ricochetClip;
     [SerializeField, Range(0f, 1f)] private float _volume = 0.6f;
-    [SerializeField] private Vector2 _pitchRange = new Vector2(0.9f, 1.1f);
+    [SerializeField] private Vector2 _pitchRange = new(0.9f, 1.1f);
 
     [Header("Camera")]
     [SerializeField] private CinemachineImpulseSource _impulseSource;

@@ -99,5 +99,6 @@ public sealed class CurrencyDropSpawner : MonoBehaviour
         _maxSize = Mathf.Max(1, _maxSize);
         _initialSize = Mathf.Clamp(_initialSize, 0, _maxSize);
         _maxPickupsPerObstacle = Mathf.Max(1, _maxPickupsPerObstacle);
+        _targetValuePerPickup = Mathf.Max(1, _targetValuePerPickup);
     }
 }

@@ -6,6 +6,7 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField, Min(1)] private int _maxHealth = 3;
 
     private bool _isDead;
+    private bool _isOneHitDeathEnabled;
 
     public int CurrentHealth { get; private set; }
     public int MaxHealth => _maxHealth;
@@ -26,7 +27,8 @@ public class PlayerHealth : MonoBehaviour
             return;
         }
 
-        CurrentHealth = Mathf.Max(0, CurrentHealth - damage);
+        CurrentHealth = _isOneHitDeathEnabled ? 0 : Mathf.Max(0, CurrentHealth - damage);
+
         HealthChanged?.Invoke(CurrentHealth, MaxHealth);
 
         if (CurrentHealth == 0)
@@ -35,8 +37,14 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
+    public void SetOneHitDeathEnabled(bool isEnabled)
+    {
+        _isOneHitDeathEnabled = isEnabled;
+    }
+
     public void ResetHealth()
     {
+        _isOneHitDeathEnabled = false;
         _isDead = false;
         CurrentHealth = _maxHealth;
         HealthChanged?.Invoke(CurrentHealth, MaxHealth);

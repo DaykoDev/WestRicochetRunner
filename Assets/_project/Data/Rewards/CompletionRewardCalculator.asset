@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d33e9b7aaec0e2440b29627f80e30829, type: 3}
   m_Name: CompletionRewardCalculator
   m_EditorClassIdentifier: 
-  _baseReward: 10
-  _growth: 0.8
+  _baseReward: 60
+  _growth: 0.3
