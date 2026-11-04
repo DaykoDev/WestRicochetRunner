@@ -32,6 +32,7 @@ public class PlayerProgress
         _bounceCountUpgradeLevel = Math.Max(0, saveData.BounceCountUpgradeLevel);
         _isTutorialCompleted = saveData.TutorialCompleted;
         _bestCompletedLevel = Math.Max(0, saveData.BestCompletedLevel);
+        MenuCoinsRewardClaimedLevel = Math.Max(0, saveData.MenuCoinsRewardClaimedLevel);
     }
 
     public int CurrentLevel { get; private set; }
@@ -39,6 +40,9 @@ public class PlayerProgress
 
     public bool IsTutorialCompleted => _isTutorialCompleted;
     public int BestCompletedLevel => _bestCompletedLevel;
+    public bool CanClaimMenuCoinsReward => MenuCoinsRewardClaimedLevel != CurrentLevel;
+
+    public int MenuCoinsRewardClaimedLevel { get; private set; }
 
     public event Action<int> BestLevelChanged;
     public event Action TutorialCompleted;
@@ -73,6 +77,11 @@ public class PlayerProgress
 
         CurrentLevelSeed = GenerateSeed();
         LevelChanged?.Invoke(CurrentLevel);
+    }
+
+    public void MarkMenuCoinsRewardClaimed()
+    {
+        MenuCoinsRewardClaimedLevel = CurrentLevel;
     }
 
     public int GetUpgradeLevel(PermanentUpgradeType type)
@@ -138,7 +147,8 @@ public class PlayerProgress
             IncomeMultiplierUpgradeLevel = _incomeMultiplierUpgradeLevel,
             BounceCountUpgradeLevel = _bounceCountUpgradeLevel,
             TutorialCompleted = _isTutorialCompleted,
-            BestCompletedLevel = _bestCompletedLevel
+            BestCompletedLevel = _bestCompletedLevel,
+            MenuCoinsRewardClaimedLevel = MenuCoinsRewardClaimedLevel
         };
     }
 
@@ -158,17 +168,9 @@ public class PlayerProgress
         BestLevelChanged?.Invoke(_bestCompletedLevel);
         LevelChanged?.Invoke(CurrentLevel);
 
-        UpgradeLevelChanged?.Invoke(
-            PermanentUpgradeType.StartBallCount,
-            _startBallCountUpgradeLevel);
-
-        UpgradeLevelChanged?.Invoke(
-            PermanentUpgradeType.BallDamage,
-            _ballDamageUpgradeLevel);
-
-        UpgradeLevelChanged?.Invoke(
-            PermanentUpgradeType.IncomeMultiplier,
-            _incomeMultiplierUpgradeLevel);
+        UpgradeLevelChanged?.Invoke(PermanentUpgradeType.StartBallCount, _startBallCountUpgradeLevel);
+        UpgradeLevelChanged?.Invoke(PermanentUpgradeType.BallDamage, _ballDamageUpgradeLevel);
+        UpgradeLevelChanged?.Invoke(PermanentUpgradeType.IncomeMultiplier, _incomeMultiplierUpgradeLevel);
     }
 
     private int GenerateSeed()

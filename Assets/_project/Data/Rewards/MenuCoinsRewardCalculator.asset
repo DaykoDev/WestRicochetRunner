@@ -12,6 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 297b38eabc1c9a54a8aa46509f895bbe, type: 3}
   m_Name: MenuCoinsRewardCalculator
   m_EditorClassIdentifier: 
-  _baseCoins: 100
-  _levelsPerStep: 3
-  _coinsPerStep: 50
+  _levelEconomySettings: {fileID: 11400000, guid: 294127f36378ca14e9597099d5e85566, type: 2}

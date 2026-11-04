@@ -37,6 +37,18 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
+    public void Kill()
+    {
+        if (_isDead)
+        {
+            return;
+        }
+
+        CurrentHealth = 0;
+        HealthChanged?.Invoke(CurrentHealth, MaxHealth);
+        Die();
+    }
+
     public void SetOneHitDeathEnabled(bool isEnabled)
     {
         _isOneHitDeathEnabled = isEnabled;

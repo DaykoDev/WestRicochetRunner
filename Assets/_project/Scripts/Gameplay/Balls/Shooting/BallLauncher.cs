@@ -11,7 +11,9 @@ public class BallLauncher : MonoBehaviour
     [SerializeField] private BallStats _ballStats;
 
     private RunModifiers _runModifiers;
-
+    private bool _isDualWieldEnabled;
+    private bool _useSecondaryNext;
+    private bool _isRainbowVisualEnabled;
 
     public BallStats CurrentStats
     {
@@ -32,12 +34,25 @@ public class BallLauncher : MonoBehaviour
         }
     }
 
-    public event Action Fired;
+    public event Action<int> Fired;
 
     public void SetRunModifiers(RunModifiers modifiers)
     {
         _runModifiers = modifiers;
         _ballQueue.SetRunModifiers(modifiers);
+    }
+
+    public void SetDualWieldEnabled(bool isEnabled)
+    {
+        _isDualWieldEnabled = isEnabled;
+        _useSecondaryNext = false;
+
+        _ballQueue.SetCapacityMultiplier(isEnabled ? 2 : 1);
+    }
+
+    public void SetRainbowVisualEnabled(bool isEnabled)
+    {
+        _isRainbowVisualEnabled = isEnabled;
     }
 
     public Vector3 GetLaunchVelocity(out BallStats stats)
@@ -59,20 +74,28 @@ public class BallLauncher : MonoBehaviour
             return false;
         }
 
-        if (_ballQueue.TryGetBall(out Ball ball) == false)
-        {
-            return false;
-        }
+        bool canUseSecondary = _isDualWieldEnabled && _playerAimer.HasSecondaryFirePoint;
+
+        bool useSecondary = canUseSecondary && _useSecondaryNext;
+
+        Vector3 firePosition = useSecondary ? _playerAimer.SecondaryFirePointPosition : _playerAimer.FirePointPosition;
 
         Vector3 velocity = GetLaunchVelocity(out BallStats stats);
 
-        if (ball.Launch(_playerAimer.FirePointPosition, velocity, stats) == false)
+        bool hasFired = TryLaunchSingle(firePosition, velocity, stats);
+
+        if (hasFired == false)
         {
-            _ballQueue.ReleaseBall(ball);
             return false;
         }
 
-        Fired?.Invoke();
+        if (canUseSecondary)
+        {
+            _useSecondaryNext = !_useSecondaryNext;
+        }
+
+        int revolverIndex = useSecondary ? 1 : 0;
+        Fired?.Invoke(revolverIndex);
 
         return true;
     }
@@ -85,6 +108,28 @@ public class BallLauncher : MonoBehaviour
     public void ResetRun()
     {
         _runModifiers = null;
+        _isRainbowVisualEnabled = false;
+
+        SetDualWieldEnabled(false);
+
         _ballQueue.ResetQueue();
+    }
+
+    private bool TryLaunchSingle(Vector3 position, Vector3 velocity, BallStats stats)
+    {
+        if (_ballQueue.TryGetBall(out Ball ball) == false)
+        {
+            return false;
+        }
+
+        ball.SetRainbowVisual(_isRainbowVisualEnabled);
+
+        if (ball.Launch(position, velocity, stats))
+        {
+            return true;
+        }
+
+        _ballQueue.ReleaseBall(ball);
+        return false;
     }
 }

@@ -14,6 +14,7 @@ public class PlayerSaveData
     public bool TutorialCompleted;
 
     public int BestCompletedLevel;
+    public int MenuCoinsRewardClaimedLevel;
 
     public bool SoundEnabled = true;
     public bool MusicEnabled = true;

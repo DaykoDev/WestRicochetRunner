@@ -87,6 +87,7 @@ public class LevelGenerator : MonoBehaviour
         Quaternion nextRotation = _buildAnchorRotation;
 
         float trackLength = 0f;
+        float incomeMultiplier = modifiers != null ? modifiers.IncomeMultiplier : 1f;
 
         for (int i = 0; i < sequence.Count; i++)
         {
@@ -130,14 +131,9 @@ public class LevelGenerator : MonoBehaviour
                 _upgradeGatePlacer.PlaceGates(instance.transform, seed, i, modifiers);
             }
 
-            float incomeMultiplier = modifiers != null ? modifiers.IncomeMultiplier : 1f;
-
             if (section.Type == TrackSectionType.FinalBonus)
             {
-                _finalBonusChest = _obstaclePlacer.PlaceFinalBonus(
-                    instance.transform,
-                    level,
-                    incomeMultiplier);
+                _finalBonusChest = _obstaclePlacer.PlaceFinalBonus(instance.transform, level);
 
                 if (_finalBonusChest == null)
                 {
@@ -153,7 +149,6 @@ public class LevelGenerator : MonoBehaviour
                     instance.transform,
                     level,
                     section.Type,
-                    incomeMultiplier,
                     seed,
                     i);
             }
@@ -165,6 +160,12 @@ public class LevelGenerator : MonoBehaviour
 
             nextPosition = anchors.EndAnchor.position;
             nextRotation = anchors.EndAnchor.rotation;
+        }
+
+        if (_obstaclePlacer.DistributeRewards(level, incomeMultiplier) == false)
+        {
+            ClearLevel();
+            return false;
         }
 
         TrackLength = trackLength;

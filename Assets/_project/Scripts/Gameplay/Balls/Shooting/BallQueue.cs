@@ -8,6 +8,7 @@ public class BallQueue : MonoBehaviour
     [SerializeField, Min(1)] private int _capacity = 3;
 
     private int _currentCapacity;
+    private int _capacityMultiplier = 1;
     private int _availableCount;
     private RunModifiers _runModifiers;
 
@@ -91,10 +92,26 @@ public class BallQueue : MonoBehaviour
         AvailableCountChanged?.Invoke(_availableCount, _currentCapacity);
     }
 
+    public void SetCapacityMultiplier(int multiplier)
+    {
+        int newMultiplier = Mathf.Max(1, multiplier);
+
+        if (_capacityMultiplier == newMultiplier)
+        {
+            return;
+        }
+
+        _capacityMultiplier = newMultiplier;
+        UpdateCapacity();
+    }
+
     private void UpdateCapacity()
     {
         int bonus = _runModifiers != null ? _runModifiers.BallCountBonus : 0;
-        SetCapacity(_capacity + bonus);
+
+        int upgradedCapacity = _capacity + bonus;
+
+        SetCapacity(upgradedCapacity * _capacityMultiplier);
     }
 
     private void OnModifiersChanged()

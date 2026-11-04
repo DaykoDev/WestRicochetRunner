@@ -24,6 +24,8 @@ public class RewardedMultiplierFlow : IDisposable
 
     public bool CanApply => _isUsed == false && _requestInFlight == false;
 
+    public int CurrentBonus => Mathf.Max(0, Mathf.RoundToInt(_rewardCollector.CollectedThisRun * (_multiplier - 1f)));
+
     public event Action<int> BonusGranted;
     public event Action AvailabilityChanged;
 

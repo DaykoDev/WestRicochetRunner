@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1132aea5a4cd36d408658a491228c228, type: 3}
   m_Name: ChallengeSection04Data
   m_EditorClassIdentifier: 
-  _type: 0
+  _type: 3
   _prefab: {fileID: 8233320011372841500, guid: 039a8e2d381682f44bfcf9c303808482, type: 3}
   _minLevel: 10
   _maxLevel: 0

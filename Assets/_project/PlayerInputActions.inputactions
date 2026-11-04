@@ -29,7 +29,7 @@
                 {
                     "name": "",
                     "id": "8f808a4f-892c-4bbf-a773-403e2af7a13c",
-                    "path": "<Mouse>/delta",
+                    "path": "<Pointer>/delta",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -40,7 +40,7 @@
                 {
                     "name": "",
                     "id": "9352adf1-24e7-469d-a5ce-e76366c36708",
-                    "path": "<Mouse>/leftButton",
+                    "path": "<Pointer>/press",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -52,12 +52,12 @@
         },
         {
             "name": "UI",
-            "id": "104f689b-d0a9-428a-815f-0690f90bceeb",
+            "id": "28fbc31f-ba4f-421a-99b1-2fc1e148023f",
             "actions": [
                 {
                     "name": "New action",
                     "type": "Button",
-                    "id": "8c1b089c-e216-4ce1-88fa-a17b0f256db1",
+                    "id": "61923c99-f621-4e1c-a39e-a94db2ab35c2",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -67,7 +67,7 @@
             "bindings": [
                 {
                     "name": "",
-                    "id": "0f9e6cbd-775c-414c-af8f-c04697888ce5",
+                    "id": "9eb18bff-428e-4c05-afb2-2a4c6c3dcd21",
                     "path": "",
                     "interactions": "",
                     "processors": "",

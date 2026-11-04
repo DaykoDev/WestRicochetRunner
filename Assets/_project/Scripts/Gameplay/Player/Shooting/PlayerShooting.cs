@@ -26,7 +26,7 @@ public class PlayerShooting : MonoBehaviour
 
         Vector3 velocity = _ballLauncher.GetLaunchVelocity(out BallStats stats);
 
-        _trajectoryRenderer.UpdateTrajectory(_playerAimer.FirePointPosition, velocity, stats);
+        _trajectoryRenderer.UpdateTrajectory(_playerAimer.TrajectoryOriginPosition, velocity, stats);
 
         _aimPointVisual.UpdateVisual( _playerAimer.AimPointPosition, _camera.transform);
     }

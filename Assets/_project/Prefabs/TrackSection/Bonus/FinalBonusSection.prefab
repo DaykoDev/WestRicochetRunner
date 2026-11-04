@@ -59,8 +59,8 @@ Transform:
   m_GameObject: {fileID: 2919699419174929763}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -5.25, y: 0.15, z: 19}
-  m_LocalScale: {x: 0.5, y: 2, z: 35}
+  m_LocalPosition: {x: -5.25, y: 0, z: 26.5}
+  m_LocalScale: {x: 0.5, y: 1.5, z: 50}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6735097281978371745}
@@ -299,8 +299,8 @@ Transform:
   m_GameObject: {fileID: 4452152999692238103}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.5, z: 27}
-  m_LocalScale: {x: 10, y: 1, z: 17}
+  m_LocalPosition: {x: 0, y: -0.5, z: 35}
+  m_LocalScale: {x: 10, y: 1, z: 34}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6735097281978371745}
@@ -419,8 +419,8 @@ Transform:
   m_GameObject: {fileID: 7528165032882476937}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.25, y: 0.15, z: 19}
-  m_LocalScale: {x: 0.5, y: 2, z: 35}
+  m_LocalPosition: {x: 5.25, y: 0, z: 26.5}
+  m_LocalScale: {x: 0.5, y: 1.5, z: 50}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6735097281978371745}
@@ -578,18 +578,6 @@ PrefabInstance:
     - target: {fileID: 1613338525533648, guid: 1bfe78583c75cef46ab918d2eb2ae905, type: 3}
       propertyPath: m_Name
       value: SM_Prop_Barricade_Wood_01
-      objectReference: {fileID: 0}
-    - target: {fileID: 4040119161413390, guid: 1bfe78583c75cef46ab918d2eb2ae905, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 4040119161413390, guid: 1bfe78583c75cef46ab918d2eb2ae905, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 2.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 4040119161413390, guid: 1bfe78583c75cef46ab918d2eb2ae905, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4040119161413390, guid: 1bfe78583c75cef46ab918d2eb2ae905, type: 3}
       propertyPath: m_LocalPosition.x

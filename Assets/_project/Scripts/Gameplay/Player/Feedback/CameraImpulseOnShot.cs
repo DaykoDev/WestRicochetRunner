@@ -35,7 +35,7 @@ public class CameraImpulseOnShot : MonoBehaviour
         }
     }
 
-    private void OnFired()
+    private void OnFired(int revolverIndex)
     {
         _impulseSource.GenerateImpulse();
     }

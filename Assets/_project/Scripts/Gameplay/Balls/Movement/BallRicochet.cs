@@ -21,7 +21,21 @@ public static class BallRicochet
             return Vector3.zero;
         }
 
+        incomingDirection = Vector3.ProjectOnPlane(incomingDirection, Vector3.up);
+
+        normal = Vector3.ProjectOnPlane(normal, Vector3.up);
+
+        if (incomingDirection.sqrMagnitude < Mathf.Epsilon)
+        {
+            return Vector3.zero;
+        }
+
         incomingDirection.Normalize();
+
+        if (normal.sqrMagnitude < Mathf.Epsilon)
+        {
+            return -incomingDirection;
+        }
 
         normal = GetFacingNormal(incomingDirection, normal);
 
@@ -46,6 +60,8 @@ public static class BallRicochet
                 reflectedDirection = tangent * Mathf.Cos(angleRadians) + normal * Mathf.Sin(angleRadians);
             }
         }
+
+        reflectedDirection.y = 0f;
 
         return reflectedDirection.normalized;
     }

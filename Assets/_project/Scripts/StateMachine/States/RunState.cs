@@ -26,6 +26,7 @@ public class RunState : IState, IPayloadedState<RunEnterMode>
     }
 
     public RunContext Context => _context;
+    public bool HasPreparedRun { get; private set; }
 
     public event Action Entered;
     public event Action Exited;
@@ -49,27 +50,51 @@ public class RunState : IState, IPayloadedState<RunEnterMode>
 
         StartNewRun();
     }
-
-    private void StartNewRun()
+    public bool PrepareRun()
     {
+        if (HasPreparedRun)
+        {
+            return true;
+        }
+
         Time.timeScale = 1f;
+        _isRunning = false;
+
         _trackScroller.ResetPosition();
-        _isRunning = true;
+        _player.ClearRun();
 
         CreateRunContext();
 
         _playerHealth.ResetHealth();
         _player.ResetToStart();
+        _player.ConfigureForLevel(_context.Level);
         _player.SetRunModifiers(_context.Modifiers);
 
         bool isLevelBuilt = _levelGenerator.BuildLevel(_context.Level, _context.Seed, _context.Modifiers);
 
         if (isLevelBuilt == false)
         {
+            ClearRun();
+            return false;
+        }
+
+        HasPreparedRun = true;
+        return true;
+    }
+
+    private void StartNewRun()
+    {
+        Time.timeScale = 1f;
+
+        if (HasPreparedRun == false && PrepareRun() == false)
+        {
             _isRunning = false;
             Failed?.Invoke();
             return;
         }
+
+        HasPreparedRun = false;
+        _isRunning = true;
 
         StartRunSystems();
         Entered?.Invoke();
@@ -116,6 +141,8 @@ public class RunState : IState, IPayloadedState<RunEnterMode>
     public void ClearRun()
     {
         _isRunning = false;
+        HasPreparedRun = false;
+
         _trackScroller.StopScrolling();
         _player.ClearRun();
         _rewardCollector.ClearPickups();

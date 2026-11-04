@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -24,8 +25,8 @@ public sealed class ObstacleVisualFeedback : MonoBehaviour
     private Sequence _hitSequence;
     private Transform _scaleTarget;
     private Vector3 _initialScale;
-    private Color _defaultColor = Color.white;
-    private bool _hasColorProperty;
+    private Material[] _materials = Array.Empty<Material>();
+    private Color[] _defaultColors = Array.Empty<Color>();
 
     private void Awake()
     {
@@ -34,15 +35,7 @@ public sealed class ObstacleVisualFeedback : MonoBehaviour
         _scaleTarget = _visualRoot != null ? _visualRoot.transform : transform;
         _initialScale = _scaleTarget.localScale;
 
-        _hasColorProperty =
-            _bodyRenderer != null &&
-            _bodyRenderer.sharedMaterial != null &&
-            _bodyRenderer.sharedMaterial.HasProperty(ColorPropertyId);
-
-        if (_hasColorProperty)
-        {
-            _defaultColor = _bodyRenderer.sharedMaterial.GetColor(ColorPropertyId);
-        }
+        CacheDefaultColors();
     }
 
     private void OnEnable()
@@ -130,16 +123,14 @@ public sealed class ObstacleVisualFeedback : MonoBehaviour
 
         _hitSequence = DOTween.Sequence();
 
-        _hitSequence.Append(
-            _scaleTarget.DOScale(hitScale, halfDuration)
-                .SetEase(Ease.OutQuad));
+        _hitSequence.Append(_scaleTarget.DOScale(hitScale, halfDuration).SetEase(Ease.OutQuad));
 
         _hitSequence.Join(
-            DOVirtual.Color(
-                    _defaultColor,
-                    _hitColor,
+            DOVirtual.Float(
+                    0f,
+                    1f,
                     halfDuration,
-                    ApplyColor)
+                    ApplyHitBlend)
                 .SetEase(Ease.OutQuad));
 
         _hitSequence.Append(
@@ -147,11 +138,11 @@ public sealed class ObstacleVisualFeedback : MonoBehaviour
                 .SetEase(Ease.InQuad));
 
         _hitSequence.Join(
-            DOVirtual.Color(
-                    _hitColor,
-                    _defaultColor,
+            DOVirtual.Float(
+                    1f,
+                    0f,
                     halfDuration,
-                    ApplyColor)
+                    ApplyHitBlend)
                 .SetEase(Ease.InQuad));
 
         _hitSequence.OnComplete(() =>
@@ -191,18 +182,71 @@ public sealed class ObstacleVisualFeedback : MonoBehaviour
             _scaleTarget.localScale = _initialScale;
         }
 
-        ApplyColor(_defaultColor);
+        RestoreColors();
     }
 
-    private void ApplyColor(Color color)
+    private void CacheDefaultColors()
     {
-        if (_hasColorProperty == false)
+        if (_bodyRenderer == null)
+        {
+            _materials = Array.Empty<Material>();
+            _defaultColors = Array.Empty<Color>();
+            return;
+        }
+
+        _materials = _bodyRenderer.sharedMaterials;
+        _defaultColors = new Color[_materials.Length];
+
+        for (int i = 0; i < _materials.Length; i++)
+        {
+            Material material = _materials[i];
+
+            _defaultColors[i] =
+                material != null && material.HasProperty(ColorPropertyId)
+                    ? material.GetColor(ColorPropertyId)
+                    : Color.white;
+        }
+    }
+
+    private void RestoreColors()
+    {
+        for (int i = 0; i < _defaultColors.Length; i++)
+        {
+            SetColor(i, _defaultColors[i]);
+        }
+    }
+
+    private void SetColor(int materialIndex, Color color)
+    {
+        Material material = _materials[materialIndex];
+
+        if (material == null ||
+            material.HasProperty(ColorPropertyId) == false)
         {
             return;
         }
 
-        _bodyRenderer.GetPropertyBlock(_propertyBlock);
+        _bodyRenderer.GetPropertyBlock(
+            _propertyBlock,
+            materialIndex);
+
         _propertyBlock.SetColor(ColorPropertyId, color);
-        _bodyRenderer.SetPropertyBlock(_propertyBlock);
+
+        _bodyRenderer.SetPropertyBlock(
+            _propertyBlock,
+            materialIndex);
+    }
+
+    private void ApplyHitBlend(float blend)
+    {
+        for (int i = 0; i < _materials.Length; i++)
+        {
+            Color color = Color.Lerp(
+                _defaultColors[i],
+                _hitColor,
+                blend);
+
+            SetColor(i, color);
+        }
     }
 }

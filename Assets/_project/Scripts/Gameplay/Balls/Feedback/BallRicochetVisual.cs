@@ -2,9 +2,6 @@ using UnityEngine;
 
 public sealed class BallRicochetVisual : MonoBehaviour
 {
-    [Header("Test Feature")]
-    [SerializeField] private bool _ricochetVisualEnabled = true;
-
     [Header("Renderer")]
     [SerializeField] private Renderer _visualRenderer;
     [SerializeField] private string _colorPropertyName = "_Color";
@@ -20,11 +17,17 @@ public sealed class BallRicochetVisual : MonoBehaviour
     private float _colorChangePerRicochet = 0.25f;
 
     [Header("Luminosity")]
-    [SerializeField, Min(0f)]
-    private float _luminosityPerRicochet = 0.2f;
+    [SerializeField, Min(0f)] private float _luminosityPerRicochet = 0.2f;
 
-    [SerializeField, Min(0f)]
-    private float _maxLuminosity = 1.2f;
+    [SerializeField, Min(0f)] private float _maxLuminosity = 1.2f;
+
+    [Header("Rainbow Bonus")]
+    [SerializeField, Min(0f)] private float _rainbowSpeed = 0.8f;
+
+    [SerializeField, Range(0f, 1f)] private float _rainbowSaturation = 0.75f;
+
+    private bool _isRainbowMode;
+    private float _rainbowHue;
 
     private MaterialPropertyBlock _propertyBlock;
 
@@ -61,17 +64,51 @@ public sealed class BallRicochetVisual : MonoBehaviour
         ResetVisual();
     }
 
+    private void Update()
+    {
+        if (_isRainbowMode == false)
+        {
+            return;
+        }
+
+        _rainbowHue = Mathf.Repeat(_rainbowHue + _rainbowSpeed * Time.deltaTime,
+            1f);
+
+        _currentColor = Color.HSVToRGB(_rainbowHue, _rainbowSaturation, 1f);
+
+        _luminosity = _maxLuminosity;
+
+        ApplyVisual();
+    }
+
+    public void SetRainbowMode(bool isEnabled)
+    {
+        _isRainbowMode = isEnabled;
+        ResetVisual();
+    }
+
     public void ResetVisual()
     {
-        _currentColor = _defaultColor;
-        _luminosity = 0f;
+        if (_isRainbowMode)
+        {
+            _rainbowHue = Random.value;
+
+            _currentColor = Color.HSVToRGB(_rainbowHue, _rainbowSaturation, 1f);
+
+            _luminosity = _maxLuminosity;
+        }
+        else
+        {
+            _currentColor = _defaultColor;
+            _luminosity = 0f;
+        }
 
         ApplyVisual();
     }
 
     public void OnRicochet()
     {
-        if (_ricochetVisualEnabled == false)
+        if (_isRainbowMode)
         {
             return;
         }

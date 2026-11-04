@@ -4,12 +4,14 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerLateralCalculator))]
 [RequireComponent(typeof(PlayerMover))]
 [RequireComponent(typeof(PlayerShooting))]
+[RequireComponent(typeof(BonusLevelPresentation))]
 public class Player : MonoBehaviour
 {
     private PlayerInputReader _inputReader;
     private PlayerLateralCalculator _lateralCalculator;
     private PlayerMover _mover;
     private PlayerShooting _playerShooting;
+    private BonusLevelPresentation _bonusLevelPresentation;
 
     private bool _isControlEnabled;
 
@@ -21,6 +23,7 @@ public class Player : MonoBehaviour
         _lateralCalculator = GetComponent<PlayerLateralCalculator>();
         _mover = GetComponent<PlayerMover>();
         _playerShooting = GetComponent<PlayerShooting>();
+        _bonusLevelPresentation = GetComponent<BonusLevelPresentation>();
 
         float initialX = transform.position.x;
 
@@ -73,6 +76,11 @@ public class Player : MonoBehaviour
     public void SetRunModifiers(RunModifiers modifiers)
     {
         _playerShooting.SetRunModifiers(modifiers);
+    }
+
+    public void ConfigureForLevel(int level)
+    {
+        _bonusLevelPresentation.SetLevel(level);
     }
 
     private void OnPointerMoved(Vector2 delta)

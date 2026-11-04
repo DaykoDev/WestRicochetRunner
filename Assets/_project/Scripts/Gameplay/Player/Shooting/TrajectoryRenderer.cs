@@ -54,6 +54,11 @@ public class TrajectoryRenderer : MonoBehaviour
 
     public void SetVisible(bool isVisible)
     {
+        if (_lineRenderer == null)
+        {
+            _lineRenderer = GetComponent<LineRenderer>();
+        }
+
         _lineRenderer.enabled = isVisible;
         enabled = isVisible;
     }

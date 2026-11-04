@@ -5,6 +5,7 @@ public class RevolverRecoilVisual : MonoBehaviour
 {
     [SerializeField] private BallLauncher _ballLauncher;
     [SerializeField] private Transform _recoilRoot;
+    [SerializeField, Range(0, 1)] private int _revolverIndex;
 
     [Header("Recoil")]
     [SerializeField, Min(0f)] private float _recoilDistance = 0.08f;
@@ -45,15 +46,17 @@ public class RevolverRecoilVisual : MonoBehaviour
         }
     }
 
-    private void OnFired()
+    private void OnFired(int revolverIndex)
     {
-        if (_recoilRoot == null)
+        if (revolverIndex != _revolverIndex || _recoilRoot == null)
         {
             return;
         }
 
         _recoilRoot.DOKill(true);
+
         _recoilRoot.DOPunchPosition(Vector3.back * _recoilDistance, _recoilDuration, 1, 0f);
+
         _recoilRoot.DOPunchRotation(Vector3.left * _recoilAngle, _recoilDuration, 1, 0f);
     }
 }

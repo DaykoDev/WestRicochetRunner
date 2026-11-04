@@ -13,8 +13,6 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
     [SerializeField, Min(0.1f)] private float _maxLifetime = 5f;
 
     [Header("Return")]
-    [SerializeField, Min(0.1f)] private float _returnDelay = 1f;
-
     [SerializeField, Range(0f, 0.5f)] private float _returnEffectMinViewportY = 0.15f;
 
     private BallMovement _movement;
@@ -26,10 +24,8 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
     private Camera _camera;
 
     private float _lifetimeTimer;
-    private float _returnTimer;
 
     private bool _isActive;
-    private bool _isReturning;
 
     public int LaunchId { get; private set; }
 
@@ -67,12 +63,6 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
 
     private void FixedUpdate()
     {
-        if (_isReturning)
-        {
-            UpdateReturnDelay();
-            return;
-        }
-
         if (_isActive == false)
         {
             return;
@@ -97,6 +87,11 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         _returnFeedback.SetEffectPool(effectPool);
     }
 
+    public void SetRainbowVisual(bool isEnabled)
+    {
+        _ricochetVisual.SetRainbowMode(isEnabled);
+    }
+
     public bool Launch(Vector3 position, Vector3 velocity, BallStats stats)
     {
         if (enabled == false || velocity.sqrMagnitude < Mathf.Epsilon || stats.Speed <= 0f)
@@ -105,9 +100,6 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         }
 
         transform.position = position;
-
-        _isReturning = false;
-        _returnTimer = 0f;
 
         _returnFeedback.Restore();
         _ricochetVisual.ResetVisual();
@@ -132,10 +124,7 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
         _movement.Reset();
 
         _isActive = false;
-        _isReturning = false;
-
         _lifetimeTimer = 0f;
-        _returnTimer = 0f;
 
         ReturnedToPool?.Invoke(this);
     }
@@ -178,36 +167,18 @@ public class Ball : MonoBehaviour, IPoolable<Ball>
 
     private void BeginReturn(bool allowEffect = true)
     {
-        if (_isActive == false || _isReturning)
+        if (_isActive == false)
         {
             return;
         }
 
         _isActive = false;
-        _isReturning = true;
-
         _movement.Stop();
 
         bool shouldPlayEffect = allowEffect && CanPlayReturnEffect();
 
         _returnFeedback.Play(transform.position, shouldPlayEffect);
 
-        _returnTimer = 0f;
-    }
-
-    private void UpdateReturnDelay()
-    {
-        _returnTimer += Time.fixedDeltaTime;
-
-        if (_returnTimer >= _returnDelay)
-        {
-            CompleteReturn();
-        }
-    }
-
-    private void CompleteReturn()
-    {
-        _isReturning = false;
         Died?.Invoke(this);
     }
 

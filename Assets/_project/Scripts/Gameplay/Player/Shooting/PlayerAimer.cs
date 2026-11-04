@@ -10,13 +10,13 @@ public class PlayerAimer : MonoBehaviour
     [Header("References")]
     [SerializeField] private Transform _aimOrigin;
     [SerializeField] private Transform _firePoint;
+    [SerializeField] private Transform _secondaryFirePoint;
 
     public Vector3 FirePointPosition => _firePoint.position;
 
-    private Vector3 AimOriginPosition =>
-        _aimOrigin != null
-            ? _aimOrigin.position
-            : transform.position;
+    public bool HasSecondaryFirePoint => _secondaryFirePoint != null;
+
+    public Vector3 SecondaryFirePointPosition => _secondaryFirePoint.position;
 
     public Vector3 AimPointPosition
     {
@@ -24,10 +24,7 @@ public class PlayerAimer : MonoBehaviour
         {
             Vector3 origin = AimOriginPosition;
 
-            return new Vector3(
-                _trackCenterX,
-                origin.y + _aimHeight,
-                origin.z + _aimDistance);
+            return new Vector3(_trackCenterX, origin.y + _aimHeight, origin.z + _aimDistance);
         }
     }
 
@@ -35,11 +32,31 @@ public class PlayerAimer : MonoBehaviour
     {
         get
         {
-            Vector3 direction =
-                AimPointPosition - AimOriginPosition;
+            Vector3 direction = AimPointPosition - AimOriginPosition;
 
             return direction.normalized;
         }
+    }
+
+    public Vector3 TrajectoryOriginPosition
+    {
+        get
+        {
+            if (_isTrajectoryCentered && HasSecondaryFirePoint)
+            {
+                return (FirePointPosition + SecondaryFirePointPosition) * 0.5f;
+            }
+
+            return FirePointPosition;
+        }
+    }
+
+    private Vector3 AimOriginPosition => _aimOrigin != null ? _aimOrigin.position : transform.position;
+    private bool _isTrajectoryCentered;
+
+    public void SetTrajectoryCentered(bool isCentered)
+    {
+        _isTrajectoryCentered = isCentered;
     }
 
     private void OnDrawGizmosSelected()

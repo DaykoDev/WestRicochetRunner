@@ -25,8 +25,6 @@ public sealed class RunComposition : IDisposable
             sceneReferences.AdsConfig.MenuCoinsRewardCalculator);
 
         BootstrapState = new BootstrapState();
-        MainMenuState = new MainMenuState();
-
         RunState = new RunState(
             meta.Progress,
             sceneReferences.Player,
@@ -35,6 +33,8 @@ public sealed class RunComposition : IDisposable
             sceneReferences.TrackScroller,
             meta.Upgrades,
             sceneReferences.RunRewardCollector);
+
+        MainMenuState = new MainMenuState(RunState, meta.Upgrades);
 
         VictoryState = new VictoryState();
         DefeatState = new DefeatState();

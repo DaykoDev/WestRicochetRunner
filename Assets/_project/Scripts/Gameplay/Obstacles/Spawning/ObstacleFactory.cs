@@ -41,7 +41,6 @@ public class ObstacleFactory : MonoBehaviour
 
     [Header("Calculators")]
     [SerializeField] private ObstacleHealthCalculator _healthCalculator;
-    [SerializeField] private IncomeCalculator _incomeCalculator;
     [SerializeField] private RunRewardCollector _rewardCollector;
 
     [Header("Cleanup")]
@@ -96,7 +95,6 @@ public class ObstacleFactory : MonoBehaviour
         Vector3 position,
         Quaternion rotation,
         Transform parent,
-        float incomeMultiplier,
         float healthMultiplier = 1f)
     {
         if (prefab == null)
@@ -105,9 +103,9 @@ public class ObstacleFactory : MonoBehaviour
             return null;
         }
 
-        if (_healthCalculator == null || _incomeCalculator == null)
+        if (_healthCalculator == null)
         {
-            Debug.LogError("ObstacleFactory calculators are not assigned.", this);
+            Debug.LogError("ObstacleFactory health calculator is not assigned.", this);
             return null;
         }
 
@@ -124,9 +122,7 @@ public class ObstacleFactory : MonoBehaviour
         obstacle.ConfigureForLevel(
             level,
             section,
-            incomeMultiplier,
             _healthCalculator,
-            _incomeCalculator,
             healthMultiplier);
 
         if (_rewardCollector != null)

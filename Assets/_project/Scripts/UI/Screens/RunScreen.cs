@@ -32,6 +32,10 @@ public class RunScreen : MonoBehaviour
     [SerializeField] private Button _tutorialDismissButton;
     [SerializeField, Min(0f)] private float _tutorialDuration = 4f;
 
+    [Header("Bonus")]
+    [SerializeField] private BonusLevelSettings _bonusLevelSettings;
+    [SerializeField] private RainbowTextGroup _rainbowTextGroup;
+
     private float _tutorialTimer;
     private bool _isTutorialCounting;
 
@@ -119,6 +123,13 @@ public class RunScreen : MonoBehaviour
         if (_levelText != null)
         {
             _levelText.text = $"Level: {level}";
+        }
+
+        bool isBonus = _bonusLevelSettings != null && _bonusLevelSettings.IsBonusLevel(level);
+
+        if (_rainbowTextGroup != null)
+        {
+            _rainbowTextGroup.SetEnabled(isBonus);
         }
     }
 

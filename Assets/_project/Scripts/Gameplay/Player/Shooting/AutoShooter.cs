@@ -13,6 +13,7 @@ public class AutoShooter : MonoBehaviour
     private float _shootTimer;
     private bool _isShooting;
     private RunModifiers _runModifiers;
+    private float _bonusFireRateMultiplier = 1f;
 
     private void Update()
     {
@@ -27,8 +28,11 @@ public class AutoShooter : MonoBehaviour
             return;
         }
 
-        float multiplier = _runModifiers != null ? _runModifiers.FireRateMultiplier : 1f;
-        float interval = _fireInterval / multiplier;
+        float permanentMultiplier = _runModifiers != null ? _runModifiers.FireRateMultiplier : 1f;
+
+        float totalMultiplier = permanentMultiplier * _bonusFireRateMultiplier;
+
+        float interval = _fireInterval / totalMultiplier;
 
         _shootTimer = _ballLauncher.TryLaunch() ? interval : RetryInterval;
     }
@@ -36,6 +40,12 @@ public class AutoShooter : MonoBehaviour
     public void SetRunModifiers(RunModifiers modifiers)
     {
         _runModifiers = modifiers;
+    }
+
+    public void SetBonusFireRateMultiplier(float multiplier)
+    {
+        _bonusFireRateMultiplier = Mathf.Max(1f, multiplier);
+        _shootTimer = 0f;
     }
 
     public void StartShooting()

@@ -1,12 +1,15 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public abstract class Obstacle : MonoBehaviour, IDamageable, IPoolable<Obstacle>
 {
     [Header("Obstacle Settings")]
     [SerializeField, Min(1)] private int _baseHP = 10;
-    [SerializeField, Min(0f)] private float _prefabCoinMultiplier = 1f;
     [SerializeField, Min(1)] private int _contactDamage = 1;
+
+    [FormerlySerializedAs("_prefabCoinMultiplier")]
+    [SerializeField, Min(0f)] private float _rewardWeight = 1f;
 
     [Header("Grid")]
     [SerializeField] private Vector2Int _gridSize = Vector2Int.one;
@@ -20,6 +23,7 @@ public abstract class Obstacle : MonoBehaviour, IDamageable, IPoolable<Obstacle>
     public int MaxHealth => _maxHealth;
     public int CurrentHealth => _currentHealth;
     public int Income => _income;
+    public float RewardWeight => _rewardWeight;
     public bool IsDestroyed => _isDestroyed;
     public Vector2Int GridSize => _gridSize;
 
@@ -31,23 +35,24 @@ public abstract class Obstacle : MonoBehaviour, IDamageable, IPoolable<Obstacle>
     public void ConfigureForLevel(
         int level,
         ObstacleSection section,
-        float incomeMultiplier,
         ObstacleHealthCalculator healthCalculator,
-        IncomeCalculator incomeCalculator,
         float healthMultiplier = 1f)
     {
-        if (healthCalculator == null || incomeCalculator == null)
+        if (healthCalculator == null)
         {
-            Debug.LogError("Obstacle calculators are not assigned.", this);
+            Debug.LogError("Obstacle health calculator is not assigned.", this);
             return;
         }
 
         int baseTargetHP = healthCalculator.Calculate(_baseHP, level, section);
         int targetHP = Mathf.Max(1, Mathf.RoundToInt(baseTargetHP * Mathf.Max(0.01f, healthMultiplier)));
 
-        int income = incomeCalculator.Calculate(targetHP, incomeMultiplier, _prefabCoinMultiplier);
+        Initialize(targetHP);
+    }
 
-        Initialize(targetHP, income);
+    public void SetIncome(int income)
+    {
+        _income = Mathf.Max(0, income);
     }
 
     public void TakeDamage(int damage)
@@ -86,11 +91,11 @@ public abstract class Obstacle : MonoBehaviour, IDamageable, IPoolable<Obstacle>
     {
     }
 
-    private void Initialize(int maxHealth, int income)
+    private void Initialize(int maxHealth)
     {
         _maxHealth = Mathf.Max(1, maxHealth);
         _currentHealth = _maxHealth;
-        _income = Mathf.Max(0, income);
+        _income = 0;
         _isDestroyed = false;
         HealthChanged?.Invoke(_currentHealth, _maxHealth);
     }

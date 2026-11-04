@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _safeCoefficient: 0.75
   _bonusCoefficient: 0.75
-  _challengeCoefficient: 1.25
+  _challengeCoefficient: 1.5
   _growthChangeLevel: 20
   _earlyGrowth: 0.15
   _lateGrowth: 0.1

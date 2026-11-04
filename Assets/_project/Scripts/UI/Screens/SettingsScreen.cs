@@ -15,6 +15,7 @@ public class SettingsScreen : MonoBehaviour
     [Header("Buttons")]
     [SerializeField] private Button _closeButton;
     [SerializeField] private Button _exitToMenuButton;
+    [SerializeField] private Button _outsideButton;
 
     [Header("Sound Icons")]
     [SerializeField] private GameObject _soundOnIcon;
@@ -38,6 +39,7 @@ public class SettingsScreen : MonoBehaviour
         _soundToggle.onValueChanged.AddListener(OnSoundChanged);
         _musicToggle.onValueChanged.AddListener(OnMusicChanged);
         _closeButton.onClick.AddListener(OnClose);
+        _outsideButton.onClick.AddListener(OnClose);
         _exitToMenuButton.onClick.AddListener(OnExitToMenu);
     }
 
@@ -48,6 +50,7 @@ public class SettingsScreen : MonoBehaviour
         _soundToggle.onValueChanged.RemoveListener(OnSoundChanged);
         _musicToggle.onValueChanged.RemoveListener(OnMusicChanged);
         _closeButton.onClick.RemoveListener(OnClose);
+        _outsideButton.onClick.RemoveListener(OnClose);
         _exitToMenuButton.onClick.RemoveListener(OnExitToMenu);
     }
 

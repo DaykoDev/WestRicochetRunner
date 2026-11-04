@@ -15,6 +15,7 @@ public sealed class BallMovement
     private float _launchSpeed;
     private float _effectiveSpeed;
     private float _pendingDistance;
+    private float _planeY;
 
     private int _bounceCount;
     private IDamageable _lastDamaged;
@@ -37,12 +38,13 @@ public sealed class BallMovement
     public void Launch(Vector3 velocity, BallStats stats)
     {
         _stats = stats;
+        _planeY = _transform.position.y;
 
         _stats.MaxBounces = Mathf.Clamp(_stats.MaxBounces, 0, _settings.MaxSupportedBounces);
 
         _launchSpeed = velocity.magnitude;
         _effectiveSpeed = _launchSpeed;
-        _direction = velocity.normalized;
+        _direction = Vector3.ProjectOnPlane(velocity, Vector3.up).normalized;
 
         _bounceCount = 0;
         _lastDamaged = null;
@@ -58,6 +60,10 @@ public sealed class BallMovement
         _pendingDistance = 0f;
 
         Move(distance, deltaTime);
+
+        Vector3 position = _transform.position;
+        position.y = _planeY;
+        _transform.position = position;
     }
 
     public void Stop()

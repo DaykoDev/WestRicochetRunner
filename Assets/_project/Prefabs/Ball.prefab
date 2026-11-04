@@ -49,7 +49,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _movementSettings: {fileID: 11400000, guid: 903a3aa7087761747bd78d86fd28dfaa, type: 2}
-  _maxLifetime: 5
+  _maxLifetime: 10
   _returnDelay: 1
   _returnEffectMinViewportY: 0.15
 --- !u!114 &2644153367570326213
@@ -77,7 +77,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abc2b1da9b41f4a4db677c8ab365730a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _ricochetVisualEnabled: 1
   _visualRenderer: {fileID: 4939397160269918619}
   _colorPropertyName: _Color
   _luminosityPropertyName: _Lumin
@@ -86,6 +85,8 @@ MonoBehaviour:
   _colorChangePerRicochet: 0.4
   _luminosityPerRicochet: 0.45
   _maxLuminosity: 2
+  _rainbowSpeed: 0.8
+  _rainbowSaturation: 0.75
 --- !u!135 &4578657144933283272
 SphereCollider:
   m_ObjectHideFlags: 0

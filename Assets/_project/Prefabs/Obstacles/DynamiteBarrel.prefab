@@ -291,8 +291,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _baseHP: 7
-  _prefabCoinMultiplier: 1
   _contactDamage: 1
+  _rewardWeight: 1
   _gridSize: {x: 1, y: 1}
   _explosionRadius: 4
   _explosionDamage: 6
@@ -315,7 +315,7 @@ MonoBehaviour:
   _visualRoot: {fileID: 5503518322171080167}
   _bodyRenderer: {fileID: 6533934875379312935}
   _destructionEffectOrigin: {fileID: 0}
-  _hitColor: {r: 1, g: 0.85, b: 0.35, a: 1}
+  _hitColor: {r: 1, g: 0, b: 0.010668278, a: 1}
   _hitDuration: 0.1
   _hitScaleAmount: 0.07
 --- !u!1001 &6556369088855024643
@@ -373,7 +373,7 @@ PrefabInstance:
     - target: {fileID: 23034581184351524, guid: 90bf11465095b134782cb56dc251a6cd, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: da23a6c2a7ba3e94d978f731b0da222b, type: 2}
+      objectReference: {fileID: 2100000, guid: 707803dece342f34cb7db5c3ff81d7b6, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

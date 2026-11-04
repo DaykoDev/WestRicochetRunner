@@ -6,6 +6,9 @@ public class ObstaclePlacer : MonoBehaviour
     [Header("References")]
     [SerializeField] private ObstacleFactory _obstacleFactory;
     [SerializeField] private DifficultyTiersSettings _difficultyTiersSettings;
+    [SerializeField] private BonusLevelSettings _bonusLevelSettings;
+    [SerializeField] private LevelEconomySettings _levelEconomySettings;
+    [SerializeField] private IncomeCalculator _incomeCalculator;
 
     [Header("Placement")]
     [SerializeField, Min(1)] private int _maxPlacementAttempts = 200;
@@ -29,11 +32,13 @@ public class ObstaclePlacer : MonoBehaviour
 
     [SerializeField, Min(0.01f)] private float _finalChestHealthMultiplier = 10f;
 
+    private readonly List<Obstacle> _regularObstacles = new();
+    private readonly List<Obstacle> _finalBonusObstacles = new();
+
     public int PlaceObstacles(
         Transform sectionRoot,
         int level,
         TrackSectionType sectionType,
-        float incomeMultiplier,
         int levelSeed,
         int sectionIndex)
     {
@@ -76,8 +81,7 @@ public class ObstaclePlacer : MonoBehaviour
 
         System.Random random = new(CreateSeed(levelSeed, sectionIndex));
 
-        //bool fillAllCells = level == 1 || level % 5 == 0;
-        bool fillAllCells = level == 1;
+        bool fillAllCells = _bonusLevelSettings.ShouldFillAllCells(level);
 
         float density = Mathf.Clamp01(_difficultyTiersSettings.GetSpawnDensity(sectionType, level));
 
@@ -130,14 +134,14 @@ public class ObstaclePlacer : MonoBehaviour
                 obstacleSection,
                 position,
                 rotation,
-                sectionRoot,
-                incomeMultiplier);
+                sectionRoot);
 
             if (obstacle == null)
             {
                 continue;
             }
 
+            _regularObstacles.Add(obstacle);
             placementGrid.Occupy(anchor, footprintSize);
             occupiedCells += footprintSize.x * footprintSize.y;
             placedCount++;
@@ -155,10 +159,7 @@ public class ObstaclePlacer : MonoBehaviour
         return placedCount;
     }
 
-    public Obstacle PlaceFinalBonus(
-        Transform sectionRoot,
-        int level,
-        float incomeMultiplier)
+    public Obstacle PlaceFinalBonus(Transform sectionRoot, int level)
     {
         if (sectionRoot == null || _obstacleFactory == null)
         {
@@ -179,7 +180,6 @@ public class ObstaclePlacer : MonoBehaviour
 
         Obstacle cratePrefab = _finalCratePrefab;
         Obstacle chestPrefab = _finalChestPrefab;
-
         Vector2Int crateSize = cratePrefab.GridSize;
         Vector2Int chestSize = chestPrefab.GridSize;
 
@@ -230,7 +230,6 @@ public class ObstaclePlacer : MonoBehaviour
                     position,
                     rotation,
                     sectionRoot,
-                    incomeMultiplier,
                     healthMultiplier);
 
                 if (obstacle == null)
@@ -238,6 +237,7 @@ public class ObstaclePlacer : MonoBehaviour
                     return null;
                 }
 
+                _finalBonusObstacles.Add(obstacle);
                 placementGrid.Occupy(anchor, crateSize);
             }
         }
@@ -252,8 +252,7 @@ public class ObstaclePlacer : MonoBehaviour
             return null;
         }
 
-        Vector3 chestPosition =
-            grid.GetWorldCenter(chestAnchor, chestSize);
+        Vector3 chestPosition = grid.GetWorldCenter(chestAnchor, chestSize);
 
         return _obstacleFactory.Create(
             chestPrefab,
@@ -262,17 +261,34 @@ public class ObstaclePlacer : MonoBehaviour
             chestPosition,
             rotation,
             sectionRoot,
-            incomeMultiplier,
             _finalChestHealthMultiplier);
+    }
+
+    public bool DistributeRewards(int level, float incomeMultiplier)
+    {
+        if (_levelEconomySettings == null || _incomeCalculator == null)
+        {
+            Debug.LogError("Obstacle reward settings are missing.", this);
+            return false;
+        }
+
+        _incomeCalculator.Distribute(_regularObstacles, _levelEconomySettings.GetRegularObstacleBudget(level), incomeMultiplier);
+        _incomeCalculator.Distribute(_finalBonusObstacles, _levelEconomySettings.GetFinalBonusBudget(level), incomeMultiplier);
+
+        return true;
     }
 
     public void BeginRun()
     {
+        _regularObstacles.Clear();
+        _finalBonusObstacles.Clear();
         _obstacleFactory.BeginRun();
     }
 
     public void ReleaseObstacles()
     {
+        _regularObstacles.Clear();
+        _finalBonusObstacles.Clear();
         _obstacleFactory.ReleaseAll();
     }
 
@@ -346,7 +362,7 @@ public class ObstaclePlacer : MonoBehaviour
         {
             for (int x = 0; x < grid.Size.x; x++)
             {
-                Vector2Int candidate = new Vector2Int(x, z);
+                Vector2Int candidate = new(x, z);
 
                 if (placementGrid.CanPlace(candidate, footprintSize))
                 {
