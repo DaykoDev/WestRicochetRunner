@@ -309,7 +309,7 @@ MonoBehaviour:
   _visualRoot: {fileID: 5503518322171080167}
   _bodyRenderer: {fileID: 7695808400539371531}
   _destructionEffectOrigin: {fileID: 0}
-  _hitColor: {r: 1, g: 0.60521245, b: 0.34901965, a: 1}
+  _hitColor: {r: 1, g: 0.4518357, b: 0.0990566, a: 1}
   _hitDuration: 0.1
   _hitScaleAmount: 0.07
 --- !u!1001 &7680934873678682091
@@ -383,7 +383,7 @@ PrefabInstance:
     - target: {fileID: 23970890364149728, guid: 0fcfcf0a9cb2e1149a0a38406da3c4ca, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: ed5fd8781ab90ea4688df22e15db7dfd, type: 2}
+      objectReference: {fileID: 2100000, guid: 20f991f23409da846a40d0ae29929c5b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TutorialStartSectionData
   m_EditorClassIdentifier: 
   _type: 0
-  _prefab: {fileID: 8233320011372841500, guid: 611fd94b673edd541b0b7f2988e899cb, type: 3}
+  _prefab: {fileID: 8233320011372841500, guid: 9a5b84cf29d4c8d428ae2f3ba80b9f81, type: 3}
   _minLevel: 1
   _maxLevel: 0
   _selectionWeight: 1

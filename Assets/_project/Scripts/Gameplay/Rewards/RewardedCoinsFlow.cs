@@ -19,7 +19,7 @@ public class RewardedCoinsFlow : IDisposable
         _rewardCalculator = rewardCalculator;
     }
 
-    public bool CanRequest => _requestInFlight == false && _adsService.IsBusy == false && _playerProgress.CanClaimMenuCoinsReward;
+    public bool CanRequest => _requestInFlight == false && _playerProgress.CanClaimMenuCoinsReward;
     public int CurrentReward => _rewardCalculator.Calculate(_playerProgress.CurrentLevel);
 
     public event Action<int> RewardGranted;
@@ -27,7 +27,7 @@ public class RewardedCoinsFlow : IDisposable
 
     public void Request()
     {
-        if (CanRequest == false)
+        if (CanRequest == false || _adsService.IsBusy)
         {
             return;
         }

@@ -285,7 +285,7 @@ MonoBehaviour:
   _visualRoot: {fileID: 5503518322171080167}
   _bodyRenderer: {fileID: 7062847117714357120}
   _destructionEffectOrigin: {fileID: 0}
-  _hitColor: {r: 1, g: 0.6039216, b: 0.35, a: 1}
+  _hitColor: {r: 1, g: 0.4509804, b: 0.09803922, a: 1}
   _hitDuration: 0.1
   _hitScaleAmount: 0.07
 --- !u!1001 &8486421798351791876
@@ -297,16 +297,24 @@ PrefabInstance:
     m_TransformParent: {fileID: 4552434391588818870}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: f761e5c83a24f6347a0cd6a5907855bd, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 85
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f761e5c83a24f6347a0cd6a5907855bd, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 85
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: f761e5c83a24f6347a0cd6a5907855bd, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f761e5c83a24f6347a0cd6a5907855bd, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.4
+      value: -0.45
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f761e5c83a24f6347a0cd6a5907855bd, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f761e5c83a24f6347a0cd6a5907855bd, type: 3}
       propertyPath: m_LocalRotation.w

@@ -375,8 +375,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _baseHP: 5
-  _prefabCoinMultiplier: 5
   _contactDamage: 1
+  _rewardWeight: 5
   _gridSize: {x: 1, y: 1}
 --- !u!114 &2816338247747744511
 MonoBehaviour:
@@ -463,7 +463,7 @@ PrefabInstance:
     - target: {fileID: 23434614403015988, guid: e476283e17c9bf24e882749be682828a, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 76c2416bc46648744b0cb4d5b50f257d, type: 2}
+      objectReference: {fileID: 2100000, guid: 8888af7b0c796a34ebdd86d6eb927940, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
