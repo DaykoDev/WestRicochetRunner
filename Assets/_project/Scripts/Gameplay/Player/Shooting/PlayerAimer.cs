@@ -12,6 +12,8 @@ public class PlayerAimer : MonoBehaviour
     [SerializeField] private Transform _firePoint;
     [SerializeField] private Transform _secondaryFirePoint;
 
+    private bool _isTrajectoryCentered;
+
     public Vector3 FirePointPosition => _firePoint.position;
 
     public bool HasSecondaryFirePoint => _secondaryFirePoint != null;
@@ -52,7 +54,6 @@ public class PlayerAimer : MonoBehaviour
     }
 
     private Vector3 AimOriginPosition => _aimOrigin != null ? _aimOrigin.position : transform.position;
-    private bool _isTrajectoryCentered;
 
     public void SetTrajectoryCentered(bool isCentered)
     {

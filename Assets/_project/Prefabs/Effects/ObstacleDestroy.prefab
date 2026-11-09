@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 132352, guid: 71b02155078e4bf4e962f302d3675af2, type: 3}
       propertyPath: m_Name
-      value: BulletFatExplosionFire Variant
+      value: ObstacleDestroy
       objectReference: {fileID: 0}
     - target: {fileID: 448740, guid: 71b02155078e4bf4e962f302d3675af2, type: 3}
       propertyPath: m_LocalPosition.x

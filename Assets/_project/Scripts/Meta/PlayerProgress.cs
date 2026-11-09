@@ -162,6 +162,8 @@ public class PlayerProgress
         _incomeMultiplierUpgradeLevel = 0;
         _bounceCountUpgradeLevel = 0;
 
+        MenuCoinsRewardClaimedLevel = 0;
+
         _isTutorialCompleted = false;
         _bestCompletedLevel = 0;
 
@@ -171,6 +173,7 @@ public class PlayerProgress
         UpgradeLevelChanged?.Invoke(PermanentUpgradeType.StartBallCount, _startBallCountUpgradeLevel);
         UpgradeLevelChanged?.Invoke(PermanentUpgradeType.BallDamage, _ballDamageUpgradeLevel);
         UpgradeLevelChanged?.Invoke(PermanentUpgradeType.IncomeMultiplier, _incomeMultiplierUpgradeLevel);
+        UpgradeLevelChanged?.Invoke(PermanentUpgradeType.BounceCount, _bounceCountUpgradeLevel);
     }
 
     private int GenerateSeed()

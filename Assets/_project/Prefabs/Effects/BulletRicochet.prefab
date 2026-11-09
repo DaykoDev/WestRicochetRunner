@@ -10,11 +10,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1861770388729636, guid: 9730ee03d63d26a4fa184edd660d0c19, type: 3}
       propertyPath: m_Name
-      value: BulletDecalWood Variant
+      value: BulletRicochet
       objectReference: {fileID: 0}
     - target: {fileID: 4285817236088152, guid: 9730ee03d63d26a4fa184edd660d0c19, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3.9787526
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4285817236088152, guid: 9730ee03d63d26a4fa184edd660d0c19, type: 3}
       propertyPath: m_LocalPosition.y
@@ -22,7 +22,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4285817236088152, guid: 9730ee03d63d26a4fa184edd660d0c19, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.58187085
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4285817236088152, guid: 9730ee03d63d26a4fa184edd660d0c19, type: 3}
       propertyPath: m_LocalRotation.w

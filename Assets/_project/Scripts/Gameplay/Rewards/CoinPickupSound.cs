@@ -9,14 +9,23 @@ public sealed class CoinPickupSound : MonoBehaviour
 
     [Header("Sound")]
     [SerializeField, Range(0f, 1f)] private float _volume = 0.7f;
-    [SerializeField] private float _minPitch = 0.95f;
-    [SerializeField] private float _maxPitch = 1.05f;
+
+    [Header("Pitch Combo")]
+    [SerializeField, Min(0f)] private float _pitchStep = 0.04f;
+
+    [SerializeField, Min(0.5f)] private float _defaultPitch = 0.8f;
+    [SerializeField, Min(1f)] private float _maxPitch = 1.5f;
+
+    [SerializeField, Min(0.05f)] private float _comboResetDelay = 0.3f;
 
     [Header("Spam Protection")]
     [SerializeField, Min(0f)] private float _minInterval = 0.035f;
 
     private int _lastCollectedAmount;
+
     private float _nextPlayTime;
+    private float _lastPlayTime;
+    private float _currentPitch;
 
     private void Awake()
     {
@@ -25,7 +34,9 @@ public sealed class CoinPickupSound : MonoBehaviour
             _audioSource = GetComponent<AudioSource>();
         }
 
-        if (_rewardCollector == null || _audioSource == null || _coinClip == null)
+        if (_rewardCollector == null ||
+            _audioSource == null ||
+            _coinClip == null)
         {
             Debug.LogError("CoinPickupSound references are missing.", this);
 
@@ -46,6 +57,10 @@ public sealed class CoinPickupSound : MonoBehaviour
         }
 
         _lastCollectedAmount = _rewardCollector.CollectedThisRun;
+
+        _currentPitch = _defaultPitch;
+        _nextPlayTime = 0f;
+        _lastPlayTime = float.NegativeInfinity;
 
         _rewardCollector.CollectedThisRunChanged += OnCollectedAmountChanged;
     }
@@ -69,15 +84,32 @@ public sealed class CoinPickupSound : MonoBehaviour
             return;
         }
 
-        if (Time.unscaledTime < _nextPlayTime)
+        float currentTime = Time.unscaledTime;
+
+        if (currentTime < _nextPlayTime)
         {
             return;
         }
 
-        _nextPlayTime = Time.unscaledTime + _minInterval;
+        UpdatePitch(currentTime);
 
-        _audioSource.pitch = Random.Range(_minPitch, _maxPitch);
-
+        _audioSource.pitch = _currentPitch;
         _audioSource.PlayOneShot(_coinClip, _volume);
+
+        _lastPlayTime = currentTime;
+        _nextPlayTime = currentTime + _minInterval;
+    }
+
+    private void UpdatePitch(float currentTime)
+    {
+        bool comboContinues = currentTime - _lastPlayTime <= _comboResetDelay;
+
+        if (comboContinues == false)
+        {
+            _currentPitch = 1f;
+            return;
+        }
+
+        _currentPitch = Mathf.Min(_currentPitch + _pitchStep, _maxPitch);
     }
 }

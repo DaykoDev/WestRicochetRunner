@@ -22,7 +22,9 @@ public class RunScreen : MonoBehaviour
     [Header("HUD")]
     [SerializeField] private Image _progressFill;
     [SerializeField] private TMP_Text _ballsText;
-    [SerializeField] private float _punchKoef = 0.2f;
+    [SerializeField, Range(0f, 1f)] private float _ballCountPunchStrength = 0.2f;
+
+    [SerializeField, Min(0.02f)] private float _ballCountPunchDuration = 0.18f;
 
     [Header("Buttons")]
     [SerializeField] private Button _settingsButton;
@@ -175,7 +177,7 @@ public class RunScreen : MonoBehaviour
             _ballsText.text = $"{available}/{capacity}";
             _ballsText.transform.DOKill();
             _ballsText.transform.localScale = Vector3.one;
-            _ballsText.transform.DOPunchScale(Vector3.one * _punchKoef, _punchKoef);
+            _ballsText.transform.DOPunchScale(Vector3.one * _ballCountPunchStrength, _ballCountPunchDuration);
         }
     }
 

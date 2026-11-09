@@ -13,10 +13,14 @@ public class RicochetFeedback : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float _volume = 0.6f;
     [SerializeField] private Vector2 _pitchRange = new(0.9f, 1.1f);
 
+    [SerializeField, Min(0f)] private float _minSoundInterval = 0.1f;
+
+
     [Header("Camera")]
     [SerializeField] private CinemachineImpulseSource _impulseSource;
 
     private readonly List<Ball> _balls = new();
+    private float _nextSoundTime;
 
     private void Awake()
     {
@@ -57,9 +61,14 @@ public class RicochetFeedback : MonoBehaviour
             _sparkPool.Get().PlayAt(position);
         }
 
-        if (_audioSource != null && _ricochetClip != null)
+        bool canPlaySound = _audioSource != null && _ricochetClip != null && Time.unscaledTime >= _nextSoundTime;
+
+        if (canPlaySound)
         {
+            _nextSoundTime = Time.unscaledTime + _minSoundInterval;
+
             _audioSource.pitch = Random.Range(_pitchRange.x, _pitchRange.y);
+
             _audioSource.PlayOneShot(_ricochetClip, _volume);
         }
 

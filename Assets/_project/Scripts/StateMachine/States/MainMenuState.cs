@@ -16,8 +16,6 @@ public class MainMenuState : IState
     public event Action Entered;
     public event Action Exited;
 
-    public event Action StartRequested;
-
     public void Enter()
     {
         Time.timeScale = 1f;
@@ -33,12 +31,9 @@ public class MainMenuState : IState
 
     public void Exit()
     {
-        Exited?.Invoke();
-    }
+        _upgradeService.UpgradeLevelChanged -= OnUpgradeLevelChanged;
 
-    public void RequestStart()
-    {
-        StartRequested?.Invoke();
+        Exited?.Invoke();
     }
 
     private void OnUpgradeLevelChanged(PermanentUpgradeType type, int level)
