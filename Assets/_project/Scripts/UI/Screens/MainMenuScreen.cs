@@ -12,14 +12,14 @@ public class MainMenuScreen : MonoBehaviour
     {
         [SerializeField] private PermanentUpgradeType _type;
         [SerializeField] private Button _button;
-        [SerializeField] private TMP_Text _levelText;
-        [SerializeField] private TMP_Text _costText;
+        [SerializeField] private LocalizedText _levelText;
+        [SerializeField] private LocalizedText _costText;
         [SerializeField] private GameObject _root;
 
         public PermanentUpgradeType Type => _type;
         public Button Button => _button;
-        public TMP_Text LevelText => _levelText;
-        public TMP_Text CostText => _costText;
+        public LocalizedText LevelText => _levelText;
+        public LocalizedText CostText => _costText;
         public GameObject Root => _root;
 
         public event Action<PermanentUpgradeType> PurchaseRequested;
@@ -31,11 +31,11 @@ public class MainMenuScreen : MonoBehaviour
     }
 
     [Header("Progress")]
-    [SerializeField] private TMP_Text _levelText;
+    [SerializeField] private LocalizedText _levelText;
 
     [Header("Coins")]
     [SerializeField] private TMP_Text _coinsText;
-    [SerializeField] private TMP_Text _coinsRewardText;
+    [SerializeField] private LocalizedText _coinsRewardText;
     [SerializeField, Range(0f, 1f)] private float _coinsPunchStrength = 0.2f;
     [SerializeField, Min(0.02f)] private float _coinsPunchDuration = 0.18f;
 
@@ -43,6 +43,7 @@ public class MainMenuScreen : MonoBehaviour
     [SerializeField] private Button _startButton;
     [SerializeField] private Button _coinsRewardButton;
     [SerializeField] private Button _settingsButton;
+    [SerializeField] private Button _leaderboardButton;
 
     [Header("Permanent Upgrades")]
     [SerializeField] private UpgradePurchaseView[] _upgradeViews;
@@ -55,6 +56,7 @@ public class MainMenuScreen : MonoBehaviour
     public event Action StartClicked;
     public event Action CoinsRewardClicked;
     public event Action SettingsClicked;
+    public event Action LeaderboardClicked;
     public event Action<PermanentUpgradeType> UpgradePurchaseRequested;
 
     private void Awake()
@@ -86,6 +88,7 @@ public class MainMenuScreen : MonoBehaviour
         _startButton.onClick.AddListener(OnStartClicked);
         _coinsRewardButton.onClick.AddListener(OnCoinsRewardClicked);
         _settingsButton.onClick.AddListener(OnSettingsClicked);
+        _leaderboardButton.onClick.AddListener(OnLeaderboardClicked);
 
         foreach (UpgradePurchaseView view in _views.Values)
         {
@@ -102,6 +105,7 @@ public class MainMenuScreen : MonoBehaviour
         _startButton.onClick.RemoveListener(OnStartClicked);
         _coinsRewardButton.onClick.RemoveListener(OnCoinsRewardClicked);
         _settingsButton.onClick.RemoveListener(OnSettingsClicked);
+        _leaderboardButton.onClick.RemoveListener(OnLeaderboardClicked);
 
         foreach (UpgradePurchaseView view in _views.Values)
         {
@@ -127,7 +131,7 @@ public class MainMenuScreen : MonoBehaviour
     {
         if (_levelText != null)
         {
-            _levelText.text = $"Level: {level}";
+            _levelText.SetKey(LocalizationKeys.Level, level);
         }
     }
 
@@ -164,7 +168,7 @@ public class MainMenuScreen : MonoBehaviour
 
         if (_coinsRewardText != null)
         {
-            _coinsRewardText.text = $"+{reward} coins";
+            _coinsRewardText.SetKey(LocalizationKeys.CoinsReward, reward);
         }
     }
 
@@ -179,15 +183,15 @@ public class MainMenuScreen : MonoBehaviour
         {
             if (maxLevel < 0)
             {
-                view.LevelText.text = "Unavailable";
+                view.LevelText.SetKey(LocalizationKeys.Unavailable);
             }
             else if (maxLevel == 0)
             {
-                view.LevelText.text = $"{level}";
+                view.LevelText.SetPlainText(level.ToString());
             }
             else
             {
-                view.LevelText.text = $"{level}/{maxLevel}";
+                view.LevelText.SetPlainText($"{level}/{maxLevel}");
             }
         }
 
@@ -197,15 +201,15 @@ public class MainMenuScreen : MonoBehaviour
         {
             if (maxLevel < 0)
             {
-                view.CostText.text = "Unavailable";
+                view.CostText.SetKey(LocalizationKeys.Unavailable);
             }
             else if (isMaxLevel)
             {
-                view.CostText.text = "MAX";
+                view.CostText.SetKey(LocalizationKeys.Max);
             }
             else
             {
-                view.CostText.text = $"{nextCost}";
+                view.CostText.SetPlainText(nextCost.ToString());
             }
         }
 
@@ -246,5 +250,10 @@ public class MainMenuScreen : MonoBehaviour
     private void OnSettingsClicked()
     {
         SettingsClicked?.Invoke();
+    }
+
+    private void OnLeaderboardClicked()
+    {
+        LeaderboardClicked?.Invoke();
     }
 }

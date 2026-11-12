@@ -53,6 +53,8 @@ public sealed class GameEventBindings : IDisposable
         _run.DefeatState.Exited += _ui.Defeat.HandleStateExited;
         
         _meta.Progress.BestLevelChanged += _leaderboardService.SubmitScore;
+
+        _leaderboardService.AuthorizationChanged += OnLeaderboardAuthorizationChanged;
     }
 
     private void UnsubscribeFromStateEvents()
@@ -73,12 +75,15 @@ public sealed class GameEventBindings : IDisposable
         _run.DefeatState.Exited -= _ui.Defeat.HandleStateExited;
 
         _meta.Progress.BestLevelChanged -= _leaderboardService.SubmitScore;
+
+        _leaderboardService.AuthorizationChanged -= OnLeaderboardAuthorizationChanged;
     }
 
     private void SubscribeToPresenterEvents()
     {
         _ui.MainMenu.StartRequested += _run.GameFlow.StartRun;
         _ui.MainMenu.SettingsRequested += _settingsFlow.OpenFromMenu;
+        _ui.MainMenu.LeaderboardRequested += _ui.Leaderboard.Show;
 
         _ui.Victory.MainMenuRequested += _run.GameFlow.ReturnToMainMenu;
 
@@ -94,6 +99,7 @@ public sealed class GameEventBindings : IDisposable
     {
         _ui.MainMenu.StartRequested -= _run.GameFlow.StartRun;
         _ui.MainMenu.SettingsRequested -= _settingsFlow.OpenFromMenu;
+        _ui.MainMenu.LeaderboardRequested -= _ui.Leaderboard.Show;
 
         _ui.Victory.MainMenuRequested -= _run.GameFlow.ReturnToMainMenu;
 
@@ -113,5 +119,20 @@ public sealed class GameEventBindings : IDisposable
     private void OnRunEntered()
     {
         _run.SecondChance.SetContext(_run.RunState.Context);
+    }
+
+    private void OnLeaderboardAuthorizationChanged()
+    {
+        if (_leaderboardService.IsAuthorized == false)
+        {
+            return;
+        }
+
+        int bestLevel = _meta.Progress.BestCompletedLevel;
+
+        if (bestLevel > 0)
+        {
+            _leaderboardService.SubmitScore(bestLevel);
+        }
     }
 }

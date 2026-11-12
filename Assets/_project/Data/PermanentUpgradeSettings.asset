@@ -17,13 +17,13 @@ MonoBehaviour:
     _baseCost: 120
     _maxLevel: 10
     _bonusPerLevel: 1
-    _costGrowthMultiplier: 1.2
+    _costGrowthMultiplier: 1
     _unlockLevel: 1
   - _type: 1
     _baseCost: 180
     _maxLevel: 0
     _bonusPerLevel: 1
-    _costGrowthMultiplier: 1.25
+    _costGrowthMultiplier: 1.2
     _unlockLevel: 1
   - _type: 2
     _baseCost: 120
@@ -36,5 +36,5 @@ MonoBehaviour:
     _maxLevel: 3
     _bonusPerLevel: 1
     _costGrowthMultiplier: 1.2
-    _unlockLevel: 4
-  _costGrowth: 1.5
+    _unlockLevel: 7
+  _costGrowth: 1.3

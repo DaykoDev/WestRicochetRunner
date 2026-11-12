@@ -1,8 +1,9 @@
 using System;
+using UnityEngine.SocialPlatforms.Impl;
 
 public sealed class UiComposition : IDisposable
 {
-    public UiComposition(SceneReferences sceneReferences, MetaComposition meta, RunComposition run)
+    public UiComposition(SceneReferences sceneReferences, MetaComposition meta, RunComposition run, ILeaderboardService leaderboardService)
     {
         MainMenu = new MainMenuPresenter(
             sceneReferences.MainMenuScreen,
@@ -31,6 +32,8 @@ public sealed class UiComposition : IDisposable
         Settings = new SettingsPresenter(
             sceneReferences.SettingsScreen,
             meta.Settings);
+
+        Leaderboard = new LeaderboardPresenter(sceneReferences.LeaderboardScreen, leaderboardService);
     }
 
     public MainMenuPresenter MainMenu { get; }
@@ -38,9 +41,11 @@ public sealed class UiComposition : IDisposable
     public VictoryPresenter Victory { get; }
     public DefeatPresenter Defeat { get; }
     public SettingsPresenter Settings { get; }
+    public LeaderboardPresenter Leaderboard { get; }
 
     public void Dispose()
     {
+        Leaderboard.Dispose();
         Settings.Dispose();
         Defeat.Dispose();
         Victory.Dispose();

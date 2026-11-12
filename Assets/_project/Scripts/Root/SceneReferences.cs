@@ -11,6 +11,7 @@ public class SceneReferences : MonoBehaviour
     [SerializeField] private VictoryScreen _victoryScreen;
     [SerializeField] private DefeatScreen _defeatScreen;
     [SerializeField] private SettingsScreen _settingsScreen;
+    [SerializeField] private LeaderboardScreen _leaderboardScreen;
 
     [Header("Player")]
     [SerializeField] private Player _player;
@@ -35,6 +36,7 @@ public class SceneReferences : MonoBehaviour
     public VictoryScreen VictoryScreen => _victoryScreen;
     public DefeatScreen DefeatScreen => _defeatScreen;
     public SettingsScreen SettingsScreen => _settingsScreen;
+    public LeaderboardScreen LeaderboardScreen => _leaderboardScreen;
 
     public Player Player => _player;
     public PlayerHealth PlayerHealth => _playerHealth;
@@ -60,6 +62,7 @@ public class SceneReferences : MonoBehaviour
         ValidateReference(_victoryScreen, nameof(_victoryScreen), errors);
         ValidateReference(_defeatScreen, nameof(_defeatScreen), errors);
         ValidateReference(_settingsScreen, nameof(_settingsScreen), errors);
+        ValidateReference(_leaderboardScreen, nameof(_leaderboardScreen), errors);
 
         ValidateReference(_player, nameof(_player), errors);
         ValidateReference(_playerHealth, nameof(_playerHealth), errors);

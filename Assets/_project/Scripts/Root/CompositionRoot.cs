@@ -112,6 +112,11 @@ public sealed class CompositionRoot : IDisposable
             disposableAds.Dispose();
         }
 
+        if (_leaderboardService is IDisposable disposableLeaderboard)
+        {
+            disposableLeaderboard.Dispose();
+        }
+
         _saveService?.Dispose();
 
         _isInitialized = false;
@@ -155,7 +160,8 @@ public sealed class CompositionRoot : IDisposable
             _ui = new UiComposition(
                 _sceneReferences,
                 _meta,
-                _run);
+                _run,
+                _leaderboardService);
 
             _settingsFlow = new SettingsFlow(
                 _ui.Settings,

@@ -122,6 +122,7 @@ GameObject:
   - component: {fileID: 1946251324916986684}
   - component: {fileID: 6023936720501100044}
   - component: {fileID: 9090165984982637478}
+  - component: {fileID: 2993886613274397407}
   m_Layer: 7
   m_Name: BonusText
   m_TagString: Untagged
@@ -146,7 +147,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 1.75}
-  m_SizeDelta: {x: 3, y: 1.5}
+  m_SizeDelta: {x: 3.4, y: 1.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &6023936720501100044
 MeshRenderer:
@@ -210,7 +211,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Ricochet Count:'
+  m_text: "\u0420\u0438\u043A\u043E\u0448\u0435\u0442\u044B:"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 02fea1fb776e0ad43a5e684a1ab0ce9e, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 34ed01d03cf5c4846b295adfc2914c6f, type: 2}
@@ -237,12 +238,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 6.1
-  m_fontSizeBase: 2.4
+  m_fontSize: 6.15
+  m_fontSizeBase: 6
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 2
-  m_fontSizeMax: 15
+  m_fontSizeMax: 9
   m_fontStyle: 17
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 4096
@@ -282,6 +283,21 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 6023936720501100044}
   m_maskType: 0
+--- !u!114 &2993886613274397407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 210555453959011492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eca20085bdbf4454d89658ff5164b409, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _text: {fileID: 9090165984982637478}
+  _database: {fileID: 11400000, guid: 9eaa54f22fc330448b5e944e62500de0, type: 2}
+  _key: Gate.RicochetCount
 --- !u!1 &5263758869853192569
 GameObject:
   m_ObjectHideFlags: 0

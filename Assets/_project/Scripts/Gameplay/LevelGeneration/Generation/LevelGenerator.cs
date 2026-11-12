@@ -122,6 +122,8 @@ public class LevelGenerator : MonoBehaviour
                     return false;
                 }
 
+                trackLength += Vector3.Distance(nextPosition, finishTrigger.transform.position);
+
                 finishTrigger.Reached += OnFinishReached;
                 _finishTriggers.Add(finishTrigger);
             }
@@ -153,7 +155,7 @@ public class LevelGenerator : MonoBehaviour
                     i);
             }
 
-            if (section.Type != TrackSectionType.FinalBonus)
+            if (section.Type != TrackSectionType.FinalBonus && section.Type != TrackSectionType.Finish)
             {
                 trackLength += Vector3.Distance(nextPosition, anchors.EndAnchor.position);
             }

@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class RunScreen : MonoBehaviour
 {
     [Header("Progress")]
-    [SerializeField] private TMP_Text _levelText;
+    [SerializeField] private LocalizedText _levelText;
 
     [Header("Coins")]
     [SerializeField] private TMP_Text _coinsText;
@@ -124,7 +124,7 @@ public class RunScreen : MonoBehaviour
     {
         if (_levelText != null)
         {
-            _levelText.text = $"Level: {level}";
+            _levelText.SetKey(LocalizationKeys.Level, level);
         }
 
         bool isBonus = _bonusLevelSettings != null && _bonusLevelSettings.IsBonusLevel(level);

@@ -16,6 +16,7 @@ public class MainMenuPresenter : IDisposable
         _screen.UpgradePurchaseRequested += OnUpgradePurchaseRequested;
         _screen.CoinsRewardClicked += OnCoinsRewardClicked;
         _screen.SettingsClicked += OnSettingsClicked;
+        _screen.LeaderboardClicked += OnLeaderboardClicked;
 
         _upgradeService.LevelChanged += OnLevelChanged;
         _upgradeService.BalanceChanged += OnBalanceChanged;
@@ -26,6 +27,7 @@ public class MainMenuPresenter : IDisposable
 
     public event Action StartRequested;
     public event Action SettingsRequested;
+    public event Action LeaderboardRequested;
 
     public void HandleStateEntered()
     {
@@ -48,6 +50,7 @@ public class MainMenuPresenter : IDisposable
         _screen.UpgradePurchaseRequested -= OnUpgradePurchaseRequested;
         _screen.CoinsRewardClicked -= OnCoinsRewardClicked;
         _screen.SettingsClicked -= OnSettingsClicked;
+        _screen.LeaderboardClicked -= OnLeaderboardClicked;
 
         _upgradeService.LevelChanged -= OnLevelChanged;
         _upgradeService.BalanceChanged -= OnBalanceChanged;
@@ -101,6 +104,11 @@ public class MainMenuPresenter : IDisposable
     private void OnSettingsClicked()
     {
         SettingsRequested?.Invoke();
+    }
+
+    private void OnLeaderboardClicked()
+    {
+        LeaderboardRequested?.Invoke();
     }
 
     private void OnLevelChanged(int level)

@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa58cebbe7769a74c95aeb596de17493, type: 3}
   m_Name: LevelEconomySettings
   m_EditorClassIdentifier: 
-  _regularObstacleBudget: 40
+  _regularObstacleBudget: 35
   _completionReward: 10
-  _finalBonusBudget: 40
+  _finalBonusBudget: 35
   _rewardGrowth: 1.1
   _bonusLevelSettings: {fileID: 11400000, guid: 5dec57d98882fa3489e6baac707d561c, type: 2}
   _bonusLevelRewardMultiplier: 1.5
