@@ -1,16 +1,19 @@
 using TMPro;
 using UnityEngine;
 
-public sealed class GateTextRenderQueue : MonoBehaviour
+namespace WestRicochet.UI
 {
-    [SerializeField] private TMP_Text[] _texts;
-    [SerializeField] private int _renderQueue = 3100;
-
-    private void Awake()
+    public sealed class GateTextRenderQueue : MonoBehaviour
     {
-        foreach (TMP_Text text in _texts)
+        [SerializeField] private TMP_Text[] _texts;
+        [SerializeField] private int _renderQueue = 3100;
+
+        private void Awake()
         {
-            text.fontSharedMaterial.renderQueue = _renderQueue;
+            foreach (TMP_Text text in _texts)
+            {
+                text.fontSharedMaterial.renderQueue = _renderQueue;
+            }
         }
     }
 }

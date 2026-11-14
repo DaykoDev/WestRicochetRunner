@@ -1,19 +1,22 @@
-public class RunContext
+namespace WestRicochet.Gameplay.Run
 {
-    public RunContext(int level, int seed, RunModifiers modifiers)
+    public class RunContext
     {
-        Level = level;
-        Seed = seed;
-        Modifiers = modifiers;
-    }
+        public RunContext(int level, int seed, RunModifiers modifiers)
+        {
+            Level = level;
+            Seed = seed;
+            Modifiers = modifiers;
+        }
 
-    public int Level { get; }
-    public int Seed { get; }
-    public RunModifiers Modifiers { get; }
-    public bool SecondChanceUsed { get; private set; }
+        public int Level { get; }
+        public int Seed { get; }
+        public RunModifiers Modifiers { get; }
+        public bool SecondChanceUsed { get; private set; }
 
-    public void UseSecondChance()
-    {
-        SecondChanceUsed = true;
+        public void UseSecondChance()
+        {
+            SecondChanceUsed = true;
+        }
     }
 }

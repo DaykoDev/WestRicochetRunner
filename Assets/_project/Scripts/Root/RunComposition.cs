@@ -1,46 +1,53 @@
 using System;
 using System.Collections.Generic;
+using WestRicochet.Gameplay.Rewards.Flow;
+using WestRicochet.Gameplay.Run;
+using WestRicochet.Infrastructure.Ads;
+using WestRicochet.StateMachine;
+using WestRicochet.StateMachine.States;
 
-public sealed class RunComposition : IDisposable
+namespace WestRicochet.Root
 {
-    public RunComposition(SceneReferences sceneReferences, MetaComposition meta, AdsService adsService)
+    public sealed class RunComposition : IDisposable
     {
-        SecondChance = new SecondChanceFlow(
-            adsService,
-            sceneReferences.ObstacleFactory,
-            sceneReferences.Player,
-            sceneReferences.PlayerHealth,
-            sceneReferences.AdsConfig.SecondChanceClearRadius);
+        public RunComposition(SceneReferences sceneReferences, MetaComposition meta, AdsService adsService)
+        {
+            SecondChance = new SecondChanceFlow(
+                adsService,
+                sceneReferences.ObstacleAreaReleaser,
+                sceneReferences.Player,
+                sceneReferences.PlayerHealth,
+                sceneReferences.AdsConfig.SecondChanceClearRadius);
 
-        VictoryMultiplier = new RewardedMultiplierFlow(
-            adsService,
-            meta.Wallet,
-            sceneReferences.RunRewardCollector,
-            sceneReferences.AdsConfig.VictoryCoinsMultiplier);
+            VictoryMultiplier = new RewardedMultiplierFlow(
+                adsService,
+                meta.Wallet,
+                sceneReferences.RunRewardCollector,
+                sceneReferences.AdsConfig.VictoryCoinsMultiplier);
 
-        MenuCoins = new RewardedCoinsFlow(
-            adsService,
-            meta.Wallet,
-            meta.Progress,
-            sceneReferences.AdsConfig.MenuCoinsRewardCalculator);
+            MenuCoins = new RewardedCoinsFlow(
+                adsService,
+                meta.Wallet,
+                meta.Progress,
+                sceneReferences.LevelEconomySettings);
 
-        BootstrapState = new BootstrapState();
-        RunState = new RunState(
-            meta.Progress,
-            sceneReferences.Player,
-            sceneReferences.PlayerHealth,
-            sceneReferences.LevelGenerator,
-            sceneReferences.TrackScroller,
-            meta.Upgrades,
-            sceneReferences.RunRewardCollector);
+            BootstrapState = new BootstrapState();
+            RunState = new RunState(
+                meta.Progress,
+                sceneReferences.Player,
+                sceneReferences.PlayerHealth,
+                sceneReferences.LevelGenerator,
+                sceneReferences.TrackScroller,
+                meta.Upgrades,
+                sceneReferences.RunRewardCollector);
 
-        MainMenuState = new MainMenuState(RunState, meta.Upgrades);
+            MainMenuState = new MainMenuState(RunState, meta.Upgrades);
 
-        VictoryState = new VictoryState();
-        DefeatState = new DefeatState();
-        PausedState = new PausedState();
+            VictoryState = new VictoryState();
+            DefeatState = new DefeatState();
+            PausedState = new PausedState();
 
-        List<IState> states = new()
+            List<IState> states = new()
         {
             BootstrapState,
             MainMenuState,
@@ -50,42 +57,43 @@ public sealed class RunComposition : IDisposable
             PausedState
         };
 
-        StateMachine = new GameStateMachine(states);
+            StateMachine = new GameStateMachine(states);
 
-        GameFlow = new GameFlow(
-            StateMachine,
-            meta.Progress,
-            sceneReferences.PlayerHealth,
-            sceneReferences.LevelGenerator,
-            RunState,
-            SecondChance,
-            adsService,
-            meta.Wallet,
-            sceneReferences.RunRewardCollector);
-    }
+            GameFlow = new GameFlow(
+                StateMachine,
+                meta.Progress,
+                sceneReferences.PlayerHealth,
+                sceneReferences.LevelGenerator,
+                RunState,
+                SecondChance,
+                adsService,
+                meta.Wallet,
+                sceneReferences.RunRewardCollector);
+        }
 
-    public SecondChanceFlow SecondChance { get; }
+        public SecondChanceFlow SecondChance { get; }
 
-    public RewardedMultiplierFlow VictoryMultiplier { get; }
+        public RewardedMultiplierFlow VictoryMultiplier { get; }
 
-    public RewardedCoinsFlow MenuCoins { get; }
+        public RewardedCoinsFlow MenuCoins { get; }
 
-    public BootstrapState BootstrapState { get; }
-    public MainMenuState MainMenuState { get; }
-    public RunState RunState { get; }
-    public VictoryState VictoryState { get; }
-    public DefeatState DefeatState { get; }
-    public PausedState PausedState { get; }
+        public BootstrapState BootstrapState { get; }
+        public MainMenuState MainMenuState { get; }
+        public RunState RunState { get; }
+        public VictoryState VictoryState { get; }
+        public DefeatState DefeatState { get; }
+        public PausedState PausedState { get; }
 
-    public GameStateMachine StateMachine { get; }
-    public GameFlow GameFlow { get; }
+        public GameStateMachine StateMachine { get; }
+        public GameFlow GameFlow { get; }
 
-    public void Dispose()
-    {
-        GameFlow?.Dispose();
+        public void Dispose()
+        {
+            GameFlow?.Dispose();
 
-        SecondChance?.Dispose();
-        VictoryMultiplier?.Dispose();
-        MenuCoins?.Dispose();
+            SecondChance?.Dispose();
+            VictoryMultiplier?.Dispose();
+            MenuCoins?.Dispose();
+        }
     }
 }

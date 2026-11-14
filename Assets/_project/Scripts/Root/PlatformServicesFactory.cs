@@ -1,29 +1,36 @@
-public sealed class PlatformServicesFactory
+using WestRicochet.Infrastructure.Ads;
+using WestRicochet.Infrastructure.Leaderboard;
+using WestRicochet.Infrastructure.Persistence;
+
+namespace WestRicochet.Root
 {
-    public IProgressStorage CreateProgressStorage()
+    public sealed class PlatformServicesFactory
     {
+        public IProgressStorage CreateProgressStorage()
+        {
 #if UNITY_WEBGL && !UNITY_EDITOR && YANDEX_GAMES
         return new YandexCloudProgressStorage();
 #else
-        return new LocalProgressStorage();
+            return new LocalProgressStorage();
 #endif
-    }
+        }
 
-    public IAdsService CreateAdsProvider()
-    {
+        public IAdsService CreateAdsProvider()
+        {
 #if UNITY_WEBGL && !UNITY_EDITOR && YANDEX_GAMES
         return new YandexAdsService();
 #else
-        return new EditorAdsService();
+            return new EditorAdsService();
 #endif
-    }
+        }
 
-    public ILeaderboardService CreateLeaderboardProvider()
-    {
+        public ILeaderboardService CreateLeaderboardProvider()
+        {
 #if UNITY_WEBGL && !UNITY_EDITOR && YANDEX_GAMES
         return new YandexLeaderboardService();
 #else
-        return new EditorLeaderboardService();
+            return new EditorLeaderboardService();
 #endif
+        }
     }
 }

@@ -2453,8 +2453,10 @@ MonoBehaviour:
   _ballQueue: {fileID: 2077562634}
   _wallet: {fileID: 796848496}
   _permanentUpgradeSettings: {fileID: 11400000, guid: 7583a877db7dbf7438a32430bc3a7162, type: 2}
+  _levelEconomySettings: {fileID: 11400000, guid: 294127f36378ca14e9597099d5e85566, type: 2}
   _runRewardCollector: {fileID: 796848497}
   _obstacleFactory: {fileID: 796848499}
+  _obstacleAreaReleaser: {fileID: 796848505}
   _adsConfig: {fileID: 11400000, guid: a78a661dbaaf0ae4ab21e4bba3a585e5, type: 2}
   _audioMixer: {fileID: 24100000, guid: 6749329fb35ca7b4ea15babdfd40276a, type: 2}
 --- !u!4 &260073109
@@ -3703,6 +3705,7 @@ GameObject:
   - component: {fileID: 418362451}
   - component: {fileID: 418362450}
   - component: {fileID: 418362449}
+  - component: {fileID: 418362452}
   m_Layer: 5
   m_Name: CoinsText
   m_TagString: Untagged
@@ -3846,6 +3849,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 418362447}
   m_CullTransparentMesh: 1
+--- !u!114 &418362452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 418362447}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2276795b45e47b43a204f64dfdfde06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _text: {fileID: 418362450}
+  _punchStrength: 0.3
+  _punchDuration: 0.18
 --- !u!1 &436503912
 GameObject:
   m_ObjectHideFlags: 0
@@ -5385,12 +5403,12 @@ Transform:
   m_GameObject: {fileID: 619326919}
   serializedVersion: 2
   m_LocalRotation: {x: 0.46174863, y: 0.000027551883, z: -0.00003129458, w: 0.8870109}
-  m_LocalPosition: {x: -0.00019977169, y: 8.191521, z: -1.7357631}
+  m_LocalPosition: {x: -875.9138, y: -672.4561, z: -438.88632}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1490811920}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 2007458068}
   m_LocalEulerAnglesHint: {x: 55, y: 0.002, z: -0.003}
 --- !u!114 &619326922
 MonoBehaviour:
@@ -6232,6 +6250,7 @@ GameObject:
   - component: {fileID: 741702949}
   - component: {fileID: 741702951}
   - component: {fileID: 741702950}
+  - component: {fileID: 741702952}
   m_Layer: 5
   m_Name: BulletsCount
   m_TagString: Untagged
@@ -6355,6 +6374,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 741702948}
   m_CullTransparentMesh: 1
+--- !u!114 &741702952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 741702948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2276795b45e47b43a204f64dfdfde06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _text: {fileID: 741702950}
+  _punchStrength: 0.3
+  _punchDuration: 0.18
 --- !u!1 &744880357
 GameObject:
   m_ObjectHideFlags: 0
@@ -7099,6 +7133,8 @@ GameObject:
   - component: {fileID: 796848502}
   - component: {fileID: 796848501}
   - component: {fileID: 796848503}
+  - component: {fileID: 796848504}
+  - component: {fileID: 796848505}
   m_Layer: 0
   m_Name: GameServices
   m_TagString: Untagged
@@ -7133,7 +7169,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _wallet: {fileID: 796848496}
   _dropSpawner: {fileID: 2011618821}
-  _completionRewardCalculator: {fileID: 11400000, guid: 5c0564c692ea31f4283d20a7aefb6119, type: 2}
+  _levelEconomySettings: {fileID: 11400000, guid: 294127f36378ca14e9597099d5e85566, type: 2}
 --- !u!4 &796848498
 Transform:
   m_ObjectHideFlags: 0
@@ -7209,10 +7245,6 @@ MonoBehaviour:
     _allowChallenge: 1
   _healthCalculator: {fileID: 11400000, guid: 0632157658190a5439e4febab07ad1b6, type: 2}
   _rewardCollector: {fileID: 796848497}
-  _obstacleMask:
-    serializedVersion: 2
-    m_Bits: 512
-  _cleanupBufferSize: 32
 --- !u!114 &796848501
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7245,22 +7277,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _obstacleFactory: {fileID: 796848499}
+  _finalBonusObstaclePlacer: {fileID: 796848504}
   _difficultyTiersSettings: {fileID: 11400000, guid: 881b3cef9b29197498f78be289054208, type: 2}
   _bonusLevelSettings: {fileID: 11400000, guid: 5dec57d98882fa3489e6baac707d561c, type: 2}
   _levelEconomySettings: {fileID: 11400000, guid: 294127f36378ca14e9597099d5e85566, type: 2}
   _incomeCalculator: {fileID: 11400000, guid: 1f7cac4d7052b474cb6ef8e6e6ffd129, type: 2}
   _maxPlacementAttempts: 200
-  _finalCratePrefab: {fileID: 4565276066544996688, guid: ac6f05857e461fa48b84e1b5107bee82, type: 3}
-  _finalChestPrefab: {fileID: 6015596115078887995, guid: ba892fcb29c5950449f070634878c66e, type: 3}
-  _finalRowCount: 5
-  _finalRowGap: 1
-  _finalRowHealthMultipliers:
-  - 1
-  - 2.5
-  - 3
-  - 4
-  - 5
-  _finalChestHealthMultiplier: 10
 --- !u!114 &796848503
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7279,6 +7301,47 @@ MonoBehaviour:
   _playerLateralCalculator: {fileID: 1483386159}
   _portraitForwardBoundaryZ: 30
   _portraitLateralLimit: 3
+--- !u!114 &796848504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 796848495}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12d9d80678500554ca6bbd9d7b376910, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _obstacleFactory: {fileID: 796848499}
+  _finalCratePrefab: {fileID: 4565276066544996688, guid: ac6f05857e461fa48b84e1b5107bee82, type: 3}
+  _finalChestPrefab: {fileID: 6015596115078887995, guid: ba892fcb29c5950449f070634878c66e, type: 3}
+  _finalRowCount: 5
+  _finalRowGap: 1
+  _finalRowHealthMultipliers:
+  - 1
+  - 1.5
+  - 2.2
+  - 3.2
+  - 4.5
+  - 6
+  _finalChestHealthMultiplier: 10
+--- !u!114 &796848505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 796848495}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1ecb4c6b02319e4fbcd3006716caf33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _obstacleMask:
+    serializedVersion: 2
+    m_Bits: 512
+  _bufferSize: 32
 --- !u!1 &804718822
 GameObject:
   m_ObjectHideFlags: 0
@@ -7625,6 +7688,7 @@ Transform:
   - {fileID: 960714816}
   - {fileID: 1871289815}
   - {fileID: 1302412766}
+  - {fileID: 2011618822}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &862013237
@@ -8662,13 +8726,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1000547376}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.46174863, y: 0, z: 0, w: 0.8870109}
-  m_LocalPosition: {x: 0, y: 11, z: -2.5}
+  m_LocalRotation: {x: 0.46174863, y: -0, z: -0, w: 0.8870109}
+  m_LocalPosition: {x: -875.91364, y: -669.64764, z: -439.65057}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1642798988}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 2007458068}
   m_LocalEulerAnglesHint: {x: 55, y: 0, z: 0}
 --- !u!114 &1000547379
 MonoBehaviour:
@@ -8744,9 +8808,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _levelText: {fileID: 1627634077}
-  _coinsText: {fileID: 418362450}
-  _coinsPunchStrength: 0.2
-  _coinsPunchDuration: 0.18
   _healthIcons:
   - {fileID: 1888571486}
   - {fileID: 901272547}
@@ -8754,9 +8815,8 @@ MonoBehaviour:
   _fullHeartSprite: {fileID: 915202734, guid: 6296f3851ca589649a5a6bb86817e71c, type: 3}
   _emptyHeartSprite: {fileID: 136518308, guid: 6296f3851ca589649a5a6bb86817e71c, type: 3}
   _progressFill: {fileID: 92826529}
-  _ballsText: {fileID: 741702950}
-  _ballCountPunchStrength: 0.2
-  _ballCountPunchDuration: 0.18
+  _ballsView: {fileID: 741702952}
+  _coinsView: {fileID: 418362452}
   _settingsButton: {fileID: 459239075}
   _tutorialHint: {fileID: 810888521}
   _tutorialDismissButton: {fileID: 1869182428}
@@ -11932,8 +11992,8 @@ MonoBehaviour:
   _coinClip: {fileID: 8300000, guid: 610679ba1846b6542824241758a69abe, type: 3}
   _volume: 0.35
   _pitchStep: 0.04
-  _defaultPitch: 0.8
-  _maxPitch: 1.1
+  _defaultPitch: 1
+  _maxPitch: 1.2
   _comboResetDelay: 0.3
   _minInterval: 0.035
 --- !u!82 &1425550614
@@ -12160,6 +12220,7 @@ GameObject:
   - component: {fileID: 1459186052}
   - component: {fileID: 1459186051}
   - component: {fileID: 1459186053}
+  - component: {fileID: 1459186054}
   m_Layer: 5
   m_Name: CoinsText
   m_TagString: Untagged
@@ -12303,6 +12364,21 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &1459186054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1459186049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2276795b45e47b43a204f64dfdfde06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _text: {fileID: 1459186051}
+  _punchStrength: 0.2
+  _punchDuration: 0.18
 --- !u!114 &1483386159 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5685529236181244119, guid: 82d8d45526851ea4ea2d62f8f88eba2b, type: 3}
@@ -15360,10 +15436,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _levelText: {fileID: 1133672022}
-  _coinsText: {fileID: 1459186051}
   _coinsRewardText: {fileID: 110271266}
-  _coinsPunchStrength: 0.2
-  _coinsPunchDuration: 0.18
+  _coinsView: {fileID: 1459186054}
   _startButton: {fileID: 22199058}
   _coinsRewardButton: {fileID: 1335470309}
   _settingsButton: {fileID: 1695784671}
@@ -16022,7 +16096,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a34188b0dfb7e2d46bfe82e614026ac2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _effectPrefab: {fileID: 2504549130734402003, guid: 436a7920b7ac55a4182ba2c1bf735071, type: 3}
+  _effectPrefab: {fileID: 1017573349247272356, guid: 436a7920b7ac55a4182ba2c1bf735071, type: 3}
   _initialSize: 8
   _maxSize: 50
 --- !u!4 &1871289815
@@ -16903,6 +16977,39 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2000774603}
   m_CullTransparentMesh: 1
+--- !u!1 &2007458067
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2007458068}
+  m_Layer: 0
+  m_Name: VirtualCameras
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2007458068
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2007458067}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 875.91364, y: 680.64764, z: 437.15057}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 619326921}
+  - {fileID: 1000547378}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2011618820
 GameObject:
   m_ObjectHideFlags: 0
@@ -16947,12 +17054,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2011618820}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 846927281}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2022805508
 GameObject:
@@ -17555,6 +17662,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7c8bf2c8cbd690e4c9993cfc4e2850ec, type: 2}
   _generatedRoot: {fileID: 2108324756}
   _obstaclePlacer: {fileID: 796848502}
+  _finalBonusObstaclePlacer: {fileID: 796848504}
   _upgradeGatePlacer: {fileID: 796848501}
   _difficultyTiers: {fileID: 11400000, guid: 881b3cef9b29197498f78be289054208, type: 2}
 --- !u!4 &2077382872
@@ -17976,13 +18084,7 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 7748038945601296258, guid: 82d8d45526851ea4ea2d62f8f88eba2b, type: 3}
-      propertyPath: _volume
-      value: 0.25
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 7748038945601296258, guid: 82d8d45526851ea4ea2d62f8f88eba2b, type: 3}
-    - {fileID: 2132459935530894287, guid: 82d8d45526851ea4ea2d62f8f88eba2b, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -17998,9 +18100,7 @@ SceneRoots:
   - {fileID: 260073109}
   - {fileID: 796848498}
   - {fileID: 2077382872}
-  - {fileID: 619326921}
-  - {fileID: 1000547378}
   - {fileID: 1646328442}
   - {fileID: 846927281}
-  - {fileID: 2011618822}
   - {fileID: 1704644881}
+  - {fileID: 2007458068}

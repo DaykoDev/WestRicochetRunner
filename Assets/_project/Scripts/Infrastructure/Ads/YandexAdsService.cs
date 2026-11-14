@@ -1,111 +1,114 @@
 using System;
-using UnityEngine;
 using YG;
 
-public class YandexAdsService : IAdsService, IDisposable
+namespace WestRicochet.Infrastructure.Ads
 {
-    private Action _onInterstitialClosed;
-    private Action _onInterstitialError;
-    private Action _onRewarded;
-    private Action _onRewardedError;
-
-    public bool IsBusy => YG2.nowAdsShow;
-    private bool _rewardGranted;
-
-    public YandexAdsService()
+    public class YandexAdsService : IAdsService, IDisposable
     {
-        YG2.onCloseInterAdv += OnCloseInterAdv;
-        YG2.onCloseRewardedAdv += OnRewardedClosed;
-        YG2.onErrorInterAdv += OnErrorInterAdv;
-        YG2.onErrorRewardedAdv += OnErrorRewardedAdv;
-    }
+        private bool _rewardGranted;
 
-    public void Dispose()
-    {
-        YG2.onCloseInterAdv -= OnCloseInterAdv;
-        YG2.onCloseRewardedAdv -= OnRewardedClosed;
-        YG2.onErrorInterAdv -= OnErrorInterAdv;
-        YG2.onErrorRewardedAdv -= OnErrorRewardedAdv;
-    }
-
-    public void ShowInterstitial(Action onClosed, Action onError)
-    {
-        if (IsBusy)
+        public YandexAdsService()
         {
-            onError?.Invoke();
-            return;
+            YG2.onCloseInterAdv += OnCloseInterAdv;
+            YG2.onCloseRewardedAdv += OnRewardedClosed;
+            YG2.onErrorInterAdv += OnErrorInterAdv;
+            YG2.onErrorRewardedAdv += OnErrorRewardedAdv;
         }
 
-        _onInterstitialClosed = onClosed;
-        _onInterstitialError = onError;
-        YG2.InterstitialAdvShow();
-    }
+        private Action _onInterstitialClosed;
+        private Action _onInterstitialError;
+        private Action _onRewarded;
+        private Action _onRewardedError;
 
-    public void ShowRewarded(string placement, Action onRewarded, Action onError)
-    {
-        if (IsBusy)
+        public bool IsBusy => YG2.nowAdsShow;
+
+        public void Dispose()
         {
-            onError?.Invoke();
-            return;
+            YG2.onCloseInterAdv -= OnCloseInterAdv;
+            YG2.onCloseRewardedAdv -= OnRewardedClosed;
+            YG2.onErrorInterAdv -= OnErrorInterAdv;
+            YG2.onErrorRewardedAdv -= OnErrorRewardedAdv;
         }
 
-        _rewardGranted = false;
-        _onRewarded = onRewarded;
-        _onRewardedError = onError;
-        YG2.RewardedAdvShow(placement, OnRewardGranted);
-    }
-
-    private void OnRewardGranted()
-    {
-        _rewardGranted = true;
-
-        Action callback = _onRewarded;
-        ClearRewarded();
-        callback?.Invoke();
-    }
-
-    private void OnRewardedClosed()
-    {
-        if (_rewardGranted)
+        public void ShowInterstitial(Action onClosed, Action onError)
         {
-            return;
+            if (IsBusy)
+            {
+                onError?.Invoke();
+                return;
+            }
+
+            _onInterstitialClosed = onClosed;
+            _onInterstitialError = onError;
+            YG2.InterstitialAdvShow();
         }
 
-        Action callback = _onRewardedError;
-        ClearRewarded();
-        callback?.Invoke();
-    }
+        public void ShowRewarded(string placement, Action onRewarded, Action onError)
+        {
+            if (IsBusy)
+            {
+                onError?.Invoke();
+                return;
+            }
 
-    private void OnCloseInterAdv()
-    {
-        Action callback = _onInterstitialClosed;
-        ClearInterstitial();
-        callback?.Invoke();
-    }
+            _rewardGranted = false;
+            _onRewarded = onRewarded;
+            _onRewardedError = onError;
+            YG2.RewardedAdvShow(placement, OnRewardGranted);
+        }
 
-    private void OnErrorInterAdv()
-    {
-        Action callback = _onInterstitialError;
-        ClearInterstitial();
-        callback?.Invoke();
-    }
+        private void OnRewardGranted()
+        {
+            _rewardGranted = true;
 
-    private void OnErrorRewardedAdv()
-    {
-        Action callback = _onRewardedError;
-        ClearRewarded();
-        callback?.Invoke();
-    }
+            Action callback = _onRewarded;
+            ClearRewarded();
+            callback?.Invoke();
+        }
 
-    private void ClearInterstitial()
-    {
-        _onInterstitialClosed = null;
-        _onInterstitialError = null;
-    }
+        private void OnRewardedClosed()
+        {
+            if (_rewardGranted)
+            {
+                return;
+            }
 
-    private void ClearRewarded()
-    {
-        _onRewarded = null;
-        _onRewardedError = null;
+            Action callback = _onRewardedError;
+            ClearRewarded();
+            callback?.Invoke();
+        }
+
+        private void OnCloseInterAdv()
+        {
+            Action callback = _onInterstitialClosed;
+            ClearInterstitial();
+            callback?.Invoke();
+        }
+
+        private void OnErrorInterAdv()
+        {
+            Action callback = _onInterstitialError;
+            ClearInterstitial();
+            callback?.Invoke();
+        }
+
+        private void OnErrorRewardedAdv()
+        {
+            Action callback = _onRewardedError;
+            ClearRewarded();
+            callback?.Invoke();
+        }
+
+        private void ClearInterstitial()
+        {
+            _onInterstitialClosed = null;
+            _onInterstitialError = null;
+        }
+
+        private void ClearRewarded()
+        {
+            _onRewarded = null;
+            _onRewardedError = null;
+        }
     }
 }

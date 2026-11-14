@@ -1,71 +1,75 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using WestRicochet.Gameplay.Obstacles.Core;
 
-[CreateAssetMenu(fileName = "IncomeCalculator", menuName = "Game/Calculators/Income")]
-public class IncomeCalculator : ScriptableObject
+namespace WestRicochet.Gameplay.Obstacles.Calculations
 {
-    public void Distribute(IReadOnlyList<Obstacle> obstacles, int budget, float incomeMultiplier)
+    [CreateAssetMenu(fileName = "IncomeCalculator", menuName = "Game/Calculators/Income")]
+    public class IncomeCalculator : ScriptableObject
     {
-        if (obstacles == null)
+        public void Distribute(IReadOnlyList<Obstacle> obstacles, int budget, float incomeMultiplier)
         {
-            return;
-        }
-
-        float totalWeight = 0f;
-
-        foreach (Obstacle obstacle in obstacles)
-        {
-            if (obstacle != null)
+            if (obstacles == null)
             {
-                totalWeight += Mathf.Max(0f, obstacle.RewardWeight);
+                return;
             }
-        }
 
-        if (totalWeight <= 0f)
-        {
+            float totalWeight = 0f;
+
             foreach (Obstacle obstacle in obstacles)
             {
                 if (obstacle != null)
                 {
-                    obstacle.SetIncome(0);
+                    totalWeight += Mathf.Max(0f, obstacle.RewardWeight);
                 }
             }
 
-            return;
-        }
-
-        double exactReward = Math.Max(0, budget) * (double)Math.Max(0f, incomeMultiplier);
-
-        int totalReward = exactReward >= int.MaxValue ? int.MaxValue : (int)Math.Round(exactReward, MidpointRounding.AwayFromZero);
-
-        float cumulativeWeight = 0f;
-        int distributedReward = 0;
-
-        foreach (Obstacle obstacle in obstacles)
-        {
-            if (obstacle == null)
+            if (totalWeight <= 0f)
             {
-                continue;
+                foreach (Obstacle obstacle in obstacles)
+                {
+                    if (obstacle != null)
+                    {
+                        obstacle.SetIncome(0);
+                    }
+                }
+
+                return;
             }
 
-            float weight = Mathf.Max(0f, obstacle.RewardWeight);
+            double exactReward = Math.Max(0, budget) * (double)Math.Max(0f, incomeMultiplier);
 
-            if (weight <= 0f)
+            int totalReward = (int)Math.Min(int.MaxValue, Math.Round(exactReward, MidpointRounding.AwayFromZero));
+
+            float cumulativeWeight = 0f;
+            int distributedReward = 0;
+
+            foreach (Obstacle obstacle in obstacles)
             {
-                obstacle.SetIncome(0);
-                continue;
+                if (obstacle == null)
+                {
+                    continue;
+                }
+
+                float weight = Mathf.Max(0f, obstacle.RewardWeight);
+
+                if (weight <= 0f)
+                {
+                    obstacle.SetIncome(0);
+                    continue;
+                }
+
+                cumulativeWeight += weight;
+
+                int targetDistributedReward = Mathf.Clamp(
+                    Mathf.RoundToInt(totalReward * cumulativeWeight / totalWeight),
+                    distributedReward,
+                    totalReward);
+
+                obstacle.SetIncome(targetDistributedReward - distributedReward);
+                distributedReward = targetDistributedReward;
             }
-
-            cumulativeWeight += weight;
-
-            int targetDistributedReward = Mathf.Clamp(
-                Mathf.RoundToInt(totalReward * cumulativeWeight / totalWeight),
-                distributedReward,
-                totalReward);
-
-            obstacle.SetIncome(targetDistributedReward - distributedReward);
-            distributedReward = targetDistributedReward;
         }
     }
 }

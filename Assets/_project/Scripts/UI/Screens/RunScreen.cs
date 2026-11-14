@@ -1,194 +1,166 @@
-using DG.Tweening;
 using System;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using WestRicochet.Gameplay.Run;
+using WestRicochet.Infrastructure.Localization;
+using WestRicochet.UI.Components;
 
-public class RunScreen : MonoBehaviour
+namespace WestRicochet.UI.Screens
 {
-    [Header("Progress")]
-    [SerializeField] private LocalizedText _levelText;
-
-    [Header("Coins")]
-    [SerializeField] private TMP_Text _coinsText;
-    [SerializeField, Range(0f, 1f)] private float _coinsPunchStrength = 0.2f;
-    [SerializeField, Min(0.02f)] private float _coinsPunchDuration = 0.18f;
-
-    [Header("Health")]
-    [SerializeField] private Image[] _healthIcons;
-    [SerializeField] private Sprite _fullHeartSprite;
-    [SerializeField] private Sprite _emptyHeartSprite;
-
-    [Header("HUD")]
-    [SerializeField] private Image _progressFill;
-    [SerializeField] private TMP_Text _ballsText;
-    [SerializeField, Range(0f, 1f)] private float _ballCountPunchStrength = 0.2f;
-
-    [SerializeField, Min(0.02f)] private float _ballCountPunchDuration = 0.18f;
-
-    [Header("Buttons")]
-    [SerializeField] private Button _settingsButton;
-
-    [Header("Tutorial")]
-    [SerializeField] private GameObject _tutorialHint;
-    [SerializeField] private Button _tutorialDismissButton;
-    [SerializeField, Min(0f)] private float _tutorialDuration = 4f;
-
-    [Header("Bonus")]
-    [SerializeField] private BonusLevelSettings _bonusLevelSettings;
-    [SerializeField] private RainbowTextGroup _rainbowTextGroup;
-
-    private float _tutorialTimer;
-    private bool _isTutorialCounting;
-
-    private int _previousCoins;
-    private bool _isCoinsInitialized;
-
-    public event Action TutorialDismissed;
-    public event Action SettingsClicked;
-
-    private void OnEnable()
+    public class RunScreen : MonoBehaviour
     {
-        _tutorialDismissButton.onClick.AddListener(OnTutorialDismissed);
-        _settingsButton.onClick.AddListener(OnSettingsClicked);
-    }
+        [Header("Progress")]
+        [SerializeField] private LocalizedText _levelText;
 
-    private void OnDisable()
-    {
-        _tutorialDismissButton.onClick.RemoveListener(OnTutorialDismissed);
-        _settingsButton.onClick.RemoveListener(OnSettingsClicked);
-    }
+        [Header("Health")]
+        [SerializeField] private Image[] _healthIcons;
+        [SerializeField] private Sprite _fullHeartSprite;
+        [SerializeField] private Sprite _emptyHeartSprite;
 
-    private void Update()
-    {
-        if (_isTutorialCounting == false)
+        [Header("HUD")]
+        [SerializeField] private Image _progressFill;
+        [SerializeField] private PunchTextView _ballsView;
+        [SerializeField] private PunchTextView _coinsView;
+
+        [Header("Buttons")]
+        [SerializeField] private Button _settingsButton;
+
+        [Header("Tutorial")]
+        [SerializeField] private GameObject _tutorialHint;
+        [SerializeField] private Button _tutorialDismissButton;
+        [SerializeField, Min(0f)] private float _tutorialDuration = 4f;
+
+        [Header("Bonus")]
+        [SerializeField] private BonusLevelSettings _bonusLevelSettings;
+        [SerializeField] private RainbowTextGroup _rainbowTextGroup;
+
+        private float _tutorialTimer;
+        private bool _isTutorialCounting;
+
+        public event Action TutorialDismissed;
+        public event Action SettingsClicked;
+
+        private void OnEnable()
         {
-            return;
+            _tutorialDismissButton.onClick.AddListener(OnTutorialDismissed);
+            _settingsButton.onClick.AddListener(OnSettingsClicked);
         }
 
-        _tutorialTimer -= Time.deltaTime;
-
-        if (_tutorialTimer <= 0f)
+        private void OnDisable()
         {
-            _isTutorialCounting = false;
-            OnTutorialDismissed();
+            _tutorialDismissButton.onClick.RemoveListener(OnTutorialDismissed);
+            _settingsButton.onClick.RemoveListener(OnSettingsClicked);
         }
-    }
 
-    public void SetTutorialVisible(bool isVisible)
-    {
-        _tutorialHint.SetActive(isVisible);
-
-        if (isVisible)
+        private void Update()
         {
-            _tutorialTimer = _tutorialDuration;
-            _isTutorialCounting = true;
-        }
-        else
-        {
-            _isTutorialCounting = false;
-        }
-    }
-    
-    public void Show()
-    {
-        gameObject.SetActive(true);
-    }
-
-    public void Hide()
-    {
-        gameObject.SetActive(false);
-    }
-
-    public void SetHealth(int currentHealth, int maxHealth)
-    {
-        for (int i = 0; i < _healthIcons.Length; i++)
-        {
-            Image icon = _healthIcons[i];
-
-            if (icon == null)
+            if (_isTutorialCounting == false)
             {
-                continue;
+                return;
             }
 
-            icon.gameObject.SetActive(i < maxHealth);
+            _tutorialTimer -= Time.deltaTime;
 
-            if (i < maxHealth)
+            if (_tutorialTimer <= 0f)
             {
-                icon.sprite = i < currentHealth ? _fullHeartSprite : _emptyHeartSprite;
+                _isTutorialCounting = false;
+                OnTutorialDismissed();
             }
         }
-    }
 
-    public void SetLevel(int level)
-    {
-        if (_levelText != null)
+        public void SetTutorialVisible(bool isVisible)
         {
-            _levelText.SetKey(LocalizationKeys.Level, level);
+            _tutorialHint.SetActive(isVisible);
+
+            if (isVisible)
+            {
+                _tutorialTimer = _tutorialDuration;
+                _isTutorialCounting = true;
+            }
+            else
+            {
+                _isTutorialCounting = false;
+            }
         }
 
-        bool isBonus = _bonusLevelSettings != null && _bonusLevelSettings.IsBonusLevel(level);
-
-        if (_rainbowTextGroup != null)
+        public void Show()
         {
-            _rainbowTextGroup.SetEnabled(isBonus);
-        }
-    }
-
-    public void SetCoins(int coins)
-    {
-        if (_coinsText == null)
-        {
-            return;
+            gameObject.SetActive(true);
         }
 
-        bool shouldAnimate = _isCoinsInitialized && coins != _previousCoins;
-
-        _coinsText.text = coins.ToString();
-
-        _previousCoins = coins;
-        _isCoinsInitialized = true;
-
-        if (shouldAnimate == false)
+        public void Hide()
         {
-            return;
+            gameObject.SetActive(false);
         }
 
-        Transform target = _coinsText.transform;
-
-        target.DOKill();
-        target.localScale = Vector3.one;
-
-        target.DOPunchScale(Vector3.one * _coinsPunchStrength, _coinsPunchDuration);
-    }
-
-    public void SetProgress(float progress)
-    {
-        if (_progressFill != null)
+        public void SetHealth(int currentHealth, int maxHealth)
         {
-            _progressFill.fillAmount = Mathf.Clamp01(progress);
-        }
-    }
+            for (int i = 0; i < _healthIcons.Length; i++)
+            {
+                Image icon = _healthIcons[i];
 
-    public void SetBallCount(int available, int capacity)
-    {
-        if (_ballsText != null)
+                if (icon == null)
+                {
+                    continue;
+                }
+
+                icon.gameObject.SetActive(i < maxHealth);
+
+                if (i < maxHealth)
+                {
+                    icon.sprite = i < currentHealth ? _fullHeartSprite : _emptyHeartSprite;
+                }
+            }
+        }
+
+        public void SetLevel(int level)
         {
-            _ballsText.text = $"{available}/{capacity}";
-            _ballsText.transform.DOKill();
-            _ballsText.transform.localScale = Vector3.one;
-            _ballsText.transform.DOPunchScale(Vector3.one * _ballCountPunchStrength, _ballCountPunchDuration);
+            if (_levelText != null)
+            {
+                _levelText.SetKey(LocalizationKeys.Level, level);
+            }
+
+            bool isBonus = _bonusLevelSettings != null && _bonusLevelSettings.IsBonusLevel(level);
+
+            if (_rainbowTextGroup != null)
+            {
+                _rainbowTextGroup.SetEnabled(isBonus);
+            }
         }
-    }
 
-    private void OnTutorialDismissed()
-    {
-        SetTutorialVisible(false);
-        TutorialDismissed?.Invoke();
-    }
+        public void SetCoins(int coins)
+        {
+            if (_coinsView != null)
+            {
+                _coinsView.SetText(coins.ToString());
+            }
+        }
 
-    private void OnSettingsClicked()
-    {
-        SettingsClicked?.Invoke();
+        public void SetProgress(float progress)
+        {
+            if (_progressFill != null)
+            {
+                _progressFill.fillAmount = Mathf.Clamp01(progress);
+            }
+        }
+
+        public void SetBallCount(int available, int capacity)
+        {
+            if (_ballsView != null)
+            {
+                _ballsView.SetText($"{available}/{capacity}");
+            }
+        }
+
+        private void OnTutorialDismissed()
+        {
+            SetTutorialVisible(false);
+            TutorialDismissed?.Invoke();
+        }
+
+        private void OnSettingsClicked()
+        {
+            SettingsClicked?.Invoke();
+        }
     }
 }

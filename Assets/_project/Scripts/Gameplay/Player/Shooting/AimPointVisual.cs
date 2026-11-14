@@ -1,28 +1,38 @@
 using UnityEngine;
 
-public class AimPointVisual : MonoBehaviour
+namespace WestRicochet.Gameplay.Player.Shooting
 {
-    [SerializeField] private SpriteRenderer _spriteRenderer;
-
-    [Header("Visual Settings")]
-    [SerializeField, Min(0.01f)] private float _worldSize = 0.6f;
-    [SerializeField, Min(0f)] private float _cameraOffset = 0.05f;
-
-    private void Awake()
+    public class AimPointVisual : MonoBehaviour
     {
-        transform.localScale = Vector3.one * _worldSize;
-        SetVisible(false);
-    }
+        [SerializeField] private SpriteRenderer _spriteRenderer;
 
-    public void UpdateVisual(Vector3 aimPosition, Transform cameraTransform)
-    {
-        transform.position = aimPosition - cameraTransform.forward * _cameraOffset;
-        transform.rotation = cameraTransform.rotation;
-    }
+        [Header("Visual Settings")]
+        [SerializeField, Min(0.01f)] private float _worldSize = 0.6f;
+        [SerializeField, Min(0f)] private float _cameraOffset = 0.05f;
 
-    public void SetVisible(bool isVisible)
-    {
-        _spriteRenderer.enabled = isVisible;
-        enabled = isVisible;
+        private void Awake()
+        {
+            if (_spriteRenderer == null)
+            {
+                Debug.LogError("AimPointVisual: SpriteRenderer is not assigned.", this);
+
+                enabled = false;
+            }
+
+            transform.localScale = Vector3.one * _worldSize;
+            SetVisible(false);
+        }
+
+        public void UpdateVisual(Vector3 aimPosition, Transform cameraTransform)
+        {
+            transform.position = aimPosition - cameraTransform.forward * _cameraOffset;
+            transform.rotation = cameraTransform.rotation;
+        }
+
+        public void SetVisible(bool isVisible)
+        {
+            _spriteRenderer.enabled = isVisible;
+            enabled = isVisible;
+        }
     }
 }

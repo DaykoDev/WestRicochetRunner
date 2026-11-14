@@ -1,5 +1,8 @@
-public enum RunEnterMode
+namespace WestRicochet.StateMachine.States
 {
-    NewRun,
-    Resume
+    public enum RunEnterMode
+    {
+        NewRun,
+        Resume
+    }
 }

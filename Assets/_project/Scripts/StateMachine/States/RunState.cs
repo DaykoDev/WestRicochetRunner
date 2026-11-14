@@ -1,167 +1,187 @@
 using System;
 using UnityEngine;
+using WestRicochet.Gameplay.Level.Generation;
+using WestRicochet.Gameplay.Level.Runtime;
+using WestRicochet.Gameplay.Player;
+using WestRicochet.Gameplay.Player.Damage;
+using WestRicochet.Gameplay.Rewards.Flow;
+using WestRicochet.Gameplay.Run;
+using WestRicochet.Gameplay.Upgrades;
+using WestRicochet.Meta;
 
-public class RunState : IState, IPayloadedState<RunEnterMode>
+namespace WestRicochet.StateMachine.States
 {
-    private readonly PlayerProgress _playerProgress;
-    private readonly Player _player;
-    private readonly PlayerHealth _playerHealth;
-    private readonly LevelGenerator _levelGenerator;
-    private readonly TrackScroller _trackScroller;
-    private readonly UpgradeService _upgradeService;
-    private readonly RunRewardCollector _rewardCollector;
-
-    private RunContext _context;
-    private bool _isRunning;
-
-    public RunState(PlayerProgress playerProgress, Player player, PlayerHealth playerHealth, LevelGenerator levelGenerator, TrackScroller trackScroller, UpgradeService upgradeService, RunRewardCollector rewardCollector)
+    public class RunState : IState, IPayloadedState<RunEnterMode>
     {
-        _playerProgress = playerProgress;
-        _player = player;
-        _playerHealth = playerHealth;
-        _levelGenerator = levelGenerator;
-        _trackScroller = trackScroller;
-        _upgradeService = upgradeService;
-        _rewardCollector = rewardCollector;
-    }
+        private readonly PlayerProgress _playerProgress;
+        private readonly PlayerController _player;
+        private readonly PlayerHealth _playerHealth;
+        private readonly LevelGenerator _levelGenerator;
+        private readonly TrackScroller _trackScroller;
+        private readonly UpgradeService _upgradeService;
+        private readonly RunRewardCollector _rewardCollector;
 
-    public RunContext Context => _context;
-    public bool HasPreparedRun { get; private set; }
+        private RunContext _context;
+        private bool _isRunning;
 
-    public event Action Entered;
-    public event Action Exited;
-    public event Action Won;
-    public event Action Lost;
-
-    public event Action Failed;
-
-    public void Enter()
-    {
-        Enter(RunEnterMode.NewRun);
-    }
-
-    public void Enter(RunEnterMode mode)
-    {
-        if (mode == RunEnterMode.Resume)
+        public RunState(
+            PlayerProgress playerProgress,
+            PlayerController player,
+            PlayerHealth playerHealth,
+            LevelGenerator levelGenerator,
+            TrackScroller trackScroller,
+            UpgradeService upgradeService,
+            RunRewardCollector rewardCollector)
         {
-            ResumeRun();
-            return;
+            _playerProgress = playerProgress;
+            _player = player;
+            _playerHealth = playerHealth;
+            _levelGenerator = levelGenerator;
+            _trackScroller = trackScroller;
+            _upgradeService = upgradeService;
+            _rewardCollector = rewardCollector;
         }
 
-        StartNewRun();
-    }
-    public bool PrepareRun()
-    {
-        if (HasPreparedRun)
+        public event Action Entered;
+        public event Action Exited;
+        public event Action Won;
+        public event Action Lost;
+
+        public event Action Failed;
+
+        public RunContext Context => _context;
+        public bool HasPreparedRun { get; private set; }
+
+        public void Enter()
         {
+            Enter(RunEnterMode.NewRun);
+        }
+
+        public void Enter(RunEnterMode mode)
+        {
+            if (mode == RunEnterMode.Resume)
+            {
+                ResumeRun();
+                return;
+            }
+
+            StartNewRun();
+        }
+        public bool PrepareRun()
+        {
+            if (HasPreparedRun)
+            {
+                return true;
+            }
+
+            Time.timeScale = 1f;
+            _isRunning = false;
+
+            _trackScroller.ResetPosition();
+            _player.ClearRun();
+
+            CreateRunContext();
+
+            _playerHealth.ResetHealth();
+            _player.ResetToStart();
+            _player.ConfigureForLevel(_context.Level);
+            _player.SetRunModifiers(_context.Modifiers);
+
+            _rewardCollector.BeginRun();
+
+            bool isLevelBuilt = _levelGenerator.BuildLevel(_context.Level, _context.Seed, _context.Modifiers);
+
+            if (isLevelBuilt == false)
+            {
+                ClearRun();
+                return false;
+            }
+
+            HasPreparedRun = true;
             return true;
         }
 
-        Time.timeScale = 1f;
-        _isRunning = false;
-
-        _trackScroller.ResetPosition();
-        _player.ClearRun();
-
-        CreateRunContext();
-
-        _playerHealth.ResetHealth();
-        _player.ResetToStart();
-        _player.ConfigureForLevel(_context.Level);
-        _player.SetRunModifiers(_context.Modifiers);
-
-        bool isLevelBuilt = _levelGenerator.BuildLevel(_context.Level, _context.Seed, _context.Modifiers);
-
-        if (isLevelBuilt == false)
-        {
-            ClearRun();
-            return false;
-        }
-
-        HasPreparedRun = true;
-        return true;
-    }
-
-    private void StartNewRun()
-    {
-        Time.timeScale = 1f;
-
-        if (HasPreparedRun == false && PrepareRun() == false)
+        public void Exit()
         {
             _isRunning = false;
-            Failed?.Invoke();
-            return;
+            _trackScroller.StopScrolling();
+            _player.SetControlEnabled(false);
+
+            Exited?.Invoke();
         }
 
-        HasPreparedRun = false;
-        _isRunning = true;
-
-        StartRunSystems();
-        Entered?.Invoke();
-    }
-
-    private void ResumeRun()
-    {
-        Time.timeScale = 1f;
-        _isRunning = true;
-
-        StartRunSystems();
-        Entered?.Invoke();
-    }
-
-    public void Exit()
-    {
-        _isRunning = false;
-        _trackScroller.StopScrolling();
-        _player.SetControlEnabled(false);
-
-        Exited?.Invoke();
-    }
-
-    public void RequestWin()
-    {
-        if (_isRunning == false)
+        public void RequestWin()
         {
-            return;
+            if (_isRunning == false)
+            {
+                return;
+            }
+
+            Won?.Invoke();
         }
 
-        Won?.Invoke();
-    }
-
-    public void RequestLose()
-    {
-        if (_isRunning == false)
+        public void RequestLose()
         {
-            return;
+            if (_isRunning == false)
+            {
+                return;
+            }
+
+            Lost?.Invoke();
         }
 
-        Lost?.Invoke();
-    }
+        public void ClearRun()
+        {
+            _isRunning = false;
+            HasPreparedRun = false;
 
-    public void ClearRun()
-    {
-        _isRunning = false;
-        HasPreparedRun = false;
+            _trackScroller.StopScrolling();
+            _player.ClearRun();
+            _rewardCollector.ClearPickups();
+            _levelGenerator.ClearLevel();
+            _trackScroller.ResetPosition();
+            _context = null;
+        }
 
-        _trackScroller.StopScrolling();
-        _player.ClearRun();
-        _rewardCollector.ClearPickups();
-        _levelGenerator.ClearLevel();
-        _trackScroller.ResetPosition();
-        _context = null;
-    }
+        private void StartNewRun()
+        {
+            Time.timeScale = 1f;
 
-    private void StartRunSystems()
-    {
-        _trackScroller.StartScrolling(_player.ForwardSpeed);
-        _player.SetControlEnabled(true);
-    }
+            if (HasPreparedRun == false && PrepareRun() == false)
+            {
+                _isRunning = false;
+                Failed?.Invoke();
+                return;
+            }
 
-    private void CreateRunContext()
-    {
-        RunModifiers modifiers = new RunModifiers();
-        _upgradeService.ApplyPermanentUpgrades(modifiers);
+            HasPreparedRun = false;
+            _isRunning = true;
 
-        _context = new RunContext(_playerProgress.CurrentLevel, _playerProgress.CurrentLevelSeed, modifiers);
+            StartRunSystems();
+            Entered?.Invoke();
+        }
+
+        private void ResumeRun()
+        {
+            Time.timeScale = 1f;
+            _isRunning = true;
+
+            StartRunSystems();
+            Entered?.Invoke();
+        }
+
+        private void StartRunSystems()
+        {
+            _trackScroller.StartScrolling(_player.ForwardSpeed);
+            _player.SetControlEnabled(true);
+        }
+
+        private void CreateRunContext()
+        {
+            RunModifiers modifiers = new RunModifiers();
+            _upgradeService.ApplyPermanentUpgrades(modifiers);
+
+            _context = new RunContext(_playerProgress.CurrentLevel, _playerProgress.CurrentLevelSeed, modifiers);
+        }
     }
 }

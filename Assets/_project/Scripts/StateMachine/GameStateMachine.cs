@@ -1,59 +1,63 @@
 using System;
 using System.Collections.Generic;
 
-public class GameStateMachine
+namespace WestRicochet.StateMachine
 {
-    private readonly Dictionary<Type, IState> _states;
-
-    private IState _currentState;
-
-    public GameStateMachine(IEnumerable<IState> states)
+    public class GameStateMachine
     {
-        _states = new Dictionary<Type, IState>();
+        private readonly Dictionary<Type, IState> _states;
 
-        foreach (IState state in states)
+        private IState _currentState;
+
+        public GameStateMachine(IEnumerable<IState> states)
         {
-            _states.Add(state.GetType(), state);
-        }
-    }
+            _states = new Dictionary<Type, IState>();
 
-    public void Enter<TState>() where TState : class, IState
-    {
-        Type stateType = typeof(TState);
-
-        if (_currentState is TState)
-        {
-            return;
+            foreach (IState state in states)
+            {
+                _states.Add(state.GetType(), state);
+            }
         }
 
-        if (_states.TryGetValue(stateType, out IState nextState) == false)
+        public void Enter<TState>() where TState : class, IState
         {
-            throw new InvalidOperationException($"State {stateType.Name} is not registered.");
+            if (TryChangeState(out TState state))
+            {
+                state.Enter();
+            }
         }
 
-        _currentState?.Exit();
-
-        _currentState = nextState;
-        _currentState.Enter();
-    }
-
-    public void Enter<TState, TPayload>(TPayload payload) where TState : class, IPayloadedState<TPayload>
-    {
-        Type stateType = typeof(TState);
-
-        if (_currentState is TState)
+        public void Enter<TState, TPayload>(TPayload payload) where TState : class, IPayloadedState<TPayload>
         {
-            return;
+            if (TryChangeState(out TState state))
+            {
+                state.Enter(payload);
+            }
         }
 
-        if (_states.TryGetValue(stateType, out IState nextState) == false)
+        private bool TryChangeState<TState>(out TState nextState) where TState : class, IState
         {
-            throw new InvalidOperationException($"State {stateType.Name} is not registered.");
+            nextState = null;
+
+            Type stateType = typeof(TState);
+
+            if (_currentState is TState)
+            {
+                return false;
+            }
+
+            if (_states.TryGetValue(stateType, out IState registeredState) == false)
+            {
+                throw new InvalidOperationException($"State {stateType.Name} is not registered.");
+            }
+
+            nextState = (TState)registeredState;
+
+            _currentState?.Exit();
+
+            _currentState = nextState;
+
+            return true;
         }
-
-        _currentState?.Exit();
-
-        _currentState = nextState;
-        ((IPayloadedState<TPayload>)_currentState).Enter(payload);
     }
 }

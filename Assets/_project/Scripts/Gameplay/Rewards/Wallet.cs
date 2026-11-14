@@ -1,68 +1,71 @@
 using System;
 using UnityEngine;
 
-public class Wallet : MonoBehaviour
+namespace WestRicochet.Gameplay.Rewards
 {
-    [SerializeField, Min(0)] private int _initialBalance;
-
-    private bool _isInitialized;
-
-    public int Balance { get; private set; }
-
-    public event Action<int> BalanceChanged;
-
-    public void Initialize(int? savedBalance = null)
+    public class Wallet : MonoBehaviour
     {
-        if (_isInitialized)
+        [SerializeField, Min(0)] private int _initialBalance;
+
+        private bool _isInitialized;
+
+        public event Action<int> BalanceChanged;
+
+        public int Balance { get; private set; }
+
+        public void Initialize(int? savedBalance = null)
         {
-            return;
+            if (_isInitialized)
+            {
+                return;
+            }
+
+            Balance = Math.Max(0, savedBalance ?? _initialBalance);
+            _isInitialized = true;
+            BalanceChanged?.Invoke(Balance);
         }
 
-        Balance = Math.Max(0, savedBalance ?? _initialBalance);
-        _isInitialized = true;
-        BalanceChanged?.Invoke(Balance);
-    }
-
-    public void Add(int amount)
-    {
-        if (amount <= 0)
+        public void Add(int amount)
         {
-            return;
+            if (amount <= 0)
+            {
+                return;
+            }
+
+            Balance = (int)Math.Min((long)Balance + amount, int.MaxValue);
+            BalanceChanged?.Invoke(Balance);
         }
 
-        Balance = (int)Math.Min((long)Balance + amount, int.MaxValue);
-        BalanceChanged?.Invoke(Balance);
-    }
-
-    public void Remove(int amount)
-    {
-        if (amount <= 0)
+        public void Remove(int amount)
         {
-            return;
+            if (amount <= 0)
+            {
+                return;
+            }
+
+            Balance = Math.Max(0, Balance - amount);
+            BalanceChanged?.Invoke(Balance);
         }
 
-        Balance = Math.Max(0, Balance - amount);
-        BalanceChanged?.Invoke(Balance);
-    }
-
-    public bool TrySpend(int amount)
-    {
-        if (amount <= 0 || Balance < amount)
+        public bool TrySpend(int amount)
         {
-            return false;
+            if (amount <= 0 || Balance < amount)
+            {
+                return false;
+            }
+
+            Balance -= amount;
+            BalanceChanged?.Invoke(Balance);
+
+            return true;
         }
 
-        Balance -= amount;
-        BalanceChanged?.Invoke(Balance);
+        public void ResetBalance()
+        {
+            Balance = Math.Max(0, _initialBalance);
+            _isInitialized = true;
 
-        return true;
-    }
-
-    public void ResetBalance()
-    {
-        Balance = Math.Max(0, _initialBalance);
-        _isInitialized = true;
-
-        BalanceChanged?.Invoke(Balance);
+            BalanceChanged?.Invoke(Balance);
+        }
     }
 }

@@ -1,59 +1,62 @@
 using TMPro;
 using UnityEngine;
+using WestRicochet.Gameplay.Obstacles.Core;
 
-public class ObstacleHealthView : MonoBehaviour
+namespace WestRicochet.Gameplay.Obstacles
 {
-    [Header("References")]
-    [SerializeField] private Obstacle _obstacle;
-    [SerializeField] private TMP_Text _healthText;
-
-    [Header("Display")]
-    [SerializeField] private Vector3 _localOffset = new Vector3(0f, 1.5f, 0f);
-
-    private void Awake()
+    public class ObstacleHealthView : MonoBehaviour
     {
-        if (_obstacle == null)
+        [Header("References")]
+        [SerializeField] private Obstacle _obstacle;
+        [SerializeField] private TMP_Text _healthText;
+
+        [Header("Display")]
+        [SerializeField] private Vector3 _localOffset = new(0f, 1.5f, 0f);
+
+        private void Awake()
         {
-            _obstacle = GetComponentInParent<Obstacle>();
+            if (_obstacle == null)
+            {
+                _obstacle = GetComponentInParent<Obstacle>();
+            }
+
+            if (_obstacle == null || _healthText == null)
+            {
+                Debug.LogError("ObstacleHealthView references are missing.", this);
+                enabled = false;
+                return;
+            }
+
+            _healthText.transform.localPosition = _localOffset;
         }
 
-
-        if (_obstacle == null || _healthText == null)
+        private void OnEnable()
         {
-            Debug.LogError("ObstacleHealthView references are missing.", this);
-            enabled = false;
-            return;
+            if (_obstacle == null || _healthText == null)
+            {
+                return;
+            }
+
+            _obstacle.HealthChanged += OnHealthChanged;
+            Refresh();
         }
 
-        _healthText.transform.localPosition = _localOffset;
-    }
-
-    private void OnEnable()
-    {
-        if (_obstacle == null || _healthText == null)
+        private void OnDisable()
         {
-            return;
+            if (_obstacle != null)
+            {
+                _obstacle.HealthChanged -= OnHealthChanged;
+            }
         }
 
-        _obstacle.HealthChanged += OnHealthChanged;
-        Refresh();
-    }
-
-    private void OnDisable()
-    {
-        if (_obstacle != null)
+        private void OnHealthChanged(int currentHealth, int maxHealth)
         {
-            _obstacle.HealthChanged -= OnHealthChanged;
+            Refresh();
         }
-    }
 
-    private void OnHealthChanged(int currentHealth, int maxHealth)
-    {
-        Refresh();
-    }
-
-    private void Refresh()
-    {
-        _healthText.text = _obstacle.CurrentHealth.ToString();
+        private void Refresh()
+        {
+            _healthText.text = _obstacle.CurrentHealth.ToString();
+        }
     }
 }

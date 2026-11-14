@@ -1,15 +1,18 @@
 using System;
 
-public class BootstrapState : IState
+namespace WestRicochet.StateMachine.States
 {
-    public event Action Completed;
-
-    public void Enter()
+    public class BootstrapState : IState
     {
-        Completed?.Invoke();
-    }
+        public event Action Completed;
 
-    public void Exit()
-    {
+        public void Enter()
+        {
+            Completed?.Invoke();
+        }
+
+        public void Exit()
+        {
+        }
     }
 }

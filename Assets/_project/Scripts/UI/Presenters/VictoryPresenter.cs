@@ -1,81 +1,91 @@
 using System;
+using WestRicochet.Gameplay.Rewards;
+using WestRicochet.Gameplay.Rewards.Flow;
+using WestRicochet.UI.Screens;
 
-public class VictoryPresenter : IDisposable
+namespace WestRicochet.UI.Presenters
 {
-    private readonly VictoryScreen _screen;
-    private readonly RunRewardCollector _rewardCollector;
-    private readonly RewardedMultiplierFlow _multiplierFlow;
-    private readonly Wallet _wallet;
-
-    public VictoryPresenter(VictoryScreen screen, RunRewardCollector rewardCollector, RewardedMultiplierFlow rewardedMultiplierFlow, Wallet wallet)
+    public class VictoryPresenter : IDisposable
     {
-        _screen = screen;
-        _rewardCollector = rewardCollector;
-        _multiplierFlow = rewardedMultiplierFlow;
-        _wallet = wallet;
+        private readonly VictoryScreen _screen;
+        private readonly RunRewardCollector _rewardCollector;
+        private readonly RewardedMultiplierFlow _multiplierFlow;
+        private readonly Wallet _wallet;
 
-        _screen.MainMenuClicked += OnMainMenuClicked;
-        _screen.MultiplyClicked += OnMultiplyClicked;
-        _multiplierFlow.BonusGranted += OnBonusGranted;
+        public VictoryPresenter(
+            VictoryScreen screen,
+            RunRewardCollector rewardCollector,
+            RewardedMultiplierFlow rewardedMultiplierFlow,
+            Wallet wallet)
+        {
+            _screen = screen;
+            _rewardCollector = rewardCollector;
+            _multiplierFlow = rewardedMultiplierFlow;
+            _wallet = wallet;
 
-        _multiplierFlow.AvailabilityChanged += OnMultiplierAvailabilityChanged;
+            _screen.MainMenuClicked += OnMainMenuClicked;
+            _screen.MultiplyClicked += OnMultiplyClicked;
+            _multiplierFlow.BonusGranted += OnBonusGranted;
 
-        _wallet.BalanceChanged += OnWalletBalanceChanged;
-    }
+            _multiplierFlow.AvailabilityChanged += OnMultiplierAvailabilityChanged;
 
-    public event Action MainMenuRequested;
+            _wallet.BalanceChanged += OnWalletBalanceChanged;
+        }
 
-    public void HandleStateEntered()
-    {
-        _screen.SetCollectedCoins(_rewardCollector.CollectedThisRun);
-        _screen.SetWalletCoins(_wallet.Balance);
+        public event Action MainMenuRequested;
 
-        _multiplierFlow.Reset();
+        public void HandleStateEntered()
+        {
+            _screen.SetCollectedCoins(_rewardCollector.CollectedThisRun);
+            _screen.SetWalletCoins(_wallet.Balance);
 
-        _screen.Show();
-        OnMultiplierAvailabilityChanged();
-    }
+            _multiplierFlow.Reset();
 
-    public void HandleStateExited()
-    {
-        _multiplierFlow.Cancel();
-        _screen.Hide();
-    }
+            _screen.Show();
+            OnMultiplierAvailabilityChanged();
+        }
 
-    public void Dispose()
-    {
-        _screen.MainMenuClicked -= OnMainMenuClicked;
-        _screen.MultiplyClicked -= OnMultiplyClicked;
-        _multiplierFlow.BonusGranted -= OnBonusGranted;
+        public void HandleStateExited()
+        {
+            _multiplierFlow.Cancel();
+            _screen.Hide();
+        }
 
-        _multiplierFlow.AvailabilityChanged -= OnMultiplierAvailabilityChanged;
+        public void Dispose()
+        {
+            _screen.MainMenuClicked -= OnMainMenuClicked;
+            _screen.MultiplyClicked -= OnMultiplyClicked;
+            _multiplierFlow.BonusGranted -= OnBonusGranted;
 
-        _wallet.BalanceChanged -= OnWalletBalanceChanged;
-    }
+            _multiplierFlow.AvailabilityChanged -= OnMultiplierAvailabilityChanged;
 
-    private void OnMainMenuClicked()
-    {
-        MainMenuRequested?.Invoke();
-    }
+            _wallet.BalanceChanged -= OnWalletBalanceChanged;
+        }
 
-    private void OnMultiplyClicked()
-    {
-        _multiplierFlow.Request();
-    }
+        private void OnMainMenuClicked()
+        {
+            MainMenuRequested?.Invoke();
+        }
 
-    private void OnBonusGranted(int bonus)
-    {
-        _screen.SetCollectedCoins(_rewardCollector.CollectedThisRun + bonus);
-        _screen.SetMultiplyAvailable(false);
-    }
+        private void OnMultiplyClicked()
+        {
+            _multiplierFlow.Request();
+        }
 
-    private void OnMultiplierAvailabilityChanged()
-    {
-        _screen.SetMultiplyAvailable(_multiplierFlow.CanApply);
-    }
+        private void OnBonusGranted(int bonus)
+        {
+            _screen.SetCollectedCoins(_rewardCollector.CollectedThisRun + bonus);
+            _screen.SetMultiplyAvailable(false);
+        }
 
-    private void OnWalletBalanceChanged(int balance)
-    {
-        _screen.SetWalletCoins(balance);
+        private void OnMultiplierAvailabilityChanged()
+        {
+            _screen.SetMultiplyAvailable(_multiplierFlow.CanApply);
+        }
+
+        private void OnWalletBalanceChanged(int balance)
+        {
+            _screen.SetWalletCoins(balance);
+        }
     }
 }

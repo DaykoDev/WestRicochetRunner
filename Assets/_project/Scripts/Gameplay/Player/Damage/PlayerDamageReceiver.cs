@@ -1,44 +1,48 @@
 using UnityEngine;
+using WestRicochet.Gameplay.Obstacles.Core;
 
-public class PlayerDamageReceiver : MonoBehaviour
+namespace WestRicochet.Gameplay.Player.Damage
 {
-    [Header("References")]
-    [SerializeField] private PlayerHealth _playerHealth;
-
-    [Header("Damage Settings")]
-    [SerializeField, Min(0f)] private float _invulnerabilityDuration = 1f;
-
-    private float _nextDamageTime;
-
-    private void Awake()
+    public class PlayerDamageReceiver : MonoBehaviour
     {
-        if (_playerHealth == null)
+        [Header("References")]
+        [SerializeField] private PlayerHealth _playerHealth;
+
+        [Header("Damage Settings")]
+        [SerializeField, Min(0f)] private float _invulnerabilityDuration = 1f;
+
+        private float _nextDamageTime;
+
+        private void Awake()
         {
-            _playerHealth = GetComponentInParent<PlayerHealth>();
+            if (_playerHealth == null)
+            {
+                _playerHealth = GetComponentInParent<PlayerHealth>();
+            }
+
+            if (_playerHealth == null)
+            {
+                Debug.LogError("PlayerHealth is not assigned.", this);
+                enabled = false;
+            }
         }
 
-        if (_playerHealth == null)
+        private void OnTriggerEnter(Collider other)
         {
-            Debug.LogError("PlayerHealth is not assigned.", this);
-            enabled = false;
+            if (_playerHealth.IsDead || Time.time < _nextDamageTime)
+            {
+                return;
+            }
+
+            Obstacle obstacle = other.GetComponentInParent<Obstacle>();
+
+            if (obstacle == null || obstacle.IsDestroyed)
+            {
+                return;
+            }
+
+            _playerHealth.TakeDamage(obstacle.ContactDamage);
+            _nextDamageTime = Time.time + _invulnerabilityDuration;
         }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (_playerHealth.IsDead || Time.time < _nextDamageTime)
-        {
-            return;
-        }
-
-        Obstacle obstacle = other.GetComponentInParent<Obstacle>();
-
-        if (obstacle == null || obstacle.IsDestroyed)
-        {
-            return;
-        }
-
-        _playerHealth.TakeDamage(obstacle.ContactDamage);
-        _nextDamageTime = Time.time + _invulnerabilityDuration;
     }
 }

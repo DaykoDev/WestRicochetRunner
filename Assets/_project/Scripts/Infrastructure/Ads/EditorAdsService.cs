@@ -1,19 +1,19 @@
 using System;
-using UnityEngine;
 
-public class EditorAdsService : IAdsService
+namespace WestRicochet.Infrastructure.Ads
 {
-    public bool IsBusy => false;
-
-    public void ShowInterstitial(Action onClosed, Action onError)
+    public class EditorAdsService : IAdsService
     {
-        Debug.Log("[EditorAdsService] Interstitial shown and closed (mock)");
-        onClosed?.Invoke();
-    }
+        public bool IsBusy => false;
 
-    public void ShowRewarded(string placement, Action onRewarded, Action onError)
-    {
-        Debug.Log($"[EditorAdsService] Rewarded granted (mock): {placement}");
-        onRewarded?.Invoke();
+        public void ShowInterstitial(Action onClosed, Action onError)
+        {
+            onClosed?.Invoke();
+        }
+
+        public void ShowRewarded(string placement, Action onRewarded, Action onError)
+        {
+            onRewarded?.Invoke();
+        }
     }
 }

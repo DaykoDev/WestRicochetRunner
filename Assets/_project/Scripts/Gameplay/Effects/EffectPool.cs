@@ -1,32 +1,36 @@
 using UnityEngine;
+using WestRicochet.Infrastructure.Pooling;
 
-public class EffectPool : MonoBehaviour
+namespace WestRicochet.Gameplay.Effects
 {
-    [Header("Pool Settings")]
-    [SerializeField] private PooledEffect _effectPrefab;
-    [SerializeField, Min(1)] private int _initialSize = 8;
-    [SerializeField, Min(1)] private int _maxSize = 30;
-
-    private ComponentPool<PooledEffect> _pool;
-
-    private void Awake()
+    public class EffectPool : MonoBehaviour
     {
-        _pool = new ComponentPool<PooledEffect>(_effectPrefab, transform, _initialSize, _maxSize, OnEffectCreated);
-        _pool.Prewarm(_initialSize);
-    }
+        [Header("Pool Settings")]
+        [SerializeField] private PooledEffect _effectPrefab;
+        [SerializeField, Min(1)] private int _initialSize = 8;
+        [SerializeField, Min(1)] private int _maxSize = 30;
 
-    public PooledEffect Get()
-    {
-        return _pool.Get();
-    }
+        private ComponentPool<PooledEffect> _pool;
 
-    public void Release(PooledEffect effect)
-    {
-        _pool?.Release(effect);
-    }
+        private void Awake()
+        {
+            _pool = new ComponentPool<PooledEffect>(_effectPrefab, transform, _initialSize, _maxSize, OnEffectCreated);
+            _pool.Prewarm(_initialSize);
+        }
 
-    private void OnEffectCreated(PooledEffect effect)
-    {
-        effect.SetPool(this);
+        public PooledEffect Get()
+        {
+            return _pool.Get();
+        }
+
+        public void Release(PooledEffect effect)
+        {
+            _pool?.Release(effect);
+        }
+
+        private void OnEffectCreated(PooledEffect effect)
+        {
+            effect.SetPool(this);
+        }
     }
 }

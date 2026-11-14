@@ -1,34 +1,38 @@
 using UnityEngine;
+using WestRicochet.Gameplay.Effects;
 
-public sealed class BallReturnFeedback : MonoBehaviour
+namespace WestRicochet.Gameplay.Balls.Feedback
 {
-    [SerializeField] private GameObject _visualRoot;
-
-    private EffectPool _effectPool;
-
-    public void SetEffectPool(EffectPool effectPool)
+    public sealed class BallReturnFeedback : MonoBehaviour
     {
-        _effectPool = effectPool;
-    }
+        [SerializeField] private GameObject _visualRoot;
 
-    public void Restore()
-    {
-        if (_visualRoot != null)
+        private EffectPool _effectPool;
+
+        public void SetEffectPool(EffectPool effectPool)
         {
-            _visualRoot.SetActive(true);
-        }
-    }
-
-    public void Play(Vector3 position, bool playEffect)
-    {
-        if (_visualRoot != null)
-        {
-            _visualRoot.SetActive(false);
+            _effectPool = effectPool;
         }
 
-        if (playEffect && _effectPool != null)
+        public void Restore()
         {
-            _effectPool.Get().PlayAt(position);
+            if (_visualRoot != null)
+            {
+                _visualRoot.SetActive(true);
+            }
+        }
+
+        public void Play(Vector3 position, bool playEffect)
+        {
+            if (_visualRoot != null)
+            {
+                _visualRoot.SetActive(false);
+            }
+
+            if (playEffect && _effectPool != null)
+            {
+                _effectPool.Get().PlayAt(position);
+            }
         }
     }
 }

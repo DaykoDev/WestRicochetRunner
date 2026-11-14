@@ -1,4 +1,7 @@
-public interface IPayloadedState<TPayload> : IState
+namespace WestRicochet.StateMachine
 {
-    void Enter(TPayload payload);
+    public interface IPayloadedState<TPayload> : IState
+    {
+        void Enter(TPayload payload);
+    }
 }

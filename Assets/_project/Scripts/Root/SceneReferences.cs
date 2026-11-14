@@ -2,99 +2,123 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using WestRicochet.Gameplay.Balls.Shooting;
+using WestRicochet.Gameplay.Level.Generation;
+using WestRicochet.Gameplay.Level.Runtime;
+using WestRicochet.Gameplay.Obstacles;
+using WestRicochet.Gameplay.Obstacles.Spawning;
+using WestRicochet.Gameplay.Player;
+using WestRicochet.Gameplay.Player.Damage;
+using WestRicochet.Gameplay.Rewards;
+using WestRicochet.Gameplay.Rewards.Flow;
+using WestRicochet.Infrastructure.Ads;
+using WestRicochet.Meta;
+using WestRicochet.UI.Screens;
 
-public class SceneReferences : MonoBehaviour
+namespace WestRicochet.Root
 {
-    [Header("UI")]
-    [SerializeField] private MainMenuScreen _mainMenuScreen;
-    [SerializeField] private RunScreen _runScreen;
-    [SerializeField] private VictoryScreen _victoryScreen;
-    [SerializeField] private DefeatScreen _defeatScreen;
-    [SerializeField] private SettingsScreen _settingsScreen;
-    [SerializeField] private LeaderboardScreen _leaderboardScreen;
-
-    [Header("Player")]
-    [SerializeField] private Player _player;
-    [SerializeField] private PlayerHealth _playerHealth;
-
-    [Header("Gameplay")]
-    [SerializeField] private LevelGenerator _levelGenerator;
-    [SerializeField] private TrackScroller _trackScroller;
-    [SerializeField] private BallQueue _ballQueue;
-    [SerializeField] private Wallet _wallet;
-    [SerializeField] private PermanentUpgradeSettings _permanentUpgradeSettings;
-    [SerializeField] private RunRewardCollector _runRewardCollector;
-    [SerializeField] private ObstacleFactory _obstacleFactory;
-
-    [Header("Services")]
-    [SerializeField] private AdsConfig _adsConfig;
-
-    [SerializeField] private AudioMixer _audioMixer;
-
-    public MainMenuScreen MainMenuScreen => _mainMenuScreen;
-    public RunScreen RunScreen => _runScreen;
-    public VictoryScreen VictoryScreen => _victoryScreen;
-    public DefeatScreen DefeatScreen => _defeatScreen;
-    public SettingsScreen SettingsScreen => _settingsScreen;
-    public LeaderboardScreen LeaderboardScreen => _leaderboardScreen;
-
-    public Player Player => _player;
-    public PlayerHealth PlayerHealth => _playerHealth;
-
-    public LevelGenerator LevelGenerator => _levelGenerator;
-    public TrackScroller TrackScroller => _trackScroller;
-    public BallQueue BallQueue => _ballQueue;
-    public Wallet Wallet => _wallet;
-    public PermanentUpgradeSettings PermanentUpgradeSettings => _permanentUpgradeSettings;
-    public RunRewardCollector RunRewardCollector => _runRewardCollector;
-    public ObstacleFactory ObstacleFactory => _obstacleFactory;
-
-    public AdsConfig AdsConfig => _adsConfig;
-
-    public AudioMixer AudioMixer => _audioMixer;
-
-    public bool TryValidate(out string errorMessage)
+    public class SceneReferences : MonoBehaviour
     {
-        List<string> errors = new List<string>();
+        [Header("UI")]
+        [SerializeField] private MainMenuScreen _mainMenuScreen;
+        [SerializeField] private RunScreen _runScreen;
+        [SerializeField] private VictoryScreen _victoryScreen;
+        [SerializeField] private DefeatScreen _defeatScreen;
+        [SerializeField] private SettingsScreen _settingsScreen;
+        [SerializeField] private LeaderboardScreen _leaderboardScreen;
 
-        ValidateReference(_mainMenuScreen, nameof(_mainMenuScreen), errors);
-        ValidateReference(_runScreen, nameof(_runScreen), errors);
-        ValidateReference(_victoryScreen, nameof(_victoryScreen), errors);
-        ValidateReference(_defeatScreen, nameof(_defeatScreen), errors);
-        ValidateReference(_settingsScreen, nameof(_settingsScreen), errors);
-        ValidateReference(_leaderboardScreen, nameof(_leaderboardScreen), errors);
+        [Header("Player")]
+        [SerializeField] private PlayerController _player;
+        [SerializeField] private PlayerHealth _playerHealth;
 
-        ValidateReference(_player, nameof(_player), errors);
-        ValidateReference(_playerHealth, nameof(_playerHealth), errors);
+        [Header("Gameplay")]
+        [SerializeField] private LevelGenerator _levelGenerator;
+        [SerializeField] private TrackScroller _trackScroller;
+        [SerializeField] private BallQueue _ballQueue;
+        [SerializeField] private Wallet _wallet;
+        [SerializeField] private PermanentUpgradeSettings _permanentUpgradeSettings;
+        [SerializeField] private LevelEconomySettings _levelEconomySettings;
+        [SerializeField] private RunRewardCollector _runRewardCollector;
+        [SerializeField] private ObstacleFactory _obstacleFactory;
+        [SerializeField] private ObstacleAreaReleaser _obstacleAreaReleaser;
 
-        ValidateReference(_levelGenerator, nameof(_levelGenerator), errors);
-        ValidateReference(_trackScroller, nameof(_trackScroller), errors);
-        ValidateReference(_ballQueue, nameof(_ballQueue), errors);
-        ValidateReference(_wallet, nameof(_wallet), errors);
-        ValidateReference(_permanentUpgradeSettings, nameof(_permanentUpgradeSettings), errors);
-        ValidateReference(_runRewardCollector, nameof(_runRewardCollector), errors);
-        ValidateReference(_obstacleFactory, nameof(_obstacleFactory), errors);
+        [Header("Services")]
+        [SerializeField] private AdsConfig _adsConfig;
 
-        ValidateReference(_adsConfig, nameof(_adsConfig), errors);
+        [SerializeField] private AudioMixer _audioMixer;
 
-        ValidateReference(_audioMixer, nameof(_audioMixer), errors);
+        public MainMenuScreen MainMenuScreen => _mainMenuScreen;
+        public RunScreen RunScreen => _runScreen;
+        public VictoryScreen VictoryScreen => _victoryScreen;
+        public DefeatScreen DefeatScreen => _defeatScreen;
+        public SettingsScreen SettingsScreen => _settingsScreen;
+        public LeaderboardScreen LeaderboardScreen => _leaderboardScreen;
 
-        if (errors.Count == 0)
+        public PlayerController Player => _player;
+        public PlayerHealth PlayerHealth => _playerHealth;
+
+        public LevelGenerator LevelGenerator => _levelGenerator;
+        public TrackScroller TrackScroller => _trackScroller;
+        public BallQueue BallQueue => _ballQueue;
+        public Wallet Wallet => _wallet;
+        public PermanentUpgradeSettings PermanentUpgradeSettings => _permanentUpgradeSettings;
+        public LevelEconomySettings LevelEconomySettings => _levelEconomySettings;
+        public RunRewardCollector RunRewardCollector => _runRewardCollector;
+        public ObstacleFactory ObstacleFactory => _obstacleFactory;
+        public ObstacleAreaReleaser ObstacleAreaReleaser => _obstacleAreaReleaser;
+
+        public AdsConfig AdsConfig => _adsConfig;
+
+        public AudioMixer AudioMixer => _audioMixer;
+
+        public bool TryValidate(out string errorMessage)
         {
-            errorMessage = string.Empty;
-            return true;
+            List<string> errors = new List<string>();
+
+            ValidateReference(_mainMenuScreen, nameof(_mainMenuScreen), errors);
+            ValidateReference(_runScreen, nameof(_runScreen), errors);
+            ValidateReference(_victoryScreen, nameof(_victoryScreen), errors);
+            ValidateReference(_defeatScreen, nameof(_defeatScreen), errors);
+            ValidateReference(_settingsScreen, nameof(_settingsScreen), errors);
+            ValidateReference(_leaderboardScreen, nameof(_leaderboardScreen), errors);
+
+            ValidateReference(_player, nameof(_player), errors);
+            ValidateReference(_playerHealth, nameof(_playerHealth), errors);
+
+            ValidateReference(_levelGenerator, nameof(_levelGenerator), errors);
+            ValidateReference(_trackScroller, nameof(_trackScroller), errors);
+            ValidateReference(_ballQueue, nameof(_ballQueue), errors);
+            ValidateReference(_wallet, nameof(_wallet), errors);
+            ValidateReference(_permanentUpgradeSettings, nameof(_permanentUpgradeSettings), errors);
+            ValidateReference(_levelEconomySettings, nameof(_levelEconomySettings), errors);
+            ValidateReference(_runRewardCollector, nameof(_runRewardCollector), errors);
+            ValidateReference(_obstacleFactory, nameof(_obstacleFactory), errors);
+            ValidateReference(_obstacleAreaReleaser, nameof(_obstacleAreaReleaser), errors);
+
+            ValidateReference(_adsConfig, nameof(_adsConfig), errors);
+
+            ValidateReference(_audioMixer, nameof(_audioMixer), errors);
+
+            if (errors.Count == 0)
+            {
+                errorMessage = string.Empty;
+                return true;
+            }
+
+            errorMessage = "SceneReferences has invalid configuration:" +
+                Environment.NewLine +
+                "- " +
+                string.Join(Environment.NewLine + "- ", errors);
+
+            return false;
         }
 
-        errorMessage = "SceneReferences has invalid configuration:" + Environment.NewLine + "- " + string.Join(Environment.NewLine + "- ", errors);
-
-        return false;
-    }
-
-    private static void ValidateReference(UnityEngine.Object reference, string referenceName, List<string> errors)
-    {
-        if (reference == null)
+        private static void ValidateReference(UnityEngine.Object reference, string referenceName, List<string> errors)
         {
-            errors.Add($"{referenceName} is not assigned.");
+            if (reference == null)
+            {
+                errors.Add($"{referenceName} is not assigned.");
+            }
         }
     }
 }

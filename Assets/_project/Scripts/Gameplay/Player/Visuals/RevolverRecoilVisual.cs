@@ -1,62 +1,66 @@
 using DG.Tweening;
 using UnityEngine;
+using WestRicochet.Gameplay.Balls.Shooting;
 
-public class RevolverRecoilVisual : MonoBehaviour
+namespace WestRicochet.Gameplay.Player.Visuals
 {
-    [SerializeField] private BallLauncher _ballLauncher;
-    [SerializeField] private Transform _recoilRoot;
-    [SerializeField, Range(0, 1)] private int _revolverIndex;
-
-    [Header("Recoil")]
-    [SerializeField, Min(0f)] private float _recoilDistance = 0.08f;
-    [SerializeField, Min(0f)] private float _recoilAngle = 6f;
-    [SerializeField, Min(0.01f)] private float _recoilDuration = 0.12f;
-
-    private void Awake()
+    public class RevolverRecoilVisual : MonoBehaviour
     {
-        if (_ballLauncher == null)
+        [SerializeField] private BallLauncher _ballLauncher;
+        [SerializeField] private Transform _recoilRoot;
+        [SerializeField, Range(0, 1)] private int _revolverIndex;
+
+        [Header("Recoil")]
+        [SerializeField, Min(0f)] private float _recoilDistance = 0.08f;
+        [SerializeField, Min(0f)] private float _recoilAngle = 6f;
+        [SerializeField, Min(0.01f)] private float _recoilDuration = 0.12f;
+
+        private void Awake()
         {
-            Debug.LogError("BallLauncher is not assigned.", this);
+            if (_ballLauncher == null)
+            {
+                Debug.LogError("BallLauncher is not assigned.", this);
+            }
+
+            if (_recoilRoot == null)
+            {
+                Debug.LogError("Recoil root is not assigned.", this);
+            }
         }
 
-        if (_recoilRoot == null)
+        private void OnEnable()
         {
-            Debug.LogError("Recoil root is not assigned.", this);
-        }
-    }
-
-    private void OnEnable()
-    {
-        if (_ballLauncher != null)
-        {
-            _ballLauncher.Fired += OnFired;
-        }
-    }
-
-    private void OnDisable()
-    {
-        if (_ballLauncher != null)
-        {
-            _ballLauncher.Fired -= OnFired;
+            if (_ballLauncher != null)
+            {
+                _ballLauncher.Fired += OnFired;
+            }
         }
 
-        if (_recoilRoot != null)
+        private void OnDisable()
         {
-            _recoilRoot.DOKill();
-        }
-    }
+            if (_ballLauncher != null)
+            {
+                _ballLauncher.Fired -= OnFired;
+            }
 
-    private void OnFired(int revolverIndex)
-    {
-        if (revolverIndex != _revolverIndex || _recoilRoot == null)
+            if (_recoilRoot != null)
+            {
+                _recoilRoot.DOKill();
+            }
+        }
+
+        private void OnFired(int revolverIndex)
         {
-            return;
+            if (revolverIndex != _revolverIndex || _recoilRoot == null)
+            {
+                return;
+            }
+
+            _recoilRoot.DOKill(true);
+
+            _recoilRoot.DOPunchPosition(Vector3.back * _recoilDistance, _recoilDuration, 1, 0f);
+
+            _recoilRoot.DOPunchRotation(Vector3.left * _recoilAngle, _recoilDuration, 1, 0f);
         }
-
-        _recoilRoot.DOKill(true);
-
-        _recoilRoot.DOPunchPosition(Vector3.back * _recoilDistance, _recoilDuration, 1, 0f);
-
-        _recoilRoot.DOPunchRotation(Vector3.left * _recoilAngle, _recoilDuration, 1, 0f);
     }
 }

@@ -1,39 +1,43 @@
 using UnityEngine;
+using WestRicochet.Gameplay.Player.Shooting;
 
-public class RevolverAimVisual : MonoBehaviour
+namespace WestRicochet.Gameplay.Player.Visuals
 {
-    [SerializeField] private PlayerAimer _aimer;
-    [SerializeField] private Transform _aimPivot;
-    [SerializeField, Min(0f)] private float _rotationSpeed = 720f;
-
-    private void Awake()
+    public class RevolverAimVisual : MonoBehaviour
     {
-        if (_aimer == null)
+        [SerializeField] private PlayerAimer _aimer;
+        [SerializeField] private Transform _aimPivot;
+        [SerializeField, Min(0f)] private float _rotationSpeed = 720f;
+
+        private void Awake()
         {
-            Debug.LogError("PlayerAimer is not assigned.", this);
+            if (_aimer == null)
+            {
+                Debug.LogError("PlayerAimer is not assigned.", this);
+            }
+
+            if (_aimPivot == null)
+            {
+                Debug.LogError("Aim pivot is not assigned.", this);
+            }
         }
 
-        if (_aimPivot == null)
+        private void LateUpdate()
         {
-            Debug.LogError("Aim pivot is not assigned.", this);
+            if (_aimer == null || _aimPivot == null)
+            {
+                return;
+            }
+
+            Vector3 direction = _aimer.Direction;
+
+            if (direction.sqrMagnitude < Mathf.Epsilon)
+            {
+                return;
+            }
+
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            _aimPivot.rotation = Quaternion.RotateTowards(_aimPivot.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
         }
-    }
-
-    private void LateUpdate()
-    {
-        if (_aimer == null || _aimPivot == null)
-        {
-            return;
-        }
-
-        Vector3 direction = _aimer.Direction;
-
-        if (direction.sqrMagnitude < Mathf.Epsilon)
-        {
-            return;
-        }
-
-        Quaternion targetRotation = Quaternion.LookRotation(direction);
-        _aimPivot.rotation = Quaternion.RotateTowards(_aimPivot.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
     }
 }

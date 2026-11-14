@@ -1,43 +1,51 @@
 using System;
+using WestRicochet.Gameplay.Rewards;
+using WestRicochet.Gameplay.Upgrades;
+using WestRicochet.Infrastructure;
+using WestRicochet.Infrastructure.Persistence;
+using WestRicochet.Meta;
 
-public sealed class MetaComposition : IDisposable
+namespace WestRicochet.Root
 {
-    public MetaComposition(PlayerSaveData saveData, SceneReferences sceneReferences)
+    public sealed class MetaComposition : IDisposable
     {
-        Progress = new PlayerProgress(saveData);
-
-        Settings = new SettingsService(
-            saveData == null || saveData.SoundEnabled,
-            saveData == null || saveData.MusicEnabled,
-            saveData?.SoundVolume ?? 1f,
-            saveData?.MusicVolume ?? 1f,
-            sceneReferences.AudioMixer);
-
-        Wallet = sceneReferences.Wallet;
-
-        if (Wallet == null)
+        public MetaComposition(PlayerSaveData saveData, SceneReferences sceneReferences)
         {
-            throw new InvalidOperationException("Wallet is not assigned in SceneReferences.");
+            Progress = new PlayerProgress(saveData);
+
+            Settings = new SettingsService(
+                saveData == null || saveData.SoundEnabled,
+                saveData == null || saveData.MusicEnabled,
+                saveData?.SoundVolume ?? 1f,
+                saveData?.MusicVolume ?? 1f,
+                sceneReferences.AudioMixer);
+
+            Wallet = sceneReferences.Wallet;
+
+            if (Wallet == null)
+            {
+                throw new InvalidOperationException("Wallet is not assigned in SceneReferences.");
+            }
+
+            Wallet.Initialize(saveData?.Coins);
+
+            PermanentUpgradeSettings upgradeSettings = sceneReferences.PermanentUpgradeSettings;
+
+            Upgrades = new UpgradeService(
+                Progress,
+                Wallet,
+                upgradeSettings,
+                new UpgradeCostCalculator(upgradeSettings.CostGrowth));
         }
 
-        Wallet.Initialize(saveData?.Coins);
+        public PlayerProgress Progress { get; }
+        public SettingsService Settings { get; }
+        public Wallet Wallet { get; }
+        public UpgradeService Upgrades { get; }
 
-        PermanentUpgradeSettings upgradeSettings = sceneReferences.PermanentUpgradeSettings;
-
-        Upgrades = new UpgradeService(
-            Progress,
-            Wallet,
-            upgradeSettings,
-            new UpgradeCostCalculator(upgradeSettings.CostGrowth));
-    }
-
-    public PlayerProgress Progress { get; }
-    public SettingsService Settings { get; }
-    public Wallet Wallet { get; }
-    public UpgradeService Upgrades { get; }
-
-    public void Dispose()
-    {
-        Upgrades.Dispose();
+        public void Dispose()
+        {
+            Upgrades.Dispose();
+        }
     }
 }

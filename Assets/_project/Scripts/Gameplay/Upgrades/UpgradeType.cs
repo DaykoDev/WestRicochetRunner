@@ -1,7 +1,10 @@
-public enum UpgradeType
+namespace WestRicochet.Gameplay.Upgrades
 {
-    BallCount,
-    FireRate,
-    BallSpeed,
-    BounceCount
+    public enum UpgradeType
+    {
+        BallCount,
+        FireRate,
+        BallSpeed,
+        BounceCount
+    }
 }

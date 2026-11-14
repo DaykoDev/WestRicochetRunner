@@ -4,95 +4,98 @@ using UnityEngine;
 using UnityEngine.UI;
 using YG;
 
-public sealed class LeaderboardScreen : MonoBehaviour
+namespace WestRicochet.UI.Screens
 {
-    [Header("Leaderboard")]
-    [SerializeField] private LeaderboardYG _leaderboard;
-
-    [Header("Authorization")]
-    [SerializeField] private GameObject _authorizationRoot;
-    [SerializeField] private Button _authorizationButton;
-
-    [Header("Close")]
-    [SerializeField] private Button _closeButton;
-    [SerializeField] private Button _outsideButton;
-
-    [Header("Scrolling")]
-    [SerializeField] private ScrollRect _scrollRect;
-
-    public event Action AuthorizationClicked;
-    public event Action CloseClicked;
-
-    private void OnEnable()
+    public sealed class LeaderboardScreen : MonoBehaviour
     {
-        _authorizationButton.onClick.AddListener(OnAuthorizationClicked);
-        _closeButton.onClick.AddListener(OnCloseClicked);
-        _outsideButton.onClick.AddListener(OnCloseClicked);
+        [Header("Leaderboard")]
+        [SerializeField] private LeaderboardYG _leaderboard;
 
-        _leaderboard.onUpdateData.AddListener(OnLeaderboardUpdated);
-    }
+        [Header("Authorization")]
+        [SerializeField] private GameObject _authorizationRoot;
+        [SerializeField] private Button _authorizationButton;
 
-    private void OnDisable()
-    {
-        _authorizationButton.onClick.RemoveListener(OnAuthorizationClicked);
-        _closeButton.onClick.RemoveListener(OnCloseClicked);
-        _outsideButton.onClick.RemoveListener(OnCloseClicked);
+        [Header("Close")]
+        [SerializeField] private Button _closeButton;
+        [SerializeField] private Button _outsideButton;
 
-        _leaderboard.onUpdateData.RemoveListener(OnLeaderboardUpdated);
-    }
+        [Header("Scrolling")]
+        [SerializeField] private ScrollRect _scrollRect;
 
-    public void Show()
-    {
-        gameObject.SetActive(true);
-        RefreshLeaderboard();
-    }
+        public event Action AuthorizationClicked;
+        public event Action CloseClicked;
 
-    public void Hide()
-    {
-        gameObject.SetActive(false);
-    }
-
-    public void SetAuthorizationVisible(bool isVisible)
-    {
-        _authorizationRoot.SetActive(isVisible);
-    }
-
-    public void RefreshLeaderboard()
-    {
-        int highlightTopCount = _leaderboard.quantityTop;
-
-        if (YG2.player.auth == false)
+        private void OnEnable()
         {
-            _leaderboard.quantityTop = _leaderboard.maxQuantityPlayers;
+            _authorizationButton.onClick.AddListener(OnAuthorizationClicked);
+            _closeButton.onClick.AddListener(OnCloseClicked);
+            _outsideButton.onClick.AddListener(OnCloseClicked);
+
+            _leaderboard.onUpdateData.AddListener(OnLeaderboardUpdated);
         }
 
-        _leaderboard.UpdateLB();
-
-        _leaderboard.quantityTop = highlightTopCount;
-    }
-
-    private void OnAuthorizationClicked()
-    {
-        AuthorizationClicked?.Invoke();
-    }
-
-    private void OnCloseClicked()
-    {
-        CloseClicked?.Invoke();
-    }
-
-    private void OnLeaderboardUpdated()
-    {
-        if (gameObject.activeInHierarchy)
+        private void OnDisable()
         {
-            StartCoroutine(ScrollToTopNextFrame());
+            _authorizationButton.onClick.RemoveListener(OnAuthorizationClicked);
+            _closeButton.onClick.RemoveListener(OnCloseClicked);
+            _outsideButton.onClick.RemoveListener(OnCloseClicked);
+
+            _leaderboard.onUpdateData.RemoveListener(OnLeaderboardUpdated);
         }
-    }
 
-    private IEnumerator ScrollToTopNextFrame()
-    {
-        yield return null;
+        public void Show()
+        {
+            gameObject.SetActive(true);
+            RefreshLeaderboard();
+        }
 
-        _scrollRect.verticalNormalizedPosition = 1f;
+        public void Hide()
+        {
+            gameObject.SetActive(false);
+        }
+
+        public void SetAuthorizationVisible(bool isVisible)
+        {
+            _authorizationRoot.SetActive(isVisible);
+        }
+
+        public void RefreshLeaderboard()
+        {
+            int highlightTopCount = _leaderboard.quantityTop;
+
+            if (YG2.player.auth == false)
+            {
+                _leaderboard.quantityTop = _leaderboard.maxQuantityPlayers;
+            }
+
+            _leaderboard.UpdateLB();
+
+            _leaderboard.quantityTop = highlightTopCount;
+        }
+
+        private void OnAuthorizationClicked()
+        {
+            AuthorizationClicked?.Invoke();
+        }
+
+        private void OnCloseClicked()
+        {
+            CloseClicked?.Invoke();
+        }
+
+        private void OnLeaderboardUpdated()
+        {
+            if (gameObject.activeInHierarchy)
+            {
+                StartCoroutine(ScrollToTopNextFrame());
+            }
+        }
+
+        private IEnumerator ScrollToTopNextFrame()
+        {
+            yield return null;
+
+            _scrollRect.verticalNormalizedPosition = 1f;
+        }
     }
 }

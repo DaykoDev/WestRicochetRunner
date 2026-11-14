@@ -1,53 +1,58 @@
 using System;
 using UnityEngine;
+using WestRicochet.Gameplay.Player;
+using WestRicochet.Gameplay.Run;
 
-public class UpgradeGateApplier : MonoBehaviour
+namespace WestRicochet.Gameplay.Upgrades
 {
-    [SerializeField] private UpgradeGateCharger _charger;
-
-    [Header("Gate Root")]
-    [SerializeField] private GameObject _gateRoot;
-
-    private RunModifiers _runModifiers;
-    private bool _hasApplied;
-
-    public event Action<UpgradeGateApplier> Applied;
-
-    private void Awake()
+    public class UpgradeGateApplier : MonoBehaviour
     {
-        if (_gateRoot == null)
+        [SerializeField] private UpgradeGateCharger _charger;
+
+        [Header("Gate Root")]
+        [SerializeField] private GameObject _gateRoot;
+
+        private RunModifiers _runModifiers;
+        private bool _hasApplied;
+
+        public event Action<UpgradeGateApplier> Applied;
+
+        private void Awake()
         {
-            _gateRoot = gameObject;
-        }
-    }
-
-    public void SetRunModifiers(RunModifiers modifiers)
-    {
-        _runModifiers = modifiers;
-        _hasApplied = false;
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (_hasApplied || _runModifiers == null || _charger == null)
-        {
-            return;
+            if (_gateRoot == null)
+            {
+                _gateRoot = gameObject;
+            }
         }
 
-        if (other.GetComponentInParent<Player>() == null)
+        public void SetRunModifiers(RunModifiers modifiers)
         {
-            return;
+            _runModifiers = modifiers;
+            _hasApplied = false;
         }
 
-        _runModifiers.Apply(_charger.Type, _charger.CurrentBonus);
-        _hasApplied = true;
+        public void Deactivate()
+        {
+            _gateRoot.SetActive(false);
+        }
 
-        Applied?.Invoke(this);
-        Deactivate();
-    }
+        private void OnTriggerEnter(Collider other)
+        {
+            if (_hasApplied || _runModifiers == null || _charger == null)
+            {
+                return;
+            }
 
-    public void Deactivate()
-    {
-        _gateRoot.SetActive(false);
+            if (other.GetComponentInParent<PlayerController>() == null)
+            {
+                return;
+            }
+
+            _runModifiers.Apply(_charger.Type, _charger.CurrentBonus);
+            _hasApplied = true;
+
+            Applied?.Invoke(this);
+            Deactivate();
+        }
     }
 }

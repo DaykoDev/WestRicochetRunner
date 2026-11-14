@@ -1,80 +1,82 @@
 using Cinemachine;
 using System.Collections.Generic;
 using UnityEngine;
+using WestRicochet.Gameplay.Balls;
 
-public class RicochetFeedback : MonoBehaviour
+namespace WestRicochet.Gameplay.Effects
 {
-    [Header("Visual")]
-    [SerializeField] private EffectPool _sparkPool;
-
-    [Header("Audio")]
-    [SerializeField] private AudioSource _audioSource;
-    [SerializeField] private AudioClip _ricochetClip;
-    [SerializeField, Range(0f, 1f)] private float _volume = 0.6f;
-    [SerializeField] private Vector2 _pitchRange = new(0.9f, 1.1f);
-
-    [SerializeField, Min(0f)] private float _minSoundInterval = 0.1f;
-
-
-    [Header("Camera")]
-    [SerializeField] private CinemachineImpulseSource _impulseSource;
-
-    private readonly List<Ball> _balls = new();
-    private float _nextSoundTime;
-
-    private void Awake()
+    public class RicochetFeedback : MonoBehaviour
     {
-        if (_sparkPool == null || _audioSource == null || _ricochetClip == null || _impulseSource == null)
-        {
-            Debug.LogError("RicochetFeedback references are missing.", this);
-        }
-    }
+        [Header("Visual")]
+        [SerializeField] private EffectPool _sparkPool;
 
-    public void Register(Ball ball)
-    {
-        if (ball == null || _balls.Contains(ball))
-        {
-            return;
-        }
+        [Header("Audio")]
+        [SerializeField] private AudioSource _audioSource;
+        [SerializeField] private AudioClip _ricochetClip;
+        [SerializeField, Range(0f, 1f)] private float _volume = 0.6f;
+        [SerializeField] private Vector2 _pitchRange = new(0.9f, 1.1f);
+        [SerializeField, Min(0f)] private float _minSoundInterval = 0.1f;
 
-        _balls.Add(ball);
-        ball.Ricocheted += OnBallRicocheted;
-    }
+        [Header("Camera")]
+        [SerializeField] private CinemachineImpulseSource _impulseSource;
 
-    private void OnDestroy()
-    {
-        foreach (Ball ball in _balls)
+        private readonly List<Ball> _balls = new();
+        private float _nextSoundTime;
+
+        private void Awake()
         {
-            if (ball != null)
+            if (_sparkPool == null || _audioSource == null || _ricochetClip == null || _impulseSource == null)
             {
-                ball.Ricocheted -= OnBallRicocheted;
+                Debug.LogError("RicochetFeedback references are missing.", this);
             }
         }
 
-        _balls.Clear();
-    }
-
-    private void OnBallRicocheted(Vector3 position)
-    {
-        if (_sparkPool != null)
+        public void Register(Ball ball)
         {
-            _sparkPool.Get().PlayAt(position);
+            if (ball == null || _balls.Contains(ball))
+            {
+                return;
+            }
+
+            _balls.Add(ball);
+            ball.Ricocheted += OnBallRicocheted;
         }
 
-        bool canPlaySound = _audioSource != null && _ricochetClip != null && Time.unscaledTime >= _nextSoundTime;
-
-        if (canPlaySound)
+        private void OnDestroy()
         {
-            _nextSoundTime = Time.unscaledTime + _minSoundInterval;
+            foreach (Ball ball in _balls)
+            {
+                if (ball != null)
+                {
+                    ball.Ricocheted -= OnBallRicocheted;
+                }
+            }
 
-            _audioSource.pitch = Random.Range(_pitchRange.x, _pitchRange.y);
-
-            _audioSource.PlayOneShot(_ricochetClip, _volume);
+            _balls.Clear();
         }
 
-        if (_impulseSource != null)
+        private void OnBallRicocheted(Vector3 position)
         {
-            _impulseSource.GenerateImpulse();
+            if (_sparkPool != null)
+            {
+                _sparkPool.Get().PlayAt(position);
+            }
+
+            bool canPlaySound = _audioSource != null && _ricochetClip != null && Time.unscaledTime >= _nextSoundTime;
+
+            if (canPlaySound)
+            {
+                _nextSoundTime = Time.unscaledTime + _minSoundInterval;
+
+                _audioSource.pitch = Random.Range(_pitchRange.x, _pitchRange.y);
+
+                _audioSource.PlayOneShot(_ricochetClip, _volume);
+            }
+
+            if (_impulseSource != null)
+            {
+                _impulseSource.GenerateImpulse();
+            }
         }
     }
 }

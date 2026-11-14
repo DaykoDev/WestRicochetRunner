@@ -1,42 +1,52 @@
 using Cinemachine;
 using UnityEngine;
+using WestRicochet.Gameplay.Balls.Shooting;
 
-public class CameraImpulseOnShot : MonoBehaviour
+namespace WestRicochet.Gameplay.Player.Feedback
 {
-    [SerializeField] private BallLauncher _ballLauncher;
-    [SerializeField] private CinemachineImpulseSource _impulseSource;
-
-    private void Awake()
+    public class CameraImpulseOnShot : MonoBehaviour
     {
-        if (_ballLauncher == null)
+        [SerializeField] private BallLauncher _ballLauncher;
+        [SerializeField] private CinemachineImpulseSource _impulseSource;
+
+        private void Awake()
         {
-            Debug.LogError("BallLauncher is not assigned.", this);
+            if (_ballLauncher == null)
+            {
+                Debug.LogError("BallLauncher is not assigned.", this);
+            }
+
+            if (_impulseSource == null)
+            {
+                Debug.LogError("Impulse source is not assigned.", this);
+                enabled = false;
+            }
         }
 
-        if (_impulseSource == null)
+        private void OnEnable()
         {
-            Debug.LogError("Impulse source is not assigned.", this);
+            if (_ballLauncher != null)
+            {
+                _ballLauncher.Fired += OnFired;
+            }
         }
-    }
 
-    private void OnEnable()
-    {
-        if (_ballLauncher != null)
+        private void OnDisable()
         {
-            _ballLauncher.Fired += OnFired;
+            if (_ballLauncher != null)
+            {
+                _ballLauncher.Fired -= OnFired;
+            }
         }
-    }
 
-    private void OnDisable()
-    {
-        if (_ballLauncher != null)
+        private void OnFired(int revolverIndex)
         {
-            _ballLauncher.Fired -= OnFired;
-        }
-    }
+            if (_impulseSource == null)
+            {
+                return;
+            }
 
-    private void OnFired(int revolverIndex)
-    {
-        _impulseSource.GenerateImpulse();
+            _impulseSource.GenerateImpulse();
+        }
     }
 }

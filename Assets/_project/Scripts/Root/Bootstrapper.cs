@@ -1,57 +1,58 @@
 using UnityEngine;
 
-public class Bootstrapper : MonoBehaviour
+namespace WestRicochet.Root
 {
-    [SerializeField] private SceneReferences _sceneReferences;
-
-    private CompositionRoot _compositionRoot;
-
-    private void Start()
+    public class Bootstrapper : MonoBehaviour
     {
-        _compositionRoot = new CompositionRoot(_sceneReferences);
-        _compositionRoot.Initialize();
-    }
+        [SerializeField] private SceneReferences _sceneReferences;
 
-    private void OnApplicationPause(bool pauseStatus)
-    {
-        if (pauseStatus)
+        private CompositionRoot _compositionRoot;
+
+        private void Start()
+        {
+            _compositionRoot = new CompositionRoot(_sceneReferences);
+            _compositionRoot.Initialize();
+        }
+
+        private void OnApplicationPause(bool pauseStatus)
+        {
+            if (pauseStatus)
+            {
+                _compositionRoot?.FlushSave();
+            }
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (hasFocus == false)
+            {
+                _compositionRoot?.FlushSave();
+            }
+        }
+
+        private void OnApplicationQuit()
         {
             _compositionRoot?.FlushSave();
         }
-    }
 
-    private void OnApplicationFocus(bool hasFocus)
-    {
-        if (hasFocus == false)
+        private void OnDestroy()
         {
-            _compositionRoot?.FlushSave();
+            _compositionRoot?.Dispose();
         }
-    }
-
-    private void OnApplicationQuit()
-    {
-        _compositionRoot?.FlushSave();
-    }
-
-    private void OnDestroy()
-    {
-        _compositionRoot?.Dispose();
-    }
 
 #if UNITY_EDITOR
-    [ContextMenu("Debug/Reset All Save")]
-    private void ResetAllSave()
-    {
-        if (Application.isPlaying == false || _compositionRoot == null)
+        [ContextMenu("Debug/Reset All Save")]
+        private void ResetAllSave()
         {
-            Debug.LogWarning("Сброс доступен в Play Mode после создания CompositionRoot.");
+            if (Application.isPlaying == false || _compositionRoot == null)
+            {
+                Debug.LogWarning("Сброс доступен в Play Mode после создания CompositionRoot.");
 
-            return;
+                return;
+            }
+
+            _compositionRoot.ResetAllSave();
         }
-
-        _compositionRoot.ResetAllSave();
-
-        Debug.Log("Сохранение полностью сброшено.");
-    }
 #endif
+    }
 }

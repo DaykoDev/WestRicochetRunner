@@ -1,42 +1,42 @@
 using UnityEngine;
+using WestRicochet.Gameplay.Upgrades;
 
-public sealed class BallGateInteraction
+namespace WestRicochet.Gameplay.Balls.Movement
 {
-    private readonly BallMovementSettings _movementSettings;
-    private readonly Collider[] _gateHits;
-
-    public BallGateInteraction(BallMovementSettings movementSettings)
+    public sealed class BallGateInteraction
     {
-        _movementSettings = movementSettings;
-        _gateHits = new Collider[movementSettings.CastBufferSize];
-    }
+        private readonly BallMovementSettings _movementSettings;
+        private readonly Collider[] _gateHits;
 
-    public void ChargeAlongSegment(
-        Ball ball,
-        Vector3 start,
-        Vector3 end)
-    {
-        int hitCount = Physics.OverlapCapsuleNonAlloc(
-            start,
-            end,
-            _movementSettings.Radius,
-            _gateHits,
-            _movementSettings.UpgradeGateMask,
-            QueryTriggerInteraction.Collide);
-
-        for (int i = 0; i < hitCount; i++)
+        public BallGateInteraction(BallMovementSettings movementSettings)
         {
-            Collider gateCollider = _gateHits[i];
+            _movementSettings = movementSettings;
+            _gateHits = new Collider[movementSettings.CastBufferSize];
+        }
 
-            if (gateCollider == null)
+        public void ChargeAlongSegment(Ball ball, Vector3 start, Vector3 end)
+        {
+            int hitCount = Physics.OverlapCapsuleNonAlloc(
+                start,
+                end,
+                _movementSettings.Radius,
+                _gateHits,
+                _movementSettings.UpgradeGateMask,
+                QueryTriggerInteraction.Collide);
+
+            for (int i = 0; i < hitCount; i++)
             {
-                continue;
+                Collider gateCollider = _gateHits[i];
+
+                if (gateCollider == null)
+                {
+                    continue;
+                }
+
+                UpgradeGateCharger charger = gateCollider.GetComponentInParent<UpgradeGateCharger>();
+
+                charger?.TryCharge(ball);
             }
-
-            UpgradeGateCharger charger =
-                gateCollider.GetComponentInParent<UpgradeGateCharger>();
-
-            charger?.TryCharge(ball);
         }
     }
 }

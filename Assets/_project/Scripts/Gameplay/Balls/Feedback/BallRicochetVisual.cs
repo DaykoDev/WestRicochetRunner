@@ -1,169 +1,167 @@
 using UnityEngine;
 
-public sealed class BallRicochetVisual : MonoBehaviour
+namespace WestRicochet.Gameplay.Balls.Feedback
 {
-    [Header("Renderer")]
-    [SerializeField] private Renderer _visualRenderer;
-    [SerializeField] private string _colorPropertyName = "_Color";
-    [SerializeField] private string _luminosityPropertyName = "_Lumin";
-
-    [Header("Color")]
-    [SerializeField] private Color _defaultColor = Color.white;
-
-    [SerializeField]
-    private Color _targetRicochetColor = new(1f, 0.55f, 0.05f, 1f);
-
-    [SerializeField, Range(0.05f, 1f)]
-    private float _colorChangePerRicochet = 0.25f;
-
-    [Header("Luminosity")]
-    [SerializeField, Min(0f)] private float _luminosityPerRicochet = 0.2f;
-
-    [SerializeField, Min(0f)] private float _maxLuminosity = 1.2f;
-
-    [Header("Rainbow Bonus")]
-    [SerializeField, Min(0f)] private float _rainbowSpeed = 0.8f;
-
-    [SerializeField, Range(0f, 1f)] private float _rainbowSaturation = 0.75f;
-
-    private bool _isRainbowMode;
-    private float _rainbowHue;
-
-    private MaterialPropertyBlock _propertyBlock;
-
-    private int _colorPropertyId;
-    private int _luminosityPropertyId;
-
-    private Color _currentColor;
-    private float _luminosity;
-
-    private bool _hasColorProperty;
-    private bool _hasLuminosityProperty;
-
-    private void Awake()
+    public sealed class BallRicochetVisual : MonoBehaviour
     {
-        if (_visualRenderer == null)
+        [Header("Renderer")]
+        [SerializeField] private Renderer _visualRenderer;
+        [SerializeField] private string _colorPropertyName = "_Color";
+        [SerializeField] private string _luminosityPropertyName = "_Lumin";
+
+        [Header("Color")]
+        [SerializeField] private Color _defaultColor = Color.white;
+        [SerializeField] private Color _targetRicochetColor = new(1f, 0.55f, 0.05f, 1f);
+        [SerializeField, Range(0.05f, 1f)] private float _colorChangePerRicochet = 0.25f;
+
+        [Header("Luminosity")]
+        [SerializeField, Min(0f)] private float _luminosityPerRicochet = 0.2f;
+        [SerializeField, Min(0f)] private float _maxLuminosity = 1.2f;
+
+        [Header("Rainbow Bonus")]
+        [SerializeField, Min(0f)] private float _rainbowSpeed = 0.8f;
+        [SerializeField, Range(0f, 1f)] private float _rainbowSaturation = 0.75f;
+
+        private bool _isRainbowMode;
+        private float _rainbowHue;
+
+        private MaterialPropertyBlock _propertyBlock;
+
+        private int _colorPropertyId;
+        private int _luminosityPropertyId;
+
+        private Color _currentColor;
+        private float _luminosity;
+
+        private bool _hasColorProperty;
+        private bool _hasLuminosityProperty;
+
+        private void Awake()
         {
-            _visualRenderer = GetComponentInChildren<Renderer>(true);
+            if (_visualRenderer == null)
+            {
+                _visualRenderer = GetComponentInChildren<Renderer>(true);
+            }
+
+            if (_visualRenderer == null)
+            {
+                Debug.LogError("BallRicochetVisual: renderer is not assigned.", this);
+
+                enabled = false;
+                return;
+            }
+
+            _propertyBlock = new MaterialPropertyBlock();
+            _colorPropertyId = Shader.PropertyToID(_colorPropertyName);
+            _luminosityPropertyId = Shader.PropertyToID(_luminosityPropertyName);
+
+            CheckShaderProperties();
+
+            ResetVisual();
         }
 
-        if (_visualRenderer == null)
+        private void Update()
         {
-            Debug.LogError("BallRicochetVisual: renderer is not assigned.", this);
+            if (_isRainbowMode == false)
+            {
+                return;
+            }
 
-            enabled = false;
-            return;
-        }
-
-        _propertyBlock = new MaterialPropertyBlock();
-        _colorPropertyId = Shader.PropertyToID(_colorPropertyName);
-        _luminosityPropertyId = Shader.PropertyToID(_luminosityPropertyName);
-
-        CheckShaderProperties();
-
-        ResetVisual();
-    }
-
-    private void Update()
-    {
-        if (_isRainbowMode == false)
-        {
-            return;
-        }
-
-        _rainbowHue = Mathf.Repeat(_rainbowHue + _rainbowSpeed * Time.deltaTime,
-            1f);
-
-        _currentColor = Color.HSVToRGB(_rainbowHue, _rainbowSaturation, 1f);
-
-        _luminosity = _maxLuminosity;
-
-        ApplyVisual();
-    }
-
-    public void SetRainbowMode(bool isEnabled)
-    {
-        _isRainbowMode = isEnabled;
-        ResetVisual();
-    }
-
-    public void ResetVisual()
-    {
-        if (_isRainbowMode)
-        {
-            _rainbowHue = Random.value;
+            _rainbowHue = Mathf.Repeat(_rainbowHue + _rainbowSpeed * Time.deltaTime, 1f);
 
             _currentColor = Color.HSVToRGB(_rainbowHue, _rainbowSaturation, 1f);
 
             _luminosity = _maxLuminosity;
-        }
-        else
-        {
-            _currentColor = _defaultColor;
-            _luminosity = 0f;
+
+            ApplyVisual();
         }
 
-        ApplyVisual();
-    }
-
-    public void OnRicochet()
-    {
-        if (_isRainbowMode)
+        public void SetRainbowMode(bool isEnabled)
         {
-            return;
+            _isRainbowMode = isEnabled;
+            ResetVisual();
         }
 
-        _currentColor = Color.Lerp(_currentColor, _targetRicochetColor, _colorChangePerRicochet);
-        _luminosity = Mathf.Min(_luminosity + _luminosityPerRicochet, _maxLuminosity);
-
-        ApplyVisual();
-    }
-
-    private void ApplyVisual()
-    {
-        if (_visualRenderer == null || _propertyBlock == null)
+        public void ResetVisual()
         {
-            return;
+            if (_isRainbowMode)
+            {
+                _rainbowHue = Random.value;
+
+                _currentColor = Color.HSVToRGB(_rainbowHue, _rainbowSaturation, 1f);
+
+                _luminosity = _maxLuminosity;
+            }
+            else
+            {
+                _currentColor = _defaultColor;
+                _luminosity = 0f;
+            }
+
+            ApplyVisual();
         }
 
-        _visualRenderer.GetPropertyBlock(_propertyBlock);
-
-        if (_hasColorProperty)
+        public void OnRicochet()
         {
-            _propertyBlock.SetColor(_colorPropertyId, _currentColor);
+            if (_isRainbowMode)
+            {
+                return;
+            }
+
+            _currentColor = Color.Lerp(_currentColor, _targetRicochetColor, _colorChangePerRicochet);
+            _luminosity = Mathf.Min(_luminosity + _luminosityPerRicochet, _maxLuminosity);
+
+            ApplyVisual();
         }
 
-        if (_hasLuminosityProperty)
+        private void ApplyVisual()
         {
-            _propertyBlock.SetFloat(_luminosityPropertyId, _luminosity);
+            if (_visualRenderer == null || _propertyBlock == null)
+            {
+                return;
+            }
+
+            _visualRenderer.GetPropertyBlock(_propertyBlock);
+
+            if (_hasColorProperty)
+            {
+                _propertyBlock.SetColor(_colorPropertyId, _currentColor);
+            }
+
+            if (_hasLuminosityProperty)
+            {
+                _propertyBlock.SetFloat(_luminosityPropertyId, _luminosity);
+            }
+
+            _visualRenderer.SetPropertyBlock(_propertyBlock);
         }
 
-        _visualRenderer.SetPropertyBlock(_propertyBlock);
-    }
-
-    private void CheckShaderProperties()
-    {
-        Material material = _visualRenderer.sharedMaterial;
-
-        if (material == null)
+        private void CheckShaderProperties()
         {
-            Debug.LogError("BallRicochetVisual: renderer has no material.", this);
+            Material material = _visualRenderer.sharedMaterial;
 
-            return;
-        }
+            if (material == null)
+            {
+                Debug.LogError("BallRicochetVisual: renderer has no material.", this);
 
-        _hasColorProperty = material.HasProperty(_colorPropertyId);
+                return;
+            }
 
-        _hasLuminosityProperty = material.HasProperty(_luminosityPropertyId);
+            _hasColorProperty = material.HasProperty(_colorPropertyId);
 
-        if (_hasColorProperty == false)
-        {
-            Debug.LogError($"BallRicochetVisual: material '{material.name}' " + $"has no property '{_colorPropertyName}'.", this);
-        }
+            _hasLuminosityProperty = material.HasProperty(_luminosityPropertyId);
 
-        if (_hasLuminosityProperty == false)
-        {
-            Debug.LogError($"BallRicochetVisual: material '{material.name}' " + $"has no property '{_luminosityPropertyName}'.", this);
+            if (_hasColorProperty == false)
+            {
+                Debug.LogError($"BallRicochetVisual: material '{material.name}' "
+                    + $"has no property '{_colorPropertyName}'.", this);
+            }
+
+            if (_hasLuminosityProperty == false)
+            {
+                Debug.LogError($"BallRicochetVisual: material '{material.name}' "
+                    + $"has no property '{_luminosityPropertyName}'.", this);
+            }
         }
     }
 }

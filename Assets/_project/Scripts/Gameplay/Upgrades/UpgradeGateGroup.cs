@@ -1,36 +1,39 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UpgradeGateGroup : MonoBehaviour
+namespace WestRicochet.Gameplay.Upgrades
 {
-    private readonly List<UpgradeGateApplier> _gates = new();
-
-    public void Register(UpgradeGateApplier gate)
+    public class UpgradeGateGroup : MonoBehaviour
     {
-        _gates.Add(gate);
-        gate.Applied += OnGateApplied;
-    }
+        private readonly List<UpgradeGateApplier> _gates = new();
 
-    private void OnDestroy()
-    {
-        foreach (UpgradeGateApplier gate in _gates)
+        private void OnDestroy()
         {
-            if (gate != null)
+            foreach (UpgradeGateApplier gate in _gates)
             {
-                gate.Applied -= OnGateApplied;
+                if (gate != null)
+                {
+                    gate.Applied -= OnGateApplied;
+                }
             }
+
+            _gates.Clear();
         }
 
-        _gates.Clear();
-    }
-
-    private void OnGateApplied(UpgradeGateApplier appliedGate)
-    {
-        foreach (UpgradeGateApplier gate in _gates)
+        public void Register(UpgradeGateApplier gate)
         {
-            if (gate != appliedGate)
+            _gates.Add(gate);
+            gate.Applied += OnGateApplied;
+        }
+
+        private void OnGateApplied(UpgradeGateApplier appliedGate)
+        {
+            foreach (UpgradeGateApplier gate in _gates)
             {
-                gate.Deactivate();
+                if (gate != appliedGate)
+                {
+                    gate.Deactivate();
+                }
             }
         }
     }

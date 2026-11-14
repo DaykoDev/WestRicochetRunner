@@ -1,76 +1,78 @@
-
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerInputReader : MonoBehaviour, PlayerInputActions.IPlayerActions
+namespace WestRicochet.Gameplay.Player.Input
 {
-    private PlayerInputActions _controls;
-    private bool _isHoldPointerPressed;
-
-    public event Action<Vector2> Moved;
-    public event Action<bool> HoldPointerChanged;
-
-    private void Awake()
+    public class PlayerInputReader : MonoBehaviour, PlayerInputActions.IPlayerActions
     {
-        _controls = new PlayerInputActions();
-        _controls.Player.SetCallbacks(this);
-    }
+        private PlayerInputActions _controls;
+        private bool _isHoldPointerPressed;
 
-    private void OnDisable()
-    {
-        SetInputEnabled(false);
-    }
+        public event Action<Vector2> Moved;
+        public event Action<bool> HoldPointerChanged;
 
-    private void OnDestroy()
-    {
-        _controls.Dispose();
-    }
-
-    public void SetInputEnabled(bool isEnabled)
-    {
-        if (isEnabled)
+        private void Awake()
         {
-            _controls.Player.Enable();
-            return;
+            _controls = new PlayerInputActions();
+            _controls.Player.SetCallbacks(this);
         }
 
-        _controls.Player.Disable();
-        SetHoldPointerState(false);
-    }
-
-    public void OnMovePointer(InputAction.CallbackContext context)
-    {
-        if (context.performed == false)
+        private void OnDisable()
         {
-            return;
+            SetInputEnabled(false);
         }
 
-        Vector2 delta = context.ReadValue<Vector2>();
-
-        Moved?.Invoke(delta);
-    }
-
-    public void OnHoldPointer(InputAction.CallbackContext context)
-    {
-        if (context.started)
+        private void OnDestroy()
         {
-            SetHoldPointerState(true);
+            _controls.Dispose();
         }
-        else if (context.canceled)
+
+        public void SetInputEnabled(bool isEnabled)
         {
+            if (isEnabled)
+            {
+                _controls.Player.Enable();
+                return;
+            }
+
+            _controls.Player.Disable();
             SetHoldPointerState(false);
         }
-    }
 
-    private void SetHoldPointerState(bool isPressed)
-    {
-        if (_isHoldPointerPressed == isPressed)
+        public void OnMovePointer(InputAction.CallbackContext context)
         {
-            return;
+            if (context.performed == false)
+            {
+                return;
+            }
+
+            Vector2 delta = context.ReadValue<Vector2>();
+
+            Moved?.Invoke(delta);
         }
 
-        _isHoldPointerPressed = isPressed;
-        HoldPointerChanged?.Invoke(isPressed);
+        public void OnHoldPointer(InputAction.CallbackContext context)
+        {
+            if (context.started)
+            {
+                SetHoldPointerState(true);
+            }
+            else if (context.canceled)
+            {
+                SetHoldPointerState(false);
+            }
+        }
+
+        private void SetHoldPointerState(bool isPressed)
+        {
+            if (_isHoldPointerPressed == isPressed)
+            {
+                return;
+            }
+
+            _isHoldPointerPressed = isPressed;
+            HoldPointerChanged?.Invoke(isPressed);
+        }
     }
 }

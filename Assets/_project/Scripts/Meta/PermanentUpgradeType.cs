@@ -1,7 +1,10 @@
-public enum PermanentUpgradeType
+namespace WestRicochet.Meta
 {
-    StartBallCount,
-    BallDamage,
-    IncomeMultiplier,
-    BounceCount
+    public enum PermanentUpgradeType
+    {
+        StartBallCount,
+        BallDamage,
+        IncomeMultiplier,
+        BounceCount
+    }
 }

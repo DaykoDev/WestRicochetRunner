@@ -1,63 +1,68 @@
 using System;
+using WestRicochet.Gameplay.Run;
+using WestRicochet.UI.Screens;
 
-public class DefeatPresenter : IDisposable
+namespace WestRicochet.UI.Presenters
 {
-    private readonly DefeatScreen _screen;
-    private readonly SecondChanceFlow _secondChanceFlow;
-
-    public DefeatPresenter(DefeatScreen screen, SecondChanceFlow secondChanceFlow)
+    public class DefeatPresenter : IDisposable
     {
-        _screen = screen;
-        _secondChanceFlow = secondChanceFlow;
+        private readonly DefeatScreen _screen;
+        private readonly SecondChanceFlow _secondChanceFlow;
 
-        _screen.MainMenuClicked += OnMainMenuClicked;
-        _screen.RestartClicked += OnRestartClicked;
-        _screen.SecondChanceClicked += OnSecondChanceClicked;
+        public DefeatPresenter(DefeatScreen screen, SecondChanceFlow secondChanceFlow)
+        {
+            _screen = screen;
+            _secondChanceFlow = secondChanceFlow;
 
-        _secondChanceFlow.AvailabilityChanged += OnSecondChanceAvailabilityChanged;
-    }
+            _screen.MainMenuClicked += OnMainMenuClicked;
+            _screen.RestartClicked += OnRestartClicked;
+            _screen.SecondChanceClicked += OnSecondChanceClicked;
 
-    public event Action MainMenuRequested;
-    public event Action RestartRequested;
+            _secondChanceFlow.AvailabilityChanged += OnSecondChanceAvailabilityChanged;
+        }
 
-    public void HandleStateEntered()
-    {
-        _screen.Show();
-        OnSecondChanceAvailabilityChanged();
-    }
+        public event Action MainMenuRequested;
+        public event Action RestartRequested;
 
-    public void HandleStateExited()
-    {
-        _secondChanceFlow.Cancel();
-        _screen.Hide();
-    }
+        public void HandleStateEntered()
+        {
+            _screen.Show();
+            OnSecondChanceAvailabilityChanged();
+        }
 
-    public void Dispose()
-    {
-        _screen.MainMenuClicked -= OnMainMenuClicked;
-        _screen.RestartClicked -= OnRestartClicked;
-        _screen.SecondChanceClicked -= OnSecondChanceClicked;
+        public void HandleStateExited()
+        {
+            _secondChanceFlow.Cancel();
+            _screen.Hide();
+        }
 
-        _secondChanceFlow.AvailabilityChanged -= OnSecondChanceAvailabilityChanged;
-    }
+        public void Dispose()
+        {
+            _screen.MainMenuClicked -= OnMainMenuClicked;
+            _screen.RestartClicked -= OnRestartClicked;
+            _screen.SecondChanceClicked -= OnSecondChanceClicked;
 
-    private void OnMainMenuClicked()
-    {
-        MainMenuRequested?.Invoke();
-    }
+            _secondChanceFlow.AvailabilityChanged -= OnSecondChanceAvailabilityChanged;
+        }
 
-    private void OnRestartClicked()
-    {
-        RestartRequested?.Invoke();
-    }
+        private void OnMainMenuClicked()
+        {
+            MainMenuRequested?.Invoke();
+        }
 
-    private void OnSecondChanceClicked()
-    {
-        _secondChanceFlow.Request();
-    }
+        private void OnRestartClicked()
+        {
+            RestartRequested?.Invoke();
+        }
 
-    private void OnSecondChanceAvailabilityChanged()
-    {
-        _screen.SetSecondChanceAvailable(_secondChanceFlow.CanOffer);
+        private void OnSecondChanceClicked()
+        {
+            _secondChanceFlow.Request();
+        }
+
+        private void OnSecondChanceAvailabilityChanged()
+        {
+            _screen.SetSecondChanceAvailable(_secondChanceFlow.CanOffer);
+        }
     }
 }

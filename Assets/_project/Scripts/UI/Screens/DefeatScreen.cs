@@ -2,57 +2,60 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DefeatScreen : MonoBehaviour
+namespace WestRicochet.UI.Screens
 {
-    [SerializeField] private Button _mainMenuButton;
-    [SerializeField] private Button _restartButton;
-    [SerializeField] private Button _secondChanceButton;
-
-    public event Action MainMenuClicked;
-    public event Action RestartClicked;
-    public event Action SecondChanceClicked;
-
-    private void OnEnable()
+    public class DefeatScreen : MonoBehaviour
     {
-        _mainMenuButton.onClick.AddListener(OnMainMenuClicked);
-        _restartButton.onClick.AddListener(OnRestartClicked);
-        _secondChanceButton.onClick.AddListener(OnSecondChanceClicked);
-    }
+        [SerializeField] private Button _mainMenuButton;
+        [SerializeField] private Button _restartButton;
+        [SerializeField] private Button _secondChanceButton;
 
-    private void OnDisable()
-    {
-        _mainMenuButton.onClick.RemoveListener(OnMainMenuClicked);
-        _restartButton.onClick.RemoveListener(OnRestartClicked);
-        _secondChanceButton.onClick.RemoveListener(OnSecondChanceClicked);
-    }
+        public event Action MainMenuClicked;
+        public event Action RestartClicked;
+        public event Action SecondChanceClicked;
 
-    public void Show()
-    {
-        gameObject.SetActive(true);
-    }
+        private void OnEnable()
+        {
+            _mainMenuButton.onClick.AddListener(OnMainMenuClicked);
+            _restartButton.onClick.AddListener(OnRestartClicked);
+            _secondChanceButton.onClick.AddListener(OnSecondChanceClicked);
+        }
 
-    public void Hide()
-    {
-        gameObject.SetActive(false);
-    }
+        private void OnDisable()
+        {
+            _mainMenuButton.onClick.RemoveListener(OnMainMenuClicked);
+            _restartButton.onClick.RemoveListener(OnRestartClicked);
+            _secondChanceButton.onClick.RemoveListener(OnSecondChanceClicked);
+        }
 
-    public void SetSecondChanceAvailable(bool isAvailable)
-    {
-        _secondChanceButton.gameObject.SetActive(isAvailable);
-    }
+        public void Show()
+        {
+            gameObject.SetActive(true);
+        }
 
-    private void OnMainMenuClicked()
-    {
-        MainMenuClicked?.Invoke();
-    }
+        public void Hide()
+        {
+            gameObject.SetActive(false);
+        }
 
-    private void OnRestartClicked()
-    {
-        RestartClicked?.Invoke();
-    }
+        public void SetSecondChanceAvailable(bool isAvailable)
+        {
+            _secondChanceButton.gameObject.SetActive(isAvailable);
+        }
 
-    private void OnSecondChanceClicked()
-    {
-        SecondChanceClicked?.Invoke();
+        private void OnMainMenuClicked()
+        {
+            MainMenuClicked?.Invoke();
+        }
+
+        private void OnRestartClicked()
+        {
+            RestartClicked?.Invoke();
+        }
+
+        private void OnSecondChanceClicked()
+        {
+            SecondChanceClicked?.Invoke();
+        }
     }
 }

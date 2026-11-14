@@ -1,30 +1,33 @@
 using System;
 
-public class UpgradeCostCalculator
+namespace WestRicochet.Meta
 {
-    private readonly double _costGrowth;
-
-    public UpgradeCostCalculator(double costGrowth)
+    public class UpgradeCostCalculator
     {
-        _costGrowth = Math.Max(1d, costGrowth);
-    }
+        private readonly double _costGrowth;
 
-    public int CalculateNextCost(PermanentUpgradeSettings.Definition definition, int currentLevel)
-    {
-        if (definition == null)
+        public UpgradeCostCalculator(double costGrowth)
         {
-            return 0;
+            _costGrowth = Math.Max(1d, costGrowth);
         }
 
-        double growth = _costGrowth * definition.CostGrowthMultiplier;
-
-        double cost = definition.BaseCost * Math.Pow(growth, Math.Max(0, currentLevel));
-
-        if (double.IsNaN(cost) || double.IsInfinity(cost) || cost >= int.MaxValue)
+        public int CalculateNextCost(PermanentUpgradeSettings.Definition definition, int currentLevel)
         {
-            return int.MaxValue;
-        }
+            if (definition == null)
+            {
+                return 0;
+            }
 
-        return Math.Max(1, (int)Math.Round(cost, MidpointRounding.AwayFromZero));
+            double growth = _costGrowth * definition.CostGrowthMultiplier;
+
+            double cost = definition.BaseCost * Math.Pow(growth, Math.Max(0, currentLevel));
+
+            if (double.IsNaN(cost) || double.IsInfinity(cost) || cost >= int.MaxValue)
+            {
+                return int.MaxValue;
+            }
+
+            return Math.Max(1, (int)Math.Round(cost, MidpointRounding.AwayFromZero));
+        }
     }
 }

@@ -1,212 +1,216 @@
 using System;
 using UnityEngine;
+using WestRicochet.Gameplay.Balls.Collision;
+using WestRicochet.Gameplay.Balls.Feedback;
+using WestRicochet.Gameplay.Balls.Movement;
+using WestRicochet.Gameplay.Effects;
+using WestRicochet.Infrastructure.Pooling;
 
-[RequireComponent(typeof(SphereCollider))]
-[RequireComponent(typeof(BallReturnFeedback))]
-[RequireComponent(typeof(BallRicochetVisual))]
-public class Ball : MonoBehaviour, IPoolable<Ball>
+namespace WestRicochet.Gameplay.Balls
 {
-    [Header("Settings")]
-    [SerializeField] private BallMovementSettings _movementSettings;
-
-    [Header("Lifetime")]
-    [SerializeField, Min(0.1f)] private float _maxLifetime = 5f;
-
-    [Header("Return")]
-    [SerializeField, Range(0f, 0.5f)] private float _returnEffectMinViewportY = 0.15f;
-
-    private BallMovement _movement;
-    private BallCollisionResolver _collisionResolver;
-
-    private BallRicochetVisual _ricochetVisual;
-    private BallReturnFeedback _returnFeedback;
-
-    private Camera _camera;
-
-    private float _lifetimeTimer;
-
-    private bool _isActive;
-
-    public int LaunchId { get; private set; }
-
-    public bool IsActive => _isActive;
-
-    public event Action<Ball> Died;
-    public event Action<Ball> ReturnedToPool;
-    public event Action<Vector3> Ricocheted;
-
-    private void Awake()
+    [RequireComponent(typeof(SphereCollider))]
+    [RequireComponent(typeof(BallReturnFeedback))]
+    [RequireComponent(typeof(BallRicochetVisual))]
+    public class Ball : MonoBehaviour, IPoolable<Ball>
     {
-        SphereCollider sphereCollider = GetComponent<SphereCollider>();
+        [Header("Settings")]
+        [SerializeField] private BallMovementSettings _movementSettings;
 
-        _collisionResolver = new BallCollisionResolver(transform, sphereCollider, _movementSettings);
+        [Header("Lifetime")]
+        [SerializeField, Min(0.1f)] private float _maxLifetime = 5f;
 
-        _movement = new BallMovement(this, transform, _movementSettings, _collisionResolver);
+        [Header("Return")]
+        [SerializeField, Range(0f, 0.5f)] private float _returnEffectMinViewportY = 0.15f;
 
-        _movement.Ricocheted += OnMovementRicocheted;
-        _movement.BouncesExhausted += OnBouncesExhausted;
+        private BallMovement _movement;
+        private BallCollisionResolver _collisionResolver;
+        private BallRicochetVisual _ricochetVisual;
+        private BallReturnFeedback _returnFeedback;
+        private Camera _camera;
+        private float _lifetimeTimer;
+        private bool _isActive;
 
-        _returnFeedback = GetComponent<BallReturnFeedback>();
-        _ricochetVisual = GetComponent<BallRicochetVisual>();
-    }
+        public event Action<Ball> Died;
+        public event Action<Ball> ReturnedToPool;
+        public event Action<Vector3> Ricocheted;
 
-    private void OnDestroy()
-    {
-        if (_movement == null)
+        public int LaunchId { get; private set; }
+
+        public bool IsActive => _isActive;
+
+        private void Awake()
         {
-            return;
+            SphereCollider sphereCollider = GetComponent<SphereCollider>();
+
+            _collisionResolver = new BallCollisionResolver(transform, sphereCollider, _movementSettings);
+
+            _movement = new BallMovement(this, transform, _movementSettings, _collisionResolver);
+
+            _movement.Ricocheted += OnMovementRicocheted;
+            _movement.BouncesExhausted += OnBouncesExhausted;
+
+            _returnFeedback = GetComponent<BallReturnFeedback>();
+            _ricochetVisual = GetComponent<BallRicochetVisual>();
         }
 
-        _movement.Ricocheted -= OnMovementRicocheted;
-        _movement.BouncesExhausted -= OnBouncesExhausted;
-    }
-
-    private void FixedUpdate()
-    {
-        if (_isActive == false)
+        private void OnDestroy()
         {
-            return;
+            if (_movement == null)
+            {
+                return;
+            }
+
+            _movement.Ricocheted -= OnMovementRicocheted;
+            _movement.BouncesExhausted -= OnBouncesExhausted;
         }
 
-        if (IsOutsideScreen())
+        private void FixedUpdate()
         {
-            BeginReturn(false);
-            return;
+            if (_isActive == false)
+            {
+                return;
+            }
+
+            if (IsOutsideScreen())
+            {
+                BeginReturn(false);
+                return;
+            }
+
+            UpdateLifetime();
         }
 
-        UpdateLifetime();
-    }
-
-    public void SetCamera(Camera camera)
-    {
-        _camera = camera;
-    }
-
-    public void SetEffectPool(EffectPool effectPool)
-    {
-        _returnFeedback.SetEffectPool(effectPool);
-    }
-
-    public void SetRainbowVisual(bool isEnabled)
-    {
-        _ricochetVisual.SetRainbowMode(isEnabled);
-    }
-
-    public bool Launch(Vector3 position, Vector3 velocity, BallStats stats)
-    {
-        if (enabled == false || velocity.sqrMagnitude < Mathf.Epsilon || stats.Speed <= 0f)
+        public void SetCamera(Camera camera)
         {
-            return false;
+            _camera = camera;
         }
 
-        transform.position = position;
-
-        _returnFeedback.Restore();
-        _ricochetVisual.ResetVisual();
-
-        _movement.Launch(velocity, stats);
-
-        _lifetimeTimer = _maxLifetime;
-        _isActive = true;
-
-        FaceDirection();
-
-        unchecked
+        public void SetEffectPool(EffectPool effectPool)
         {
-            LaunchId++;
+            _returnFeedback.SetEffectPool(effectPool);
         }
 
-        return true;
-    }
-
-    public void OnReturnedToPool()
-    {
-        _movement.Reset();
-
-        _isActive = false;
-        _lifetimeTimer = 0f;
-
-        ReturnedToPool?.Invoke(this);
-    }
-
-    private void UpdateLifetime()
-    {
-        _lifetimeTimer -= Time.fixedDeltaTime;
-
-        if (_lifetimeTimer <= 0f)
+        public void SetRainbowVisual(bool isEnabled)
         {
-            BeginReturn();
-            return;
+            _ricochetVisual.SetRainbowMode(isEnabled);
         }
 
-        _movement.Tick(Time.fixedDeltaTime);
-    }
-
-    private void OnMovementRicocheted(Vector3 position)
-    {
-        FaceDirection();
-        _ricochetVisual.OnRicochet();
-
-        Ricocheted?.Invoke(position);
-    }
-
-    private void OnBouncesExhausted()
-    {
-        BeginReturn();
-    }
-
-    private void FaceDirection()
-    {
-        Vector3 direction = _movement.Direction;
-
-        if (direction.sqrMagnitude > Mathf.Epsilon)
+        public bool Launch(Vector3 position, Vector3 velocity, BallStats stats)
         {
-            transform.rotation = Quaternion.LookRotation(direction);
-        }
-    }
+            if (enabled == false || velocity.sqrMagnitude < Mathf.Epsilon || stats.Speed <= 0f)
+            {
+                return false;
+            }
 
-    private void BeginReturn(bool allowEffect = true)
-    {
-        if (_isActive == false)
-        {
-            return;
-        }
+            transform.position = position;
 
-        _isActive = false;
-        _movement.Stop();
+            _returnFeedback.Restore();
+            _ricochetVisual.ResetVisual();
 
-        bool shouldPlayEffect = allowEffect && CanPlayReturnEffect();
+            _movement.Launch(velocity, stats);
 
-        _returnFeedback.Play(transform.position, shouldPlayEffect);
+            _lifetimeTimer = _maxLifetime;
+            _isActive = true;
 
-        Died?.Invoke(this);
-    }
+            FaceDirection();
 
-    private bool IsOutsideScreen()
-    {
-        if (_camera == null)
-        {
-            return false;
-        }
+            unchecked
+            {
+                LaunchId++;
+            }
 
-        Vector3 viewportPosition = _camera.WorldToViewportPoint(transform.position);
-
-        return viewportPosition.z < 0f || viewportPosition.y < 0f;
-    }
-
-    private bool CanPlayReturnEffect()
-    {
-        if (_camera == null)
-        {
             return true;
         }
 
-        Vector3 viewportPosition = _camera.WorldToViewportPoint(transform.position);
+        public void OnReturnedToPool()
+        {
+            _movement.Reset();
 
-        return viewportPosition.z > 0f &&
-               viewportPosition.x >= 0f &&
-               viewportPosition.x <= 1f &&
-               viewportPosition.y >= _returnEffectMinViewportY &&
-               viewportPosition.y <= 1f;
+            _isActive = false;
+            _lifetimeTimer = 0f;
+
+            ReturnedToPool?.Invoke(this);
+        }
+
+        private void UpdateLifetime()
+        {
+            _lifetimeTimer -= Time.fixedDeltaTime;
+
+            if (_lifetimeTimer <= 0f)
+            {
+                BeginReturn();
+                return;
+            }
+
+            _movement.Tick(Time.fixedDeltaTime);
+        }
+
+        private void OnMovementRicocheted(Vector3 position)
+        {
+            FaceDirection();
+            _ricochetVisual.OnRicochet();
+
+            Ricocheted?.Invoke(position);
+        }
+
+        private void OnBouncesExhausted()
+        {
+            BeginReturn();
+        }
+
+        private void FaceDirection()
+        {
+            Vector3 direction = _movement.Direction;
+
+            if (direction.sqrMagnitude > Mathf.Epsilon)
+            {
+                transform.rotation = Quaternion.LookRotation(direction);
+            }
+        }
+
+        private void BeginReturn(bool allowEffect = true)
+        {
+            if (_isActive == false)
+            {
+                return;
+            }
+
+            _isActive = false;
+            _movement.Stop();
+
+            bool shouldPlayEffect = allowEffect && CanPlayReturnEffect();
+
+            _returnFeedback.Play(transform.position, shouldPlayEffect);
+
+            Died?.Invoke(this);
+        }
+
+        private bool IsOutsideScreen()
+        {
+            if (_camera == null)
+            {
+                return false;
+            }
+
+            Vector3 viewportPosition = _camera.WorldToViewportPoint(transform.position);
+
+            return viewportPosition.z < 0f || viewportPosition.y < 0f;
+        }
+
+        private bool CanPlayReturnEffect()
+        {
+            if (_camera == null)
+            {
+                return true;
+            }
+
+            Vector3 viewportPosition = _camera.WorldToViewportPoint(transform.position);
+
+            return viewportPosition.z > 0f &&
+                   viewportPosition.x >= 0f &&
+                   viewportPosition.x <= 1f &&
+                   viewportPosition.y >= _returnEffectMinViewportY &&
+                   viewportPosition.y <= 1f;
+        }
     }
 }

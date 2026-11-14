@@ -1,97 +1,106 @@
 using UnityEngine;
+using WestRicochet.Gameplay.Balls;
 
-[RequireComponent(typeof(LineRenderer))]
-public class TrajectoryRenderer : MonoBehaviour
+namespace WestRicochet.Gameplay.Player.Shooting
 {
-    [SerializeField] private TrajectoryPredictor _trajectoryPredictor;
-
-    [Header("Animation")]
-    [SerializeField, Min(0f)] private float _scrollSpeed = 1.5f;
-
-    private LineRenderer _lineRenderer;
-    private Material _lineMaterial;
-
-    private Vector3[] _cachedPoints;
-    private float _textureOffset;
-
-    private void Awake()
+    [RequireComponent(typeof(LineRenderer))]
+    public class TrajectoryRenderer : MonoBehaviour
     {
-        _lineRenderer = GetComponent<LineRenderer>();
-        _lineRenderer.useWorldSpace = true;
-        _lineRenderer.textureMode = LineTextureMode.Tile;
+        [SerializeField] private TrajectoryPredictor _trajectoryPredictor;
 
-        _cachedPoints = new Vector3[_trajectoryPredictor.MaxPointCount];
+        [Header("Animation")]
+        [SerializeField, Min(0f)] private float _scrollSpeed = 1.5f;
 
-        _lineMaterial = _lineRenderer.material;
+        private LineRenderer _lineRenderer;
+        private Material _lineMaterial;
 
-        SetVisible(false);
-    }
+        private Vector3[] _cachedPoints;
+        private float _textureOffset;
 
-    private void Update()
-    {
-        AnimateTexture();
-    }
-
-    private void OnDestroy()
-    {
-        if (_lineMaterial != null)
-        {
-            Destroy(_lineMaterial);
-        }
-    }
-
-    public void UpdateTrajectory(Vector3 origin, Vector3 velocity, BallStats stats)
-    {
-        if (enabled == false)
-        {
-            return;
-        }
-
-        _trajectoryPredictor.CalculateTrajectory(origin, velocity, stats);
-
-        UpdateLine();
-    }
-
-    public void SetVisible(bool isVisible)
-    {
-        if (_lineRenderer == null)
+        private void Awake()
         {
             _lineRenderer = GetComponent<LineRenderer>();
+            _lineRenderer.useWorldSpace = true;
+            _lineRenderer.textureMode = LineTextureMode.Tile;
+
+            _cachedPoints = new Vector3[_trajectoryPredictor.MaxPointCount];
+
+            _lineMaterial = _lineRenderer.material;
+
+            SetVisible(false);
         }
 
-        _lineRenderer.enabled = isVisible;
-        enabled = isVisible;
-    }
-
-    private void UpdateLine()
-    {
-        int pointCount = _trajectoryPredictor.PointCount;
-        
-        if (pointCount > _cachedPoints.Length)
+        private void Update()
         {
-            return;
+            AnimateTexture();
         }
 
-        _lineRenderer.positionCount = pointCount;
-
-        if (pointCount == 0)
+        private void OnDestroy()
         {
-            return;
+            if (_lineMaterial != null)
+            {
+                Destroy(_lineMaterial);
+            }
         }
 
-        _trajectoryPredictor.GetTrajectoryPoints(_cachedPoints);
-        _lineRenderer.SetPositions(_cachedPoints);
-    }
-
-    private void AnimateTexture()
-    {
-        if (_lineMaterial == null)
+        public void UpdateTrajectory(Vector3 origin, Vector3 velocity, BallStats stats)
         {
-            return;
+            if (enabled == false)
+            {
+                return;
+            }
+
+            _trajectoryPredictor.CalculateTrajectory(origin, velocity, stats);
+
+            UpdateLine();
         }
 
-        _textureOffset -= _scrollSpeed * Time.deltaTime;
+        public void SetVisible(bool isVisible)
+        {
+            if (_lineRenderer == null)
+            {
+                _lineRenderer = GetComponent<LineRenderer>();
+            }
 
-        _lineMaterial.mainTextureOffset = new Vector2(_textureOffset, 0f);
+            _lineRenderer.enabled = isVisible;
+            enabled = isVisible;
+        }
+
+        private void UpdateLine()
+        {
+            int pointCount = _trajectoryPredictor.PointCount;
+
+            if (pointCount > _cachedPoints.Length)
+            {
+                return;
+            }
+
+            if (pointCount == 0)
+            {
+                _lineRenderer.positionCount = 0;
+                return;
+            }
+
+            _trajectoryPredictor.GetTrajectoryPoints(_cachedPoints);
+
+            _lineRenderer.positionCount = pointCount;
+
+            for (int i = 0; i < pointCount; i++)
+            {
+                _lineRenderer.SetPosition(i, _cachedPoints[i]);
+            }
+        }
+
+        private void AnimateTexture()
+        {
+            if (_lineMaterial == null)
+            {
+                return;
+            }
+
+            _textureOffset -= _scrollSpeed * Time.deltaTime;
+
+            _lineMaterial.mainTextureOffset = new Vector2(_textureOffset, 0f);
+        }
     }
 }

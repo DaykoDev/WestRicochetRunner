@@ -1,158 +1,166 @@
 using System.Collections.Generic;
 using UnityEngine;
+using WestRicochet.Gameplay.Balls.Movement;
 
-public sealed class BallCollisionResolver
+namespace WestRicochet.Gameplay.Balls.Collision
 {
-    private const int MaxPenetrationPasses = 3;
-
-    private readonly Transform _transform;
-    private readonly SphereCollider _sphereCollider;
-    private readonly BallMovementSettings _settings;
-
-    private readonly RaycastHit[] _hits;
-    private readonly Collider[] _overlapHits;
-
-    private readonly HashSet<Collider> _contactColliders = new();
-    private readonly List<Collider> _finishedContacts = new();
-
-    public BallCollisionResolver(Transform ballTransform, SphereCollider sphereCollider, BallMovementSettings settings)
+    public sealed class BallCollisionResolver
     {
-        _transform = ballTransform;
-        _sphereCollider = sphereCollider;
-        _settings = settings;
+        private const int MaxPenetrationPasses = 3;
+        private const float ContactReleaseDistanceMultiplier = 3f;
 
-        _sphereCollider.radius = _settings.Radius;
-        _sphereCollider.isTrigger = true;
+        private readonly Transform _transform;
+        private readonly SphereCollider _sphereCollider;
+        private readonly BallMovementSettings _settings;
 
-        _hits = new RaycastHit[_settings.CastBufferSize];
-        _overlapHits = new Collider[_settings.CastBufferSize];
-    }
+        private readonly RaycastHit[] _hits;
+        private readonly Collider[] _overlapHits;
 
-    public void Reset()
-    {
-        _contactColliders.Clear();
-        _finishedContacts.Clear();
-    }
+        private readonly HashSet<Collider> _contactColliders = new();
+        private readonly List<Collider> _finishedContacts = new();
 
-    public void PrepareStep()
-    {
-        UpdateContactColliders();
-        ResolvePenetration();
-    }
-
-    public bool TryGetCollision(Vector3 direction, float distance, out RaycastHit hit, out Vector3 normal)
-    {
-        return BallCollisionQuery.SphereCast(
-            _transform.position,
-            _settings.Radius,
-            direction,
-            distance,
-            _hits,
-            _settings.CollisionMask,
-            out hit,
-            out normal,
-            _contactColliders);
-    }
-
-    public void RegisterContact(Collider collider)
-    {
-        if (collider != null)
+        public BallCollisionResolver(
+            Transform ballTransform,
+            SphereCollider sphereCollider,
+            BallMovementSettings settings)
         {
-            _contactColliders.Add(collider);
+            _transform = ballTransform;
+            _sphereCollider = sphereCollider;
+            _settings = settings;
+
+            _sphereCollider.radius = _settings.Radius;
+            _sphereCollider.isTrigger = true;
+
+            _hits = new RaycastHit[_settings.CastBufferSize];
+            _overlapHits = new Collider[_settings.CastBufferSize];
         }
-    }
 
-    public float Separate(RaycastHit hit, Vector3 normal)
-    {
-        float separation = BallCollisionQuery.GetSeparationDistance(hit, _settings);
-
-        _transform.position += normal * separation;
-
-        return separation;
-    }
-
-    private void ResolvePenetration()
-    {
-        for (int pass = 0; pass < MaxPenetrationPasses; pass++)
+        public void Reset()
         {
-            int hitCount = Physics.OverlapSphereNonAlloc(
+            _contactColliders.Clear();
+            _finishedContacts.Clear();
+        }
+
+        public void PrepareStep()
+        {
+            UpdateContactColliders();
+            ResolvePenetration();
+        }
+
+        public bool TryGetCollision(Vector3 direction, float distance, out RaycastHit hit, out Vector3 normal)
+        {
+            return BallCollisionQuery.SphereCast(
                 _transform.position,
                 _settings.Radius,
-                _overlapHits,
+                direction,
+                distance,
+                _hits,
                 _settings.CollisionMask,
-                QueryTriggerInteraction.Ignore);
+                out hit,
+                out normal,
+                _contactColliders);
+        }
 
-            bool hasPenetration = false;
-
-            for (int i = 0; i < hitCount; i++)
+        public void RegisterContact(Collider collider)
+        {
+            if (collider != null)
             {
-                Collider other = _overlapHits[i];
+                _contactColliders.Add(collider);
+            }
+        }
 
-                if (other == null || other == _sphereCollider)
-                {
-                    continue;
-                }
+        public float Separate(RaycastHit hit, Vector3 normal)
+        {
+            float separation = BallCollisionQuery.GetSeparationDistance(_settings);
 
-                bool hasOverlap = Physics.ComputePenetration(
-                    _sphereCollider,
+            _transform.position += normal * separation;
+
+            return separation;
+        }
+
+        private void ResolvePenetration()
+        {
+            for (int pass = 0; pass < MaxPenetrationPasses; pass++)
+            {
+                int hitCount = Physics.OverlapSphereNonAlloc(
                     _transform.position,
-                    _transform.rotation,
-                    other,
-                    other.transform.position,
-                    other.transform.rotation,
-                    out Vector3 separationDirection,
-                    out float separationDistance);
+                    _settings.Radius,
+                    _overlapHits,
+                    _settings.CollisionMask,
+                    QueryTriggerInteraction.Ignore);
 
-                if (hasOverlap == false || separationDistance <= 0f)
+                bool hasPenetration = false;
+
+                for (int i = 0; i < hitCount; i++)
                 {
-                    continue;
+                    Collider other = _overlapHits[i];
+
+                    if (other == null || other == _sphereCollider)
+                    {
+                        continue;
+                    }
+
+                    bool hasOverlap = Physics.ComputePenetration(
+                        _sphereCollider,
+                        _transform.position,
+                        _transform.rotation,
+                        other,
+                        other.transform.position,
+                        other.transform.rotation,
+                        out Vector3 separationDirection,
+                        out float separationDistance);
+
+                    if (hasOverlap == false || separationDistance <= 0f)
+                    {
+                        continue;
+                    }
+
+                    _transform.position += separationDirection * (separationDistance + _settings.CollisionOffset);
+
+                    hasPenetration = true;
                 }
 
-                _transform.position += separationDirection * (separationDistance + _settings.CollisionOffset);
-
-                hasPenetration = true;
+                if (hasPenetration == false)
+                {
+                    return;
+                }
             }
+        }
 
-            if (hasPenetration == false)
+        private void UpdateContactColliders()
+        {
+            foreach (Collider contact in _contactColliders)
             {
-                return;
+                if (CanReleaseContact(contact))
+                {
+                    _finishedContacts.Add(contact);
+                }
             }
-        }
-    }
 
-    private void UpdateContactColliders()
-    {
-        foreach (Collider contact in _contactColliders)
-        {
-            if (CanReleaseContact(contact))
+            foreach (Collider contact in _finishedContacts)
             {
-                _finishedContacts.Add(contact);
+                _contactColliders.Remove(contact);
             }
+
+            _finishedContacts.Clear();
         }
 
-        foreach (Collider contact in _finishedContacts)
+        private bool CanReleaseContact(Collider contact)
         {
-            _contactColliders.Remove(contact);
+            if (contact == null ||
+                contact.enabled == false ||
+                contact.gameObject.activeInHierarchy == false)
+            {
+                return true;
+            }
+
+            float releaseDistance = _settings.Radius + _settings.CollisionOffset * ContactReleaseDistanceMultiplier;
+
+            Vector3 closestPoint = contact.ClosestPoint(_transform.position);
+
+            float sqrDistance = (_transform.position - closestPoint).sqrMagnitude;
+
+            return sqrDistance > releaseDistance * releaseDistance;
         }
-
-        _finishedContacts.Clear();
-    }
-
-    private bool CanReleaseContact(Collider contact)
-    {
-        if (contact == null ||
-            contact.enabled == false ||
-            contact.gameObject.activeInHierarchy == false)
-        {
-            return true;
-        }
-
-        float releaseDistance = _settings.Radius + _settings.CollisionOffset * 3f;
-
-        Vector3 closestPoint = contact.ClosestPoint(_transform.position);
-
-        float sqrDistance = (_transform.position - closestPoint).sqrMagnitude;
-
-        return sqrDistance > releaseDistance * releaseDistance;
     }
 }

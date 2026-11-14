@@ -1,8 +1,12 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class UpgradeGateSpawnPoints : MonoBehaviour
+namespace WestRicochet.Gameplay.Upgrades.Spawning
 {
-    [SerializeField] private Transform[] _points;
+    public class UpgradeGateSpawnPoints : MonoBehaviour
+    {
+        [SerializeField] private Transform[] _points;
 
-    public Transform[] Points => _points;
+        public IReadOnlyList<Transform> Points => _points;
+    }
 }

@@ -1,5 +1,8 @@
-public interface IState
+namespace WestRicochet.StateMachine
 {
-    void Enter();
-    void Exit();
+    public interface IState
+    {
+        void Enter();
+        void Exit();
+    }
 }

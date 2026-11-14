@@ -1,195 +1,204 @@
 using System;
 using UnityEngine;
+using WestRicochet.Gameplay.Balls.Collision;
+using WestRicochet.Gameplay.Obstacles.Core;
 
-public sealed class BallMovement
+namespace WestRicochet.Gameplay.Balls.Movement
 {
-    private readonly Ball _ball;
-    private readonly Transform _transform;
-    private readonly BallMovementSettings _settings;
-    private readonly BallCollisionResolver _collisionResolver;
-    private readonly BallGateInteraction _gateInteraction;
-
-    private BallStats _stats;
-    private Vector3 _direction;
-
-    private float _launchSpeed;
-    private float _effectiveSpeed;
-    private float _pendingDistance;
-    private float _planeY;
-
-    private int _bounceCount;
-    private IDamageable _lastDamaged;
-
-    public BallMovement(Ball ball, Transform ballTransform, BallMovementSettings settings, BallCollisionResolver collisionResolver)
+    public sealed class BallMovement
     {
-        _ball = ball;
-        _transform = ballTransform;
-        _settings = settings;
-        _collisionResolver = collisionResolver;
+        private readonly Ball _ball;
+        private readonly Transform _transform;
+        private readonly BallMovementSettings _settings;
+        private readonly BallCollisionResolver _collisionResolver;
+        private readonly BallGateInteraction _gateInteraction;
 
-        _gateInteraction = new BallGateInteraction(settings);
-    }
+        private BallStats _stats;
+        private Vector3 _direction;
 
-    public Vector3 Direction => _direction;
+        private float _launchSpeed;
+        private float _effectiveSpeed;
+        private float _pendingDistance;
+        private float _planeY;
 
-    public event Action<Vector3> Ricocheted;
-    public event Action BouncesExhausted;
+        private int _bounceCount;
+        private IDamageable _lastDamaged;
 
-    public void Launch(Vector3 velocity, BallStats stats)
-    {
-        _stats = stats;
-        _planeY = _transform.position.y;
-
-        _stats.MaxBounces = Mathf.Clamp(_stats.MaxBounces, 0, _settings.MaxSupportedBounces);
-
-        _launchSpeed = velocity.magnitude;
-        _effectiveSpeed = _launchSpeed;
-        _direction = Vector3.ProjectOnPlane(velocity, Vector3.up).normalized;
-
-        _bounceCount = 0;
-        _lastDamaged = null;
-        _pendingDistance = 0f;
-
-        _collisionResolver.Reset();
-    }
-
-    public void Tick(float deltaTime)
-    {
-        float distance = _effectiveSpeed * deltaTime + _pendingDistance;
-
-        _pendingDistance = 0f;
-
-        Move(distance, deltaTime);
-
-        Vector3 position = _transform.position;
-        position.y = _planeY;
-        _transform.position = position;
-    }
-
-    public void Stop()
-    {
-        _pendingDistance = 0f;
-    }
-
-    public void Reset()
-    {
-        _stats = default;
-        _direction = Vector3.zero;
-
-        _launchSpeed = 0f;
-        _effectiveSpeed = 0f;
-        _pendingDistance = 0f;
-
-        _bounceCount = 0;
-        _lastDamaged = null;
-
-        _collisionResolver.Reset();
-    }
-
-    private void Move(float distance, float deltaTime)
-    {
-        _collisionResolver.PrepareStep();
-
-        float remainingDistance = distance;
-        int collisionCount = 0;
-
-        while (remainingDistance > 0f && collisionCount < _settings.MaxCollisionsPerStep)
+        public BallMovement(
+            Ball ball,
+            Transform ballTransform,
+            BallMovementSettings settings,
+            BallCollisionResolver collisionResolver)
         {
-            bool hasHit = _collisionResolver.TryGetCollision(
-                _direction,
-                remainingDistance,
-                out RaycastHit hit,
-                out Vector3 normal);
+            _ball = ball;
+            _transform = ballTransform;
+            _settings = settings;
+            _collisionResolver = collisionResolver;
 
-            if (hasHit == false)
-            {
-                MoveWithoutCollision(remainingDistance);
-                return;
-            }
+            _gateInteraction = new BallGateInteraction(settings);
+        }
+        
+        public event Action<Vector3> Ricocheted;
+        public event Action BouncesExhausted;
 
-            bool hasNoMovementProgress = hit.distance <= BallCollisionQuery.ContactEpsilon;
+        public Vector3 Direction => _direction;
 
-            if (hasNoMovementProgress && collisionCount > 0)
-            {
-                Stop();
-                return;
-            }
+        public void Launch(Vector3 velocity, BallStats stats)
+        {
+            _stats = stats;
+            _planeY = _transform.position.y;
 
-            MoveToCollision(hit);
+            _stats.MaxBounces = Mathf.Clamp(_stats.MaxBounces, 0, _settings.MaxSupportedBounces);
 
-            remainingDistance -= Mathf.Max(0f, hit.distance);
+            _launchSpeed = velocity.magnitude;
+            _effectiveSpeed = _launchSpeed;
+            _direction = Vector3.ProjectOnPlane(velocity, Vector3.up).normalized;
 
-            _collisionResolver.RegisterContact(hit.collider);
+            _bounceCount = 0;
+            _lastDamaged = null;
+            _pendingDistance = 0f;
 
-            ApplyDamage(hit.collider);
-            ApplyRicochet(normal);
-
-            _bounceCount++;
-            collisionCount++;
-
-            Ricocheted?.Invoke(_transform.position);
-
-            float separation = _collisionResolver.Separate(hit, normal);
-
-            remainingDistance = Mathf.Max(0f, remainingDistance - separation);
-
-            if (_bounceCount > _stats.MaxBounces)
-            {
-                BouncesExhausted?.Invoke();
-                return;
-            }
-
-            if (hasNoMovementProgress)
-            {
-                Stop();
-                return;
-            }
+            _collisionResolver.Reset();
         }
 
-        float maxPendingDistance = _effectiveSpeed * deltaTime;
-
-        _pendingDistance = Mathf.Min(remainingDistance, maxPendingDistance);
-    }
-
-    private void MoveWithoutCollision(float distance)
-    {
-        Vector3 startPosition = _transform.position;
-        Vector3 endPosition = startPosition + _direction * distance;
-
-        _gateInteraction.ChargeAlongSegment(_ball, startPosition, endPosition);
-
-        _transform.position = endPosition;
-    }
-
-    private void MoveToCollision(RaycastHit hit)
-    {
-        float traveledDistance = Mathf.Max(0f, hit.distance);
-
-        Vector3 hitCenter = _transform.position + _direction * traveledDistance;
-
-        _gateInteraction.ChargeAlongSegment(_ball, _transform.position, hitCenter);
-
-        _transform.position = hitCenter;
-    }
-
-    private void ApplyDamage(Collider collider)
-    {
-        IDamageable damageable = collider.GetComponentInParent<IDamageable>();
-
-        if (damageable != null && ReferenceEquals(damageable, _lastDamaged) == false)
+        public void Tick(float deltaTime)
         {
-            damageable.TakeDamage(_stats.Damage);
+            float distance = _effectiveSpeed * deltaTime + _pendingDistance;
+
+            _pendingDistance = 0f;
+
+            Move(distance, deltaTime);
+
+            Vector3 position = _transform.position;
+            position.y = _planeY;
+            _transform.position = position;
         }
 
-        _lastDamaged = damageable;
-    }
+        public void Stop()
+        {
+            _pendingDistance = 0f;
+        }
 
-    private void ApplyRicochet(Vector3 normal)
-    {
-        _direction = BallRicochet.CalculateDirection(_direction, normal, _settings.MinBounceAngle);
+        public void Reset()
+        {
+            _stats = default;
+            _direction = Vector3.zero;
 
-        float maxSpeed = _launchSpeed * _settings.MaxSpeedMultiplierAfterRicochet;
+            _launchSpeed = 0f;
+            _effectiveSpeed = 0f;
+            _pendingDistance = 0f;
 
-        _effectiveSpeed = Mathf.Min( _effectiveSpeed * _settings.SpeedMultiplierAfterRicochet, maxSpeed);
+            _bounceCount = 0;
+            _lastDamaged = null;
+
+            _collisionResolver.Reset();
+        }
+
+        private void Move(float distance, float deltaTime)
+        {
+            _collisionResolver.PrepareStep();
+
+            float remainingDistance = distance;
+            int collisionCount = 0;
+
+            while (remainingDistance > 0f && collisionCount < _settings.MaxCollisionsPerStep)
+            {
+                bool hasHit = _collisionResolver.TryGetCollision(
+                    _direction,
+                    remainingDistance,
+                    out RaycastHit hit,
+                    out Vector3 normal);
+
+                if (hasHit == false)
+                {
+                    MoveWithoutCollision(remainingDistance);
+                    return;
+                }
+
+                bool hasNoMovementProgress = hit.distance <= BallCollisionQuery.ContactEpsilon;
+
+                if (hasNoMovementProgress && collisionCount > 0)
+                {
+                    Stop();
+                    return;
+                }
+
+                MoveToCollision(hit);
+
+                remainingDistance -= Mathf.Max(0f, hit.distance);
+
+                _collisionResolver.RegisterContact(hit.collider);
+
+                ApplyDamage(hit.collider);
+                ApplyRicochet(normal);
+
+                _bounceCount++;
+                collisionCount++;
+
+                Ricocheted?.Invoke(_transform.position);
+
+                float separation = _collisionResolver.Separate(hit, normal);
+
+                remainingDistance = Mathf.Max(0f, remainingDistance - separation);
+
+                if (_bounceCount > _stats.MaxBounces)
+                {
+                    BouncesExhausted?.Invoke();
+                    return;
+                }
+
+                if (hasNoMovementProgress)
+                {
+                    Stop();
+                    return;
+                }
+            }
+
+            float maxPendingDistance = _effectiveSpeed * deltaTime;
+
+            _pendingDistance = Mathf.Min(remainingDistance, maxPendingDistance);
+        }
+
+        private void MoveWithoutCollision(float distance)
+        {
+            Vector3 startPosition = _transform.position;
+            Vector3 endPosition = startPosition + _direction * distance;
+
+            _gateInteraction.ChargeAlongSegment(_ball, startPosition, endPosition);
+
+            _transform.position = endPosition;
+        }
+
+        private void MoveToCollision(RaycastHit hit)
+        {
+            float traveledDistance = Mathf.Max(0f, hit.distance);
+
+            Vector3 hitCenter = _transform.position + _direction * traveledDistance;
+
+            _gateInteraction.ChargeAlongSegment(_ball, _transform.position, hitCenter);
+
+            _transform.position = hitCenter;
+        }
+
+        private void ApplyDamage(Collider collider)
+        {
+            IDamageable damageable = collider.GetComponentInParent<IDamageable>();
+
+            if (damageable != null && ReferenceEquals(damageable, _lastDamaged) == false)
+            {
+                damageable.TakeDamage(_stats.Damage);
+            }
+
+            _lastDamaged = damageable;
+        }
+
+        private void ApplyRicochet(Vector3 normal)
+        {
+            _direction = BallRicochet.CalculateDirection(_direction, normal, _settings.MinBounceAngle);
+
+            float maxSpeed = _launchSpeed * _settings.MaxSpeedMultiplierAfterRicochet;
+
+            _effectiveSpeed = Mathf.Min(_effectiveSpeed * _settings.SpeedMultiplierAfterRicochet, maxSpeed);
+        }
     }
 }

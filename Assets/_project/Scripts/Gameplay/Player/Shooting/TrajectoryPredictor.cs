@@ -1,99 +1,125 @@
 using System;
 using UnityEngine;
+using WestRicochet.Gameplay.Balls;
+using WestRicochet.Gameplay.Balls.Collision;
+using WestRicochet.Gameplay.Balls.Movement;
 
-public class TrajectoryPredictor : MonoBehaviour
+namespace WestRicochet.Gameplay.Player.Shooting
 {
-    private const int PreviewBounceCount = 1;
-
-    [Header("Settings")]
-    [SerializeField] private BallMovementSettings _movementSettings;
-
-    [Header("Trajectory")]
-    [SerializeField, Min(0.1f)] private float _maxDistance = 30f;
-
-    private RaycastHit[] _raycastHits;
-    private Vector3[] _trajectoryPoints;
-
-    public int PointCount { get; private set; }
-    public int MaxPointCount => PreviewBounceCount + 2;
-
-    private void Awake()
+    public class TrajectoryPredictor : MonoBehaviour
     {
-        _raycastHits = new RaycastHit[_movementSettings.CastBufferSize];
-        _trajectoryPoints = new Vector3[MaxPointCount];
-    }
+        private const int PreviewBounceCount = 1;
 
-    public int CalculateTrajectory(Vector3 origin, Vector3 velocity, BallStats stats)
-    {
-        PointCount = 0;
-        float speed = velocity.magnitude;
+        [Header("Settings")]
+        [SerializeField] private BallMovementSettings _movementSettings;
 
-        if (enabled == false || speed < Mathf.Epsilon)
+        [Header("Trajectory")]
+        [SerializeField, Min(0.1f)] private float _maxDistance = 30f;
+
+        private RaycastHit[] _raycastHits;
+        private Vector3[] _trajectoryPoints;
+
+        public int PointCount { get; private set; }
+        public int MaxPointCount => PreviewBounceCount + 2;
+
+        private void Awake()
         {
+            if (_movementSettings == null)
+            {
+                Debug.LogError("TrajectoryPredictor: MovementSettings is not assigned.", this);
+
+                enabled = false;
+                return;
+            }
+
+            _raycastHits = new RaycastHit[_movementSettings.CastBufferSize];
+            _trajectoryPoints = new Vector3[MaxPointCount];
+        }
+
+        public int CalculateTrajectory(Vector3 origin, Vector3 velocity, BallStats stats)
+        {
+            PointCount = 0;
+            float speed = velocity.magnitude;
+
+            if (enabled == false || speed < Mathf.Epsilon)
+            {
+                return PointCount;
+            }
+
+            int maxBounces = Mathf.Min(stats.MaxBounces, PreviewBounceCount);
+            Vector3 direction = velocity / speed;
+            Vector3 simulationOrigin = origin;
+            float remainingDistance = _maxDistance;
+            int bounceCount = 0;
+
+            _trajectoryPoints[PointCount++] = origin;
+
+            while (remainingDistance > 0f && PointCount < _trajectoryPoints.Length)
+            {
+                bool hasHit = BallCollisionQuery.SphereCast(
+                    simulationOrigin,
+                    _movementSettings.Radius,
+                    direction,
+                    remainingDistance,
+                    _raycastHits,
+                    _movementSettings.CollisionMask,
+                    out RaycastHit hit,
+                    out Vector3 normal
+                 );
+
+                if (hasHit == false)
+                {
+                    _trajectoryPoints[PointCount++] = simulationOrigin + direction * remainingDistance;
+                    break;
+                }
+
+                float traveledDistance = Mathf.Max(0f, hit.distance);
+                Vector3 hitCenter = simulationOrigin + direction * traveledDistance;
+
+                _trajectoryPoints[PointCount++] = hitCenter;
+                remainingDistance = Mathf.Max(0f, remainingDistance - traveledDistance);
+
+                if (bounceCount >= maxBounces)
+                {
+                    break;
+                }
+
+                direction = BallRicochet.CalculateDirection(direction, normal, _movementSettings.MinBounceAngle);
+
+                float separation = BallCollisionQuery.GetSeparationDistance(_movementSettings);
+
+                simulationOrigin = hitCenter + normal * separation;
+
+                remainingDistance = Mathf.Max(0f, remainingDistance - separation);
+
+                bounceCount++;
+
+                if (hit.distance <= BallCollisionQuery.ContactEpsilon)
+                {
+                    break;
+                }
+            }
+
             return PointCount;
         }
 
-        int maxBounces = Mathf.Min(stats.MaxBounces, PreviewBounceCount);
-        Vector3 direction = velocity / speed;
-        Vector3 simulationOrigin = origin;
-        float remainingDistance = _maxDistance;
-        int bounceCount = 0;
-
-        _trajectoryPoints[PointCount++] = origin;
-
-        while (remainingDistance > 0f && PointCount < _trajectoryPoints.Length)
+        public void GetTrajectoryPoints(Vector3[] destinationArray)
         {
-            bool hasHit = BallCollisionQuery.SphereCast(
-                simulationOrigin,
-                _movementSettings.Radius,
-                direction,
-                remainingDistance,
-                _raycastHits,
-                _movementSettings.CollisionMask,
-                out RaycastHit hit,
-                out Vector3 normal
-             );
-
-            if (hasHit == false)
+            if (destinationArray == null)
             {
-                _trajectoryPoints[PointCount++] = simulationOrigin + direction * remainingDistance;
-                break;
+                throw new ArgumentNullException(nameof(destinationArray));
             }
 
-            float traveledDistance = Mathf.Max(0f, hit.distance);
-            Vector3 hitCenter = simulationOrigin + direction * traveledDistance;
-
-            _trajectoryPoints[PointCount++] = hitCenter;
-            remainingDistance = Mathf.Max(0f, remainingDistance - traveledDistance);
-
-            if (bounceCount >= maxBounces)
+            if (destinationArray.Length < PointCount)
             {
-                break;
+                throw new ArgumentException(
+                    "Destination array is smaller than the trajectory point count.",
+                    nameof(destinationArray));
             }
 
-            direction = BallRicochet.CalculateDirection(direction, normal, _movementSettings.MinBounceAngle);
+            int count = Mathf.Min(PointCount, destinationArray.Length);
 
-            float separation = BallCollisionQuery.GetSeparationDistance(hit, _movementSettings);
-
-            simulationOrigin = hitCenter + normal * separation;
-
-            remainingDistance = Mathf.Max(0f, remainingDistance - separation);
-
-            bounceCount++;
-
-            if (hit.distance <= BallCollisionQuery.ContactEpsilon)
-            {
-                break;
-            }
+            Array.Copy(_trajectoryPoints, destinationArray, count);
         }
-
-        return PointCount;
-    }
-
-    public void GetTrajectoryPoints(Vector3[] destinationArray)
-    {
-        int count = Mathf.Min(PointCount, destinationArray.Length);
-
-        Array.Copy(_trajectoryPoints, destinationArray, count);
     }
 }

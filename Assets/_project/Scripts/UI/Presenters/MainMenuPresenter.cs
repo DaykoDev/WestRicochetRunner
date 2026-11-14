@@ -1,140 +1,147 @@
 using System;
+using WestRicochet.Gameplay.Rewards.Flow;
+using WestRicochet.Gameplay.Upgrades;
+using WestRicochet.Meta;
+using WestRicochet.UI.Screens;
 
-public class MainMenuPresenter : IDisposable
+namespace WestRicochet.UI.Presenters
 {
-    private readonly MainMenuScreen _screen;
-    private readonly UpgradeService _upgradeService;
-    private readonly RewardedCoinsFlow _coinsFlow;
-
-    public MainMenuPresenter(MainMenuScreen screen, UpgradeService upgradeService, RewardedCoinsFlow coinsFlow)
+    public class MainMenuPresenter : IDisposable
     {
-        _screen = screen;
-        _upgradeService = upgradeService;
-        _coinsFlow = coinsFlow;
+        private readonly MainMenuScreen _screen;
+        private readonly UpgradeService _upgradeService;
+        private readonly RewardedCoinsFlow _coinsFlow;
 
-        _screen.StartClicked += OnStartClicked;
-        _screen.UpgradePurchaseRequested += OnUpgradePurchaseRequested;
-        _screen.CoinsRewardClicked += OnCoinsRewardClicked;
-        _screen.SettingsClicked += OnSettingsClicked;
-        _screen.LeaderboardClicked += OnLeaderboardClicked;
-
-        _upgradeService.LevelChanged += OnLevelChanged;
-        _upgradeService.BalanceChanged += OnBalanceChanged;
-        _upgradeService.UpgradeLevelChanged += OnUpgradeLevelChanged;
-
-        _coinsFlow.AvailabilityChanged += OnCoinsRewardAvailabilityChanged;
-    }
-
-    public event Action StartRequested;
-    public event Action SettingsRequested;
-    public event Action LeaderboardRequested;
-
-    public void HandleStateEntered()
-    {
-        _screen.Show();
-        _screen.SetLevel(_upgradeService.CurrentLevel);
-        _screen.SetCoins(_upgradeService.Balance);
-
-        RefreshCoinsReward();
-        RefreshAllUpgradeViews();
-    }
-
-    public void HandleStateExited()
-    {
-        _screen.Hide();
-    }
-
-    public void Dispose()
-    {
-        _screen.StartClicked -= OnStartClicked;
-        _screen.UpgradePurchaseRequested -= OnUpgradePurchaseRequested;
-        _screen.CoinsRewardClicked -= OnCoinsRewardClicked;
-        _screen.SettingsClicked -= OnSettingsClicked;
-        _screen.LeaderboardClicked -= OnLeaderboardClicked;
-
-        _upgradeService.LevelChanged -= OnLevelChanged;
-        _upgradeService.BalanceChanged -= OnBalanceChanged;
-        _upgradeService.UpgradeLevelChanged -= OnUpgradeLevelChanged;
-
-        _coinsFlow.AvailabilityChanged -= OnCoinsRewardAvailabilityChanged;
-    }
-
-    private void RefreshAllUpgradeViews()
-    {
-        RefreshUpgradeView(PermanentUpgradeType.StartBallCount);
-        RefreshUpgradeView(PermanentUpgradeType.BallDamage);
-        RefreshUpgradeView(PermanentUpgradeType.IncomeMultiplier);
-        RefreshUpgradeView(PermanentUpgradeType.BounceCount);
-    }
-
-    private void RefreshUpgradeView(PermanentUpgradeType type)
-    {
-        bool isUnlocked = _upgradeService.IsUnlocked(type);
-
-        _screen.SetUpgradeUnlocked(type, isUnlocked);
-
-        if (isUnlocked == false)
+        public MainMenuPresenter(MainMenuScreen screen, UpgradeService upgradeService, RewardedCoinsFlow coinsFlow)
         {
-            return;
+            _screen = screen;
+            _upgradeService = upgradeService;
+            _coinsFlow = coinsFlow;
+
+            _screen.StartClicked += OnStartClicked;
+            _screen.UpgradePurchaseRequested += OnUpgradePurchaseRequested;
+            _screen.CoinsRewardClicked += OnCoinsRewardClicked;
+            _screen.SettingsClicked += OnSettingsClicked;
+            _screen.LeaderboardClicked += OnLeaderboardClicked;
+
+            _upgradeService.LevelChanged += OnLevelChanged;
+            _upgradeService.BalanceChanged += OnBalanceChanged;
+            _upgradeService.UpgradeLevelChanged += OnUpgradeLevelChanged;
+
+            _coinsFlow.AvailabilityChanged += OnCoinsRewardAvailabilityChanged;
         }
 
-        int level = _upgradeService.GetLevel(type);
-        int maxLevel = _upgradeService.GetMaxLevel(type);
-        int nextCost = _upgradeService.GetNextCost(type);
-        bool canPurchase = _upgradeService.CanPurchase(type);
+        public event Action StartRequested;
+        public event Action SettingsRequested;
+        public event Action LeaderboardRequested;
 
-        _screen.SetUpgradeInfo(type, level, maxLevel, nextCost, canPurchase);
-    }
+        public void HandleStateEntered()
+        {
+            _screen.Show();
+            _screen.SetLevel(_upgradeService.CurrentLevel);
+            _screen.SetCoins(_upgradeService.Balance);
 
-    private void OnUpgradePurchaseRequested(PermanentUpgradeType type)
-    {
-        _upgradeService.TryPurchase(type);
-    }
+            RefreshCoinsReward();
+            RefreshAllUpgradeViews();
+        }
 
-    private void OnStartClicked()
-    {
-        StartRequested?.Invoke();
-    }
+        public void HandleStateExited()
+        {
+            _screen.Hide();
+        }
 
-    private void OnCoinsRewardClicked()
-    {
-        _coinsFlow.Request();
-    }
+        public void Dispose()
+        {
+            _screen.StartClicked -= OnStartClicked;
+            _screen.UpgradePurchaseRequested -= OnUpgradePurchaseRequested;
+            _screen.CoinsRewardClicked -= OnCoinsRewardClicked;
+            _screen.SettingsClicked -= OnSettingsClicked;
+            _screen.LeaderboardClicked -= OnLeaderboardClicked;
 
-    private void OnSettingsClicked()
-    {
-        SettingsRequested?.Invoke();
-    }
+            _upgradeService.LevelChanged -= OnLevelChanged;
+            _upgradeService.BalanceChanged -= OnBalanceChanged;
+            _upgradeService.UpgradeLevelChanged -= OnUpgradeLevelChanged;
 
-    private void OnLeaderboardClicked()
-    {
-        LeaderboardRequested?.Invoke();
-    }
+            _coinsFlow.AvailabilityChanged -= OnCoinsRewardAvailabilityChanged;
+        }
 
-    private void OnLevelChanged(int level)
-    {
-        _screen.SetLevel(level);
-        RefreshCoinsReward();
-    }
+        private void RefreshAllUpgradeViews()
+        {
+            RefreshUpgradeView(PermanentUpgradeType.StartBallCount);
+            RefreshUpgradeView(PermanentUpgradeType.BallDamage);
+            RefreshUpgradeView(PermanentUpgradeType.IncomeMultiplier);
+            RefreshUpgradeView(PermanentUpgradeType.BounceCount);
+        }
 
-    private void OnUpgradeLevelChanged(PermanentUpgradeType type, int level)
-    {
-        RefreshUpgradeView(type);
-    }
+        private void RefreshUpgradeView(PermanentUpgradeType type)
+        {
+            bool isUnlocked = _upgradeService.IsUnlocked(type);
 
-    private void OnBalanceChanged(int balance)
-    {
-        _screen.SetCoins(balance);
-        RefreshAllUpgradeViews();
-    }
+            _screen.SetUpgradeUnlocked(type, isUnlocked);
 
-    private void OnCoinsRewardAvailabilityChanged()
-    {
-        RefreshCoinsReward();
-    }
+            if (isUnlocked == false)
+            {
+                return;
+            }
 
-    private void RefreshCoinsReward()
-    {
-        _screen.SetCoinsReward(_coinsFlow.CurrentReward, _coinsFlow.CanRequest);
+            int level = _upgradeService.GetLevel(type);
+            int maxLevel = _upgradeService.GetMaxLevel(type);
+            int nextCost = _upgradeService.GetNextCost(type);
+            bool canPurchase = _upgradeService.CanPurchase(type);
+
+            _screen.SetUpgradeInfo(type, level, maxLevel, nextCost, canPurchase);
+        }
+
+        private void OnUpgradePurchaseRequested(PermanentUpgradeType type)
+        {
+            _upgradeService.TryPurchase(type);
+        }
+
+        private void OnStartClicked()
+        {
+            StartRequested?.Invoke();
+        }
+
+        private void OnCoinsRewardClicked()
+        {
+            _coinsFlow.Request();
+        }
+
+        private void OnSettingsClicked()
+        {
+            SettingsRequested?.Invoke();
+        }
+
+        private void OnLeaderboardClicked()
+        {
+            LeaderboardRequested?.Invoke();
+        }
+
+        private void OnLevelChanged(int level)
+        {
+            _screen.SetLevel(level);
+            RefreshCoinsReward();
+        }
+
+        private void OnUpgradeLevelChanged(PermanentUpgradeType type, int level)
+        {
+            RefreshUpgradeView(type);
+        }
+
+        private void OnBalanceChanged(int balance)
+        {
+            _screen.SetCoins(balance);
+            RefreshAllUpgradeViews();
+        }
+
+        private void OnCoinsRewardAvailabilityChanged()
+        {
+            RefreshCoinsReward();
+        }
+
+        private void RefreshCoinsReward()
+        {
+            _screen.SetCoinsReward(_coinsFlow.CurrentReward, _coinsFlow.CanRequest);
+        }
     }
 }

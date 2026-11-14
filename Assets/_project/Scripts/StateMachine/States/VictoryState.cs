@@ -1,19 +1,22 @@
 using System;
 using UnityEngine;
 
-public class VictoryState : IState
+namespace WestRicochet.StateMachine.States
 {
-    public event Action Entered;
-    public event Action Exited;
-
-    public void Enter()
+    public class VictoryState : IState
     {
-        Time.timeScale = 0f;
-        Entered?.Invoke();
-    }
+        public event Action Entered;
+        public event Action Exited;
 
-    public void Exit()
-    {
-        Exited?.Invoke();
+        public void Enter()
+        {
+            Time.timeScale = 0f;
+            Entered?.Invoke();
+        }
+
+        public void Exit()
+        {
+            Exited?.Invoke();
+        }
     }
 }

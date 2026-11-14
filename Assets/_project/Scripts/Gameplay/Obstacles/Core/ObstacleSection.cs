@@ -1,6 +1,9 @@
-public enum ObstacleSection
+namespace WestRicochet.Gameplay.Obstacles.Core
 {
-    Safe,
-    Bonus,
-    Challenge
+    public enum ObstacleSection
+    {
+        Safe,
+        Bonus,
+        Challenge
+    }
 }

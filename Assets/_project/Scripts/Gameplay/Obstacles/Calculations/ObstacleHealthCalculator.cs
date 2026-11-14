@@ -1,53 +1,57 @@
 using UnityEngine;
+using WestRicochet.Gameplay.Obstacles.Core;
 
-[CreateAssetMenu(fileName = "ObstacleHealthCalculator", menuName = "Game/Calculators/Obstacle Health")]
-public class ObstacleHealthCalculator : ScriptableObject
+namespace WestRicochet.Gameplay.Obstacles.Calculations
 {
-    [Header("Section Coefficients")]
-    [SerializeField, Min(0f)] private float _safeCoefficient = 0.5f;
-    [SerializeField, Min(0f)] private float _bonusCoefficient = 0.75f;
-    [SerializeField, Min(0f)] private float _challengeCoefficient = 1.5f;
-
-    [Header("Level Growth")]
-    [SerializeField, Min(1)] private int _growthChangeLevel = 20;
-    [SerializeField, Min(0f)] private float _earlyGrowth = 0.15f;
-    [SerializeField, Min(0f)] private float _lateGrowth = 0.1f;
-
-    public int Calculate(int baseHP, int level, ObstacleSection section)
+    [CreateAssetMenu(fileName = "ObstacleHealthCalculator", menuName = "Game/Calculators/Obstacle Health")]
+    public class ObstacleHealthCalculator : ScriptableObject
     {
-        float sectionCoefficient = GetSectionCoefficient(section);
-        float growth = CalculateGrowth(level);
+        [Header("Section Coefficients")]
+        [SerializeField, Min(0f)] private float _safeCoefficient = 0.5f;
+        [SerializeField, Min(0f)] private float _bonusCoefficient = 0.75f;
+        [SerializeField, Min(0f)] private float _challengeCoefficient = 1.5f;
 
-        return Mathf.Max(1, Mathf.RoundToInt(baseHP * sectionCoefficient * growth));
-    }
+        [Header("Level Growth")]
+        [SerializeField, Min(1)] private int _growthChangeLevel = 20;
+        [SerializeField, Min(0f)] private float _earlyGrowth = 0.15f;
+        [SerializeField, Min(0f)] private float _lateGrowth = 0.1f;
 
-    private float CalculateGrowth(int level)
-    {
-        level = Mathf.Max(1, level);
-
-        if (level <= _growthChangeLevel)
+        public int Calculate(int baseHP, int level, ObstacleSection section)
         {
-            return 1f + _earlyGrowth * (level - 1);
+            float sectionCoefficient = GetSectionCoefficient(section);
+            float growth = CalculateGrowth(level);
+
+            return Mathf.Max(1, Mathf.RoundToInt(baseHP * sectionCoefficient * growth));
         }
 
-        return 1f + _earlyGrowth * (_growthChangeLevel - 1) + _lateGrowth * (level - _growthChangeLevel);
-    }
-
-    private float GetSectionCoefficient(ObstacleSection section)
-    {
-        switch (section)
+        private float CalculateGrowth(int level)
         {
-            case ObstacleSection.Safe:
-                return _safeCoefficient;
+            level = Mathf.Max(1, level);
 
-            case ObstacleSection.Bonus:
-                return _bonusCoefficient;
+            if (level <= _growthChangeLevel)
+            {
+                return 1f + _earlyGrowth * (level - 1);
+            }
 
-            case ObstacleSection.Challenge:
-                return _challengeCoefficient;
+            return 1f + _earlyGrowth * (_growthChangeLevel - 1) + _lateGrowth * (level - _growthChangeLevel);
+        }
 
-            default:
-                return 1f;
+        private float GetSectionCoefficient(ObstacleSection section)
+        {
+            switch (section)
+            {
+                case ObstacleSection.Safe:
+                    return _safeCoefficient;
+
+                case ObstacleSection.Bonus:
+                    return _bonusCoefficient;
+
+                case ObstacleSection.Challenge:
+                    return _challengeCoefficient;
+
+                default:
+                    return 1f;
+            }
         }
     }
 }

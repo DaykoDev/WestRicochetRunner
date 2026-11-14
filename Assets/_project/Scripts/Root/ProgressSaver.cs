@@ -1,164 +1,173 @@
 using DG.Tweening;
 using System;
+using WestRicochet.Gameplay.Rewards;
+using WestRicochet.Gameplay.Rewards.Flow;
+using WestRicochet.Infrastructure;
+using WestRicochet.Infrastructure.Persistence;
+using WestRicochet.Meta;
+using WestRicochet.StateMachine.States;
 
-public sealed class ProgressSaver : IDisposable
+namespace WestRicochet.Root
 {
-    private const float SettingsSaveDelay = 0.3f;
-
-    private readonly SaveService _saveService;
-    private readonly PlayerProgress _playerProgress;
-    private readonly Wallet _wallet;
-    private readonly SettingsService _settingsService;
-    private readonly MainMenuState _mainMenuState;
-    private readonly RunState _runState;
-    private readonly RewardedCoinsFlow _coinsFlow;
-    private readonly RewardedMultiplierFlow _multiplierFlow;
-
-    private bool _isDisposed;
-    private Tween _settingsSaveTween;
-
-    public ProgressSaver(
-        SaveService saveService,
-        PlayerProgress playerProgress,
-        Wallet wallet,
-        SettingsService settingsService,
-        MainMenuState mainMenuState,
-        RunState runState,
-        RewardedCoinsFlow coinsFlow,
-        RewardedMultiplierFlow multiplierFlow)
+    public sealed class ProgressSaver : IDisposable
     {
-        _saveService = saveService;
-        _playerProgress = playerProgress;
-        _wallet = wallet;
-        _settingsService = settingsService;
-        _mainMenuState = mainMenuState;
-        _runState = runState;
-        _coinsFlow = coinsFlow;
-        _multiplierFlow = multiplierFlow;
+        private const float SettingsSaveDelay = 0.3f;
 
-        Subscribe();
-    }
+        private readonly SaveService _saveService;
+        private readonly PlayerProgress _playerProgress;
+        private readonly Wallet _wallet;
+        private readonly SettingsService _settingsService;
+        private readonly MainMenuState _mainMenuState;
+        private readonly RunState _runState;
+        private readonly RewardedCoinsFlow _coinsFlow;
+        private readonly RewardedMultiplierFlow _multiplierFlow;
 
-    public void SaveAndFlush()
-    {
-        if (_isDisposed)
+        private bool _isDisposed;
+        private Tween _settingsSaveTween;
+
+        public ProgressSaver(
+            SaveService saveService,
+            PlayerProgress playerProgress,
+            Wallet wallet,
+            SettingsService settingsService,
+            MainMenuState mainMenuState,
+            RunState runState,
+            RewardedCoinsFlow coinsFlow,
+            RewardedMultiplierFlow multiplierFlow)
         {
-            return;
+            _saveService = saveService;
+            _playerProgress = playerProgress;
+            _wallet = wallet;
+            _settingsService = settingsService;
+            _mainMenuState = mainMenuState;
+            _runState = runState;
+            _coinsFlow = coinsFlow;
+            _multiplierFlow = multiplierFlow;
+
+            Subscribe();
         }
 
-        PlayerSaveData data = _playerProgress.CreateSaveData(_wallet.Balance);
-
-        data.SoundVolume = _settingsService.SoundVolume;
-        data.MusicVolume = _settingsService.MusicVolume;
-        data.SoundEnabled = _settingsService.SoundEnabled;
-        data.MusicEnabled = _settingsService.MusicEnabled;
-
-        _saveService.Save(data);
-        _saveService.Flush();
-    }
-
-    public void Dispose()
-    {
-        if (_isDisposed)
+        public void SaveAndFlush()
         {
-            return;
+            if (_isDisposed)
+            {
+                return;
+            }
+
+            PlayerSaveData data = _playerProgress.CreateSaveData(_wallet.Balance);
+
+            data.SoundVolume = _settingsService.SoundVolume;
+            data.MusicVolume = _settingsService.MusicVolume;
+            data.SoundEnabled = _settingsService.SoundEnabled;
+            data.MusicEnabled = _settingsService.MusicEnabled;
+
+            _saveService.Save(data);
+            _saveService.Flush();
         }
 
-        _isDisposed = true;
+        public void Dispose()
+        {
+            if (_isDisposed)
+            {
+                return;
+            }
 
-        _settingsSaveTween?.Kill();
-        _settingsSaveTween = null;
+            _isDisposed = true;
 
-        Unsubscribe();
-    }
+            _settingsSaveTween?.Kill();
+            _settingsSaveTween = null;
 
-    private void Subscribe()
-    {
-        _playerProgress.LevelChanged += OnProgressChanged;
-        _playerProgress.UpgradeLevelChanged += OnUpgradeLevelChanged;
-        _playerProgress.TutorialCompleted += OnTutorialCompleted;
+            Unsubscribe();
+        }
 
-        _settingsService.SoundVolumeChanged += OnVolumeChanged;
-        _settingsService.MusicVolumeChanged += OnVolumeChanged;
-        _settingsService.SoundEnabledChanged += OnSettingChanged;
-        _settingsService.MusicEnabledChanged += OnSettingChanged;
+        private void Subscribe()
+        {
+            _playerProgress.LevelChanged += OnProgressChanged;
+            _playerProgress.UpgradeLevelChanged += OnUpgradeLevelChanged;
+            _playerProgress.TutorialCompleted += OnTutorialCompleted;
 
-        _runState.Lost += OnRunLost;
-        _mainMenuState.Entered += OnMainMenuEntered;
+            _settingsService.SoundVolumeChanged += OnVolumeChanged;
+            _settingsService.MusicVolumeChanged += OnVolumeChanged;
+            _settingsService.SoundEnabledChanged += OnSettingChanged;
+            _settingsService.MusicEnabledChanged += OnSettingChanged;
 
-        _coinsFlow.RewardGranted += OnRewardGranted;
-        _multiplierFlow.BonusGranted += OnRewardGranted;
-    }
+            _runState.Lost += OnRunLost;
+            _mainMenuState.Entered += OnMainMenuEntered;
 
-    private void Unsubscribe()
-    {
-        _playerProgress.LevelChanged -= OnProgressChanged;
-        _playerProgress.UpgradeLevelChanged -= OnUpgradeLevelChanged;
-        _playerProgress.TutorialCompleted -= OnTutorialCompleted;
+            _coinsFlow.RewardGranted += OnRewardGranted;
+            _multiplierFlow.BonusGranted += OnRewardGranted;
+        }
 
-        _settingsService.SoundVolumeChanged -= OnVolumeChanged;
-        _settingsService.MusicVolumeChanged -= OnVolumeChanged;
-        _settingsService.SoundEnabledChanged -= OnSettingChanged;
-        _settingsService.MusicEnabledChanged -= OnSettingChanged;
+        private void Unsubscribe()
+        {
+            _playerProgress.LevelChanged -= OnProgressChanged;
+            _playerProgress.UpgradeLevelChanged -= OnUpgradeLevelChanged;
+            _playerProgress.TutorialCompleted -= OnTutorialCompleted;
 
-        _runState.Lost -= OnRunLost;
-        _mainMenuState.Entered -= OnMainMenuEntered;
+            _settingsService.SoundVolumeChanged -= OnVolumeChanged;
+            _settingsService.MusicVolumeChanged -= OnVolumeChanged;
+            _settingsService.SoundEnabledChanged -= OnSettingChanged;
+            _settingsService.MusicEnabledChanged -= OnSettingChanged;
 
-        _coinsFlow.RewardGranted -= OnRewardGranted;
-        _multiplierFlow.BonusGranted -= OnRewardGranted;
-    }
+            _runState.Lost -= OnRunLost;
+            _mainMenuState.Entered -= OnMainMenuEntered;
 
-    private void OnProgressChanged(int level)
-    {
-        SaveAndFlush();
-    }
+            _coinsFlow.RewardGranted -= OnRewardGranted;
+            _multiplierFlow.BonusGranted -= OnRewardGranted;
+        }
 
-    private void OnUpgradeLevelChanged(PermanentUpgradeType type, int level)
-    {
-        SaveAndFlush();
-    }
+        private void OnProgressChanged(int level)
+        {
+            SaveAndFlush();
+        }
 
-    private void OnTutorialCompleted()
-    {
-        SaveAndFlush();
-    }
+        private void OnUpgradeLevelChanged(PermanentUpgradeType type, int level)
+        {
+            SaveAndFlush();
+        }
 
-    private void OnVolumeChanged(float volume)
-    {
-        ScheduleSettingsSave();
-    }
+        private void OnTutorialCompleted()
+        {
+            SaveAndFlush();
+        }
 
-    private void ScheduleSettingsSave()
-    {
-        _settingsSaveTween?.Kill();
+        private void OnVolumeChanged(float volume)
+        {
+            ScheduleSettingsSave();
+        }
 
-        _settingsSaveTween = DOVirtual.DelayedCall(
-                SettingsSaveDelay,
-                () =>
-                {
-                    _settingsSaveTween = null;
-                    SaveAndFlush();
-                })
-            .SetUpdate(true);
-    }
+        private void ScheduleSettingsSave()
+        {
+            _settingsSaveTween?.Kill();
 
-    private void OnSettingChanged(bool isEnabled)
-    {
-        SaveAndFlush();
-    }
+            _settingsSaveTween = DOVirtual.DelayedCall(
+                    SettingsSaveDelay,
+                    () =>
+                    {
+                        _settingsSaveTween = null;
+                        SaveAndFlush();
+                    })
+                .SetUpdate(true);
+        }
 
-    private void OnRunLost()
-    {
-        SaveAndFlush();
-    }
+        private void OnSettingChanged(bool isEnabled)
+        {
+            SaveAndFlush();
+        }
 
-    private void OnMainMenuEntered()
-    {
-        SaveAndFlush();
-    }
+        private void OnRunLost()
+        {
+            SaveAndFlush();
+        }
 
-    private void OnRewardGranted(int amount)
-    {
-        SaveAndFlush();
+        private void OnMainMenuEntered()
+        {
+            SaveAndFlush();
+        }
+
+        private void OnRewardGranted(int amount)
+        {
+            SaveAndFlush();
+        }
     }
 }

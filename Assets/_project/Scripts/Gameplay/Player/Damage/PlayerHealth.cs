@@ -1,75 +1,78 @@
 using System;
 using UnityEngine;
 
-public class PlayerHealth : MonoBehaviour
+namespace WestRicochet.Gameplay.Player.Damage
 {
-    [SerializeField, Min(1)] private int _maxHealth = 3;
-
-    private bool _isDead;
-    private bool _isOneHitDeathEnabled;
-
-    public int CurrentHealth { get; private set; }
-    public int MaxHealth => _maxHealth;
-    public bool IsDead => _isDead;
-
-    public event Action<int, int> HealthChanged;
-    public event Action Died;
-
-    private void Awake()
+    public class PlayerHealth : MonoBehaviour
     {
-        ResetHealth();
-    }
+        [SerializeField, Min(1)] private int _maxHealth = 3;
 
-    public void TakeDamage(int damage)
-    {
-        if (_isDead || damage <= 0)
+        private bool _isDead;
+        private bool _isOneHitDeathEnabled;
+        
+        public event Action<int, int> HealthChanged;
+        public event Action Died;
+
+        public int CurrentHealth { get; private set; }
+        public int MaxHealth => _maxHealth;
+        public bool IsDead => _isDead;
+
+        private void Awake()
         {
-            return;
+            ResetHealth();
         }
 
-        CurrentHealth = _isOneHitDeathEnabled ? 0 : Mathf.Max(0, CurrentHealth - damage);
-
-        HealthChanged?.Invoke(CurrentHealth, MaxHealth);
-
-        if (CurrentHealth == 0)
+        public void TakeDamage(int damage)
         {
+            if (_isDead || damage <= 0)
+            {
+                return;
+            }
+
+            CurrentHealth = _isOneHitDeathEnabled ? 0 : Mathf.Max(0, CurrentHealth - damage);
+
+            HealthChanged?.Invoke(CurrentHealth, MaxHealth);
+
+            if (CurrentHealth == 0)
+            {
+                Die();
+            }
+        }
+
+        public void Kill()
+        {
+            if (_isDead)
+            {
+                return;
+            }
+
+            CurrentHealth = 0;
+            HealthChanged?.Invoke(CurrentHealth, MaxHealth);
             Die();
         }
-    }
 
-    public void Kill()
-    {
-        if (_isDead)
+        public void SetOneHitDeathEnabled(bool isEnabled)
         {
-            return;
+            _isOneHitDeathEnabled = isEnabled;
         }
 
-        CurrentHealth = 0;
-        HealthChanged?.Invoke(CurrentHealth, MaxHealth);
-        Die();
-    }
-
-    public void SetOneHitDeathEnabled(bool isEnabled)
-    {
-        _isOneHitDeathEnabled = isEnabled;
-    }
-
-    public void ResetHealth()
-    {
-        _isOneHitDeathEnabled = false;
-        _isDead = false;
-        CurrentHealth = _maxHealth;
-        HealthChanged?.Invoke(CurrentHealth, MaxHealth);
-    }
-
-    private void Die()
-    {
-        if (_isDead)
+        public void ResetHealth()
         {
-            return;
+            _isOneHitDeathEnabled = false;
+            _isDead = false;
+            CurrentHealth = _maxHealth;
+            HealthChanged?.Invoke(CurrentHealth, MaxHealth);
         }
 
-        _isDead = true;
-        Died?.Invoke();
+        private void Die()
+        {
+            if (_isDead)
+            {
+                return;
+            }
+
+            _isDead = true;
+            Died?.Invoke();
+        }
     }
 }

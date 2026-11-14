@@ -4,100 +4,104 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class VictoryScreen : MonoBehaviour
+namespace WestRicochet.UI.Screens
 {
-    [SerializeField] private Button _mainMenuButton;
-    [SerializeField] private Button _multiplyButton;
-    [SerializeField, Min(0f)] private float _mainMenuButtonDelay = 2f;
-
-    [Header("Reward")]
-    [SerializeField] private TMP_Text _coinsText;
-    [SerializeField, Min(0f)] private float _coinsCountDuration = 0.6f;
-
-    [Header("Wallet")]
-    [SerializeField] private TMP_Text _walletCoinsText;
-
-    private int _displayedCoins;
-    private Tween _coinsTween;
-    private Tween _mainMenuDelayTween;
-
-    public event Action MainMenuClicked;
-    public event Action MultiplyClicked;
-
-    private void OnEnable()
+    public class VictoryScreen : MonoBehaviour
     {
-        _mainMenuButton.onClick.AddListener(OnMainMenuClicked);
-        _multiplyButton.onClick.AddListener(OnMultiplyClicked);
-    }
+        [Header("Buttons")]
+        [SerializeField] private Button _mainMenuButton;
+        [SerializeField] private Button _multiplyButton;
+        [SerializeField, Min(0f)] private float _mainMenuButtonDelay = 2f;
 
-    private void OnDisable()
-    {
-        _mainMenuButton.onClick.RemoveListener(OnMainMenuClicked);
-        _multiplyButton.onClick.RemoveListener(OnMultiplyClicked);
+        [Header("Reward")]
+        [SerializeField] private TMP_Text _coinsText;
+        [SerializeField, Min(0f)] private float _coinsCountDuration = 0.6f;
 
-        _coinsTween?.Kill();
+        [Header("Wallet")]
+        [SerializeField] private TMP_Text _walletCoinsText;
 
-        _mainMenuDelayTween?.Kill();
-        _mainMenuDelayTween = null;
-    }
+        private int _displayedCoins;
+        private Tween _coinsTween;
+        private Tween _mainMenuDelayTween;
 
-    public void Show()
-    {
-        gameObject.SetActive(true);
+        public event Action MainMenuClicked;
+        public event Action MultiplyClicked;
 
-        _mainMenuDelayTween?.Kill();
-
-        _mainMenuButton.gameObject.SetActive(false);
-
-        _mainMenuDelayTween = DOVirtual.DelayedCall(
-                _mainMenuButtonDelay,
-                () =>
-                {
-                    _mainMenuButton.gameObject.SetActive(true);
-                })
-            .SetUpdate(true);
-    }
-
-    public void SetWalletCoins(int coins)
-    {
-        if (_walletCoinsText != null)
+        private void OnEnable()
         {
-            _walletCoinsText.text = coins.ToString();
+            _mainMenuButton.onClick.AddListener(OnMainMenuClicked);
+            _multiplyButton.onClick.AddListener(OnMultiplyClicked);
         }
-    }
 
-    public void Hide()
-    {
-        gameObject.SetActive(false);
-    }
+        private void OnDisable()
+        {
+            _mainMenuButton.onClick.RemoveListener(OnMainMenuClicked);
+            _multiplyButton.onClick.RemoveListener(OnMultiplyClicked);
 
-    public void SetMultiplyAvailable(bool isAvailable)
-    {
-        _multiplyButton.interactable = isAvailable;
-    }
+            _coinsTween?.Kill();
 
-    private void OnMultiplyClicked()
-    {
-        MultiplyClicked?.Invoke();
-    }
+            _mainMenuDelayTween?.Kill();
+            _mainMenuDelayTween = null;
+        }
 
-    public void SetCollectedCoins(int coins)
-    {
-        _coinsTween?.Kill();
-        _coinsTween = DOTween.To(
-                () => _displayedCoins,
-                value =>
-                {
-                    _displayedCoins = value;
-                    _coinsText.text = $"+{value}";
-                },
-                coins,
-                _coinsCountDuration)
-            .SetUpdate(true);
-    }
+        public void Show()
+        {
+            gameObject.SetActive(true);
 
-    private void OnMainMenuClicked()
-    {
-        MainMenuClicked?.Invoke();
+            _mainMenuDelayTween?.Kill();
+
+            _mainMenuButton.gameObject.SetActive(false);
+
+            _mainMenuDelayTween = DOVirtual.DelayedCall(
+                    _mainMenuButtonDelay,
+                    () =>
+                    {
+                        _mainMenuButton.gameObject.SetActive(true);
+                    })
+                .SetUpdate(true);
+        }
+
+        public void SetWalletCoins(int coins)
+        {
+            if (_walletCoinsText != null)
+            {
+                _walletCoinsText.text = coins.ToString();
+            }
+        }
+
+        public void Hide()
+        {
+            gameObject.SetActive(false);
+        }
+
+        public void SetMultiplyAvailable(bool isAvailable)
+        {
+            _multiplyButton.interactable = isAvailable;
+        }
+
+        public void SetCollectedCoins(int coins)
+        {
+            _coinsTween?.Kill();
+            _coinsTween = DOTween.To(
+                    () => _displayedCoins,
+                    value =>
+                    {
+                        _displayedCoins = value;
+                        _coinsText.text = $"+{value}";
+                    },
+                    coins,
+                    _coinsCountDuration)
+                .SetUpdate(true);
+        }
+
+        private void OnMultiplyClicked()
+        {
+            MultiplyClicked?.Invoke();
+        }
+
+        private void OnMainMenuClicked()
+        {
+            MainMenuClicked?.Invoke();
+        }
     }
 }

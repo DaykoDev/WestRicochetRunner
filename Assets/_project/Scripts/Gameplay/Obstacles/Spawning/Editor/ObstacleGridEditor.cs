@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using WestRicochet.Gameplay.Obstacles.Spawning;
 
 [CustomEditor(typeof(ObstacleGrid))]
 public sealed class ObstacleGridEditor : Editor

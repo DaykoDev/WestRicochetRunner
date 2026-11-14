@@ -1,104 +1,121 @@
 using System;
+using WestRicochet.Gameplay.Balls.Shooting;
+using WestRicochet.Gameplay.Level.Generation;
+using WestRicochet.Gameplay.Level.Runtime;
+using WestRicochet.Gameplay.Player.Damage;
+using WestRicochet.Gameplay.Rewards.Flow;
+using WestRicochet.Meta;
+using WestRicochet.UI.Screens;
 
-public class RunPresenter : IDisposable
+namespace WestRicochet.UI.Presenters
 {
-    private readonly RunScreen _screen;
-    private readonly PlayerHealth _playerHealth;
-    private readonly PlayerProgress _playerProgress;
-    private readonly RunRewardCollector _rewardCollector;
-    private readonly TrackScroller _trackScroller;
-    private readonly LevelGenerator _levelGenerator;
-    private readonly BallQueue _ballQueue;
-
-    public RunPresenter(RunScreen screen, PlayerHealth playerHealth, PlayerProgress playerProgress, RunRewardCollector rewardCollector, TrackScroller trackScroller, LevelGenerator levelGenerator, BallQueue ballQueue)
+    public class RunPresenter : IDisposable
     {
-        _screen = screen;
-        _playerHealth = playerHealth;
-        _playerProgress = playerProgress;
-        _rewardCollector = rewardCollector;
-        _trackScroller = trackScroller;
-        _levelGenerator = levelGenerator;
-        _ballQueue = ballQueue;
+        private readonly RunScreen _screen;
+        private readonly PlayerHealth _playerHealth;
+        private readonly PlayerProgress _playerProgress;
+        private readonly RunRewardCollector _rewardCollector;
+        private readonly TrackScroller _trackScroller;
+        private readonly LevelGenerator _levelGenerator;
+        private readonly BallQueue _ballQueue;
 
-        _screen.TutorialDismissed += OnTutorialDismissed;
-        _screen.SettingsClicked += OnSettingsClicked;
-        _playerHealth.HealthChanged += OnHealthChanged;
-        _playerProgress.LevelChanged += OnLevelChanged;
-        _rewardCollector.CollectedThisRunChanged += OnCollectedCoinsChanged;
-        _trackScroller.DistanceChanged += OnDistanceChanged;
-        _ballQueue.AvailableCountChanged += OnAvailableCountChanged;
-    }
+        public RunPresenter(
+            RunScreen screen,
+            PlayerHealth playerHealth,
+            PlayerProgress playerProgress,
+            RunRewardCollector rewardCollector,
+            TrackScroller trackScroller,
+            LevelGenerator levelGenerator,
+            BallQueue ballQueue)
+        {
+            _screen = screen;
+            _playerHealth = playerHealth;
+            _playerProgress = playerProgress;
+            _rewardCollector = rewardCollector;
+            _trackScroller = trackScroller;
+            _levelGenerator = levelGenerator;
+            _ballQueue = ballQueue;
 
-    public event Action SettingsRequested;
+            _screen.TutorialDismissed += OnTutorialDismissed;
+            _screen.SettingsClicked += OnSettingsClicked;
+            _playerHealth.HealthChanged += OnHealthChanged;
+            _playerProgress.LevelChanged += OnLevelChanged;
+            _rewardCollector.CollectedThisRunChanged += OnCollectedCoinsChanged;
+            _trackScroller.DistanceChanged += OnDistanceChanged;
+            _ballQueue.AvailableCountChanged += OnAvailableCountChanged;
+        }
 
-    public void HandleStateEntered()
-    {
-        _screen.SetTutorialVisible(_playerProgress.IsTutorialCompleted == false);
-        _screen.Show();
-        _screen.SetHealth(_playerHealth.CurrentHealth, _playerHealth.MaxHealth);
-        _screen.SetLevel(_playerProgress.CurrentLevel);
-        _screen.SetCoins(_rewardCollector.CollectedThisRun);
-        UpdateProgress();
-        _screen.SetBallCount(_ballQueue.AvailableCount, _ballQueue.Capacity);
-    }
+        public event Action SettingsRequested;
 
-    public void HandleStateExited()
-    {
-        _screen.Hide();
-    }
+        public void HandleStateEntered()
+        {
+            _screen.SetTutorialVisible(_playerProgress.IsTutorialCompleted == false);
+            _screen.Show();
+            _screen.SetHealth(_playerHealth.CurrentHealth, _playerHealth.MaxHealth);
+            _screen.SetLevel(_playerProgress.CurrentLevel);
+            _screen.SetCoins(_rewardCollector.CollectedThisRun);
+            UpdateProgress();
+            _screen.SetBallCount(_ballQueue.AvailableCount, _ballQueue.Capacity);
+        }
 
-    public void Dispose()
-    {
-        _screen.TutorialDismissed -= OnTutorialDismissed;
-        _screen.SettingsClicked -= OnSettingsClicked;
-        _playerHealth.HealthChanged -= OnHealthChanged;
-        _playerProgress.LevelChanged -= OnLevelChanged;
-        _rewardCollector.CollectedThisRunChanged -= OnCollectedCoinsChanged;
-        _trackScroller.DistanceChanged -= OnDistanceChanged;
-        _ballQueue.AvailableCountChanged -= OnAvailableCountChanged;
-    }
+        public void HandleStateExited()
+        {
+            _screen.Hide();
+        }
 
-    private void OnTutorialDismissed()
-    {
-        _playerProgress.CompleteTutorial();
-    }
+        public void Dispose()
+        {
+            _screen.TutorialDismissed -= OnTutorialDismissed;
+            _screen.SettingsClicked -= OnSettingsClicked;
+            _playerHealth.HealthChanged -= OnHealthChanged;
+            _playerProgress.LevelChanged -= OnLevelChanged;
+            _rewardCollector.CollectedThisRunChanged -= OnCollectedCoinsChanged;
+            _trackScroller.DistanceChanged -= OnDistanceChanged;
+            _ballQueue.AvailableCountChanged -= OnAvailableCountChanged;
+        }
 
-    private void OnSettingsClicked()
-    {
-        SettingsRequested?.Invoke();
-    }
+        private void OnTutorialDismissed()
+        {
+            _playerProgress.CompleteTutorial();
+        }
 
-    private void OnHealthChanged(int currentHealth, int maxHealth)
-    {
-        _screen.SetHealth(currentHealth, maxHealth);
-    }
+        private void OnSettingsClicked()
+        {
+            SettingsRequested?.Invoke();
+        }
 
-    private void OnLevelChanged(int level)
-    {
-        _screen.SetLevel(level);
-    }
+        private void OnHealthChanged(int currentHealth, int maxHealth)
+        {
+            _screen.SetHealth(currentHealth, maxHealth);
+        }
 
-    private void OnCollectedCoinsChanged(int coins)
-    {
-        _screen.SetCoins(coins);
-    }
+        private void OnLevelChanged(int level)
+        {
+            _screen.SetLevel(level);
+        }
 
-    private void OnDistanceChanged(float distance)
-    {
-        UpdateProgress();
-    }
+        private void OnCollectedCoinsChanged(int coins)
+        {
+            _screen.SetCoins(coins);
+        }
 
-    private void UpdateProgress()
-    {
-        float length = _levelGenerator.TrackLength;
+        private void OnDistanceChanged(float distance)
+        {
+            UpdateProgress();
+        }
 
-        float progress = length > 0f ? _trackScroller.DistanceScrolled / length : 0f;
+        private void UpdateProgress()
+        {
+            float length = _levelGenerator.TrackLength;
 
-        _screen.SetProgress(progress);
-    }
+            float progress = length > 0f ? _trackScroller.DistanceScrolled / length : 0f;
 
-    private void OnAvailableCountChanged(int available, int capacity)
-    {
-        _screen.SetBallCount(available, capacity);
+            _screen.SetProgress(progress);
+        }
+
+        private void OnAvailableCountChanged(int available, int capacity)
+        {
+            _screen.SetBallCount(available, capacity);
+        }
     }
 }

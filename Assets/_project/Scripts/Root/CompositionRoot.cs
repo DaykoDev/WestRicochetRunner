@@ -1,199 +1,210 @@
 using System;
 using UnityEngine;
+using WestRicochet.Infrastructure.Ads;
+using WestRicochet.Infrastructure.Leaderboard;
+using WestRicochet.Infrastructure.Persistence;
+using WestRicochet.StateMachine.States;
 
-public sealed class CompositionRoot : IDisposable
+namespace WestRicochet.Root
 {
-    private readonly SceneReferences _sceneReferences;
-    private readonly PlatformServicesFactory _platformFactory;
-
-    private SaveService _saveService;
-
-    private AdsService _adsService;
-    private IAdsService _adsProvider;
-    private ILeaderboardService _leaderboardService;
-
-    private MetaComposition _meta;
-    private RunComposition _run;
-    private UiComposition _ui;
-
-    private SettingsFlow _settingsFlow;
-    private ProgressSaver _progressSaver;
-    private GameEventBindings _eventBindings;
-
-    private bool _isInitializing;
-    private bool _isInitialized;
-    private bool _isDisposed;
-
-    public CompositionRoot(SceneReferences sceneReferences)
+    public sealed class CompositionRoot : IDisposable
     {
-        _sceneReferences = sceneReferences;
-        _platformFactory = new PlatformServicesFactory();
-    }
+        private readonly SceneReferences _sceneReferences;
+        private readonly PlatformServicesFactory _platformFactory;
 
-    public void Initialize()
-    {
-        if (_isDisposed || _isInitialized || _isInitializing)
+        private SaveService _saveService;
+
+        private AdsService _adsService;
+        private IAdsService _adsProvider;
+        private ILeaderboardService _leaderboardService;
+
+        private MetaComposition _meta;
+        private RunComposition _run;
+        private UiComposition _ui;
+
+        private SettingsFlow _settingsFlow;
+        private ProgressSaver _progressSaver;
+        private GameEventBindings _eventBindings;
+
+        private bool _isInitializing;
+        private bool _isInitialized;
+        private bool _isDisposed;
+
+        public CompositionRoot(SceneReferences sceneReferences)
         {
-            return;
+            _sceneReferences = sceneReferences;
+            _platformFactory = new PlatformServicesFactory();
         }
 
-        if (_sceneReferences == null)
+        public void Initialize()
         {
-            Debug.LogError("CompositionRoot: SceneReferences is not assigned.");
+            if (_isDisposed || _isInitialized || _isInitializing)
+            {
+                return;
+            }
 
-            return;
+            if (_sceneReferences == null)
+            {
+                Debug.LogError("CompositionRoot: SceneReferences is not assigned.");
+
+                return;
+            }
+
+            if (_sceneReferences.TryValidate(out string errorMessage) == false)
+            {
+                Debug.LogError(
+                    "CompositionRoot initialization failed." +
+                    Environment.NewLine +
+                    errorMessage,
+                    _sceneReferences);
+
+                return;
+            }
+
+            _isInitializing = true;
+
+            _saveService = new SaveService(_platformFactory.CreateProgressStorage());
+
+            _saveService.Load(OnProgressLoaded);
         }
 
-        if (_sceneReferences.TryValidate(out string errorMessage) == false)
+        public void FlushSave()
         {
-            Debug.LogError(
-                "CompositionRoot initialization failed." +
-                Environment.NewLine +
-                errorMessage,
-                _sceneReferences);
+            if (_isDisposed)
+            {
+                return;
+            }
 
-            return;
+            if (_isInitialized)
+            {
+                _progressSaver.SaveAndFlush();
+            }
+            else
+            {
+                _saveService?.Flush();
+            }
         }
 
-        _isInitializing = true;
-
-        _saveService = new SaveService(_platformFactory.CreateProgressStorage());
-
-        _saveService.Load(OnProgressLoaded);
-    }
-
-    public void FlushSave()
-    {
-        if (_isDisposed)
+        public void Dispose()
         {
-            return;
+            if (_isDisposed)
+            {
+                return;
+            }
+
+            _isDisposed = true;
+
+            if (_isInitialized)
+            {
+                _progressSaver?.SaveAndFlush();
+            }
+            else
+            {
+                _saveService?.Flush();
+            }
+
+            _eventBindings?.Dispose();
+            _settingsFlow?.Dispose();
+            _progressSaver?.Dispose();
+
+            _ui?.Dispose();
+            _run?.Dispose();
+            _meta?.Dispose();
+
+            _adsService?.Dispose();
+
+            if (_adsProvider is IDisposable disposableAds)
+            {
+                disposableAds.Dispose();
+            }
+
+            if (_leaderboardService is IDisposable disposableLeaderboard)
+            {
+                disposableLeaderboard.Dispose();
+            }
+
+            _saveService?.Dispose();
+
+            _isInitialized = false;
+            _isInitializing = false;
         }
 
-        if (_isInitialized)
+        public void ResetAllSave()
         {
+            if (_isDisposed || _isInitialized == false)
+            {
+                Debug.LogWarning("Cannot reset save before initialization is completed.");
+                return;
+            }
+
+            _meta.Progress.ResetProgress();
+            _meta.Wallet.ResetBalance();
+
             _progressSaver.SaveAndFlush();
         }
-        else
+
+        private void OnProgressLoaded(PlayerSaveData saveData)
         {
-            _saveService?.Flush();
-        }
-    }
+            if (_isDisposed || _isInitialized)
+            {
+                return;
+            }
 
-    public void Dispose()
-    {
-        if (_isDisposed)
-        {
-            return;
-        }
+            _isInitializing = false;
 
-        _isDisposed = true;
+            try
+            {
+                _meta = new MetaComposition(saveData, _sceneReferences);
 
-        if (_isInitialized)
-        {
-            _progressSaver?.SaveAndFlush();
-        }
-        else
-        {
-            _saveService?.Flush();
-        }
+                _adsProvider = _platformFactory.CreateAdsProvider();
 
-        _eventBindings?.Dispose();
-        _settingsFlow?.Dispose();
-        _progressSaver?.Dispose();
+                _leaderboardService = _platformFactory.CreateLeaderboardProvider();
 
-        _ui?.Dispose();
-        _run?.Dispose();
-        _meta?.Dispose();
+                _adsService = new AdsService(_adsProvider, _sceneReferences.AdsConfig);
 
-        _adsService?.Dispose();
+                _run = new RunComposition(
+                    _sceneReferences,
+                    _meta,
+                    _adsService);
 
-        if (_adsProvider is IDisposable disposableAds)
-        {
-            disposableAds.Dispose();
-        }
+                _ui = new UiComposition(
+                    _sceneReferences,
+                    _meta,
+                    _run,
+                    _leaderboardService);
 
-        if (_leaderboardService is IDisposable disposableLeaderboard)
-        {
-            disposableLeaderboard.Dispose();
-        }
+                _settingsFlow = new SettingsFlow(
+                    _ui.Settings,
+                    _run.PausedState,
+                    _run.GameFlow);
 
-        _saveService?.Dispose();
+                _progressSaver = new ProgressSaver(
+                    _saveService,
+                    _meta.Progress,
+                    _meta.Wallet,
+                    _meta.Settings,
+                    _run.MainMenuState,
+                    _run.RunState,
+                    _run.MenuCoins,
+                    _run.VictoryMultiplier);
 
-        _isInitialized = false;
-        _isInitializing = false;
-    }
+                _eventBindings = new GameEventBindings(
+                    _leaderboardService,
+                    _meta,
+                    _run,
+                    _ui,
+                    _settingsFlow);
 
-    public void ResetAllSave()
-    {
-        _meta.Progress.ResetProgress();
-        _meta.Wallet.ResetBalance();
+                _isInitialized = true;
 
-        PlayerSaveData resetData = _meta.Progress.CreateSaveData(_meta.Wallet.Balance);
+                _run.StateMachine.Enter<BootstrapState>();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, _sceneReferences);
 
-        _saveService.Save(resetData);
-    }
-
-    private void OnProgressLoaded(PlayerSaveData saveData)
-    {
-        if (_isDisposed || _isInitialized)
-        {
-            return;
-        }
-
-        _isInitializing = false;
-
-        try
-        {
-            _meta = new MetaComposition(saveData, _sceneReferences);
-
-            _adsProvider = _platformFactory.CreateAdsProvider();
-
-            _leaderboardService = _platformFactory.CreateLeaderboardProvider();
-
-            _adsService = new AdsService(_adsProvider, _sceneReferences.AdsConfig);
-
-            _run = new RunComposition(
-                _sceneReferences,
-                _meta,
-                _adsService);
-
-            _ui = new UiComposition(
-                _sceneReferences,
-                _meta,
-                _run,
-                _leaderboardService);
-
-            _settingsFlow = new SettingsFlow(
-                _ui.Settings,
-                _run.PausedState,
-                _run.GameFlow);
-
-            _progressSaver = new ProgressSaver(
-                _saveService,
-                _meta.Progress,
-                _meta.Wallet,
-                _meta.Settings,
-                _run.MainMenuState,
-                _run.RunState,
-                _run.MenuCoins,
-                _run.VictoryMultiplier);
-
-            _eventBindings = new GameEventBindings(
-                _leaderboardService,
-                _meta,
-                _run,
-                _ui,
-                _settingsFlow);
-
-            _isInitialized = true;
-
-            _run.StateMachine.Enter<BootstrapState>();
-        }
-        catch (Exception exception)
-        {
-            Debug.LogException(exception, _sceneReferences);
-
-            Dispose();
+                Dispose();
+            }
         }
     }
 }
