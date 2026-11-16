@@ -18,6 +18,14 @@ namespace WestRicochet.UI.Components
 
         private void Awake()
         {
+            if (_hand == null)
+            {
+                Debug.LogError( "TutorialSwipeHint: Hand is not assigned.", this);
+
+                enabled = false;
+                return;
+            }
+
             _startPosition = _hand.anchoredPosition;
         }
 
@@ -40,6 +48,7 @@ namespace WestRicochet.UI.Components
         private void StartAnimation()
         {
             _swipeTween?.Kill();
+            _swipeTween = null;
 
             _hand.anchoredPosition = _startPosition;
 

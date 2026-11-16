@@ -35,10 +35,11 @@ namespace WestRicochet.UI.Screens
 
         private void OnDisable()
         {
-            _mainMenuButton.onClick.RemoveListener(OnMainMenuClicked);
-            _multiplyButton.onClick.RemoveListener(OnMultiplyClicked);
+            _mainMenuButton?.onClick.RemoveListener(OnMainMenuClicked);
+            _multiplyButton?.onClick.RemoveListener(OnMultiplyClicked);
 
             _coinsTween?.Kill();
+            _coinsTween = null;
 
             _mainMenuDelayTween?.Kill();
             _mainMenuDelayTween = null;
@@ -49,6 +50,7 @@ namespace WestRicochet.UI.Screens
             gameObject.SetActive(true);
 
             _mainMenuDelayTween?.Kill();
+            _mainMenuDelayTween = null;
 
             _mainMenuButton.gameObject.SetActive(false);
 
@@ -57,6 +59,7 @@ namespace WestRicochet.UI.Screens
                     () =>
                     {
                         _mainMenuButton.gameObject.SetActive(true);
+                        _mainMenuDelayTween = null;
                     })
                 .SetUpdate(true);
         }
@@ -82,6 +85,8 @@ namespace WestRicochet.UI.Screens
         public void SetCollectedCoins(int coins)
         {
             _coinsTween?.Kill();
+            _coinsTween = null;
+
             _coinsTween = DOTween.To(
                     () => _displayedCoins,
                     value =>
@@ -91,7 +96,8 @@ namespace WestRicochet.UI.Screens
                     },
                     coins,
                     _coinsCountDuration)
-                .SetUpdate(true);
+                .SetUpdate(true)
+                .OnComplete(() => _coinsTween = null);
         }
 
         private void OnMultiplyClicked()

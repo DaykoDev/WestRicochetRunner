@@ -48,7 +48,10 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
 
                 for (int i = 0; i < _allowedCells.Length; i++)
                 {
-                    if (_allowedCells[i]) count++;
+                    if (_allowedCells[i])
+                    {
+                        count++;
+                    }
                 }
 
                 return count;
@@ -132,10 +135,13 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
 
         public bool IsAllowed(Vector2Int cell)
         {
-            if (IsInside(cell) == false)
+            if (IsInside(cell) == false ||
+                _allowedCells == null ||
+                _allowedCells.Length != _size.x * _size.y)
             {
                 return false;
             }
+
 
             return _allowedCells[GetCellIndex(cell)];
         }
@@ -203,16 +209,9 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
             return true;
         }
 
-        private Vector3 GetGridStart()
-        {
-            return _gridStart;
-        }
-
         private Vector3 GetLocalCenter(Vector2Int anchor, Vector2Int footprintSize)
         {
-            Vector3 gridStart = GetGridStart();
-
-            return gridStart + new Vector3(
+            return _gridStart + new Vector3(
                 (anchor.x + footprintSize.x * 0.5f) * _cellSize,
                 0f,
                 (anchor.y + footprintSize.y * 0.5f) * _cellSize);
@@ -309,7 +308,7 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
         {
             Gizmos.color = _lineColor;
 
-            Vector3 start = GetGridStart() + Vector3.up * LineVisualOffset;
+            Vector3 start = _gridStart + Vector3.up * LineVisualOffset;
             float width = _size.x * _cellSize;
             float length = _size.y * _cellSize;
 

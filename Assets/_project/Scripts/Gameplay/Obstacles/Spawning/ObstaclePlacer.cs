@@ -134,7 +134,7 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
                 }
 
                 _regularObstacles.Add(obstacle);
-                placementGrid.Occupy(anchor, footprintSize);
+                placementGrid.TryOccupy(anchor, footprintSize);
                 occupiedCells += footprintSize.x * footprintSize.y;
                 placedCount++;
             }
@@ -208,7 +208,10 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
 
             foreach (ObstacleEntry entry in _obstacleFactory.Entries)
             {
-                if (entry == null || entry.Prefab == null || entry.Weight <= 0 || entry.IsAvailable(level, section) == false)
+                if (entry == null ||
+                    entry.Prefab == null ||
+                    entry.Weight <= 0 |
+                    entry.IsAvailable(level, section) == false)
                 {
                     continue;
                 }

@@ -11,7 +11,7 @@ namespace WestRicochet.Meta
             _costGrowth = Math.Max(1d, costGrowth);
         }
 
-        public int CalculateNextCost(PermanentUpgradeSettings.Definition definition, int currentLevel)
+        public int CalculateNextCost(PermanentUpgradeDefinition definition, int currentLevel)
         {
             if (definition == null)
             {

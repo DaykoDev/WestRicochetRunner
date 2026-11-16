@@ -4,6 +4,7 @@ using WestRicochet.Infrastructure.Ads;
 using WestRicochet.Infrastructure.Leaderboard;
 using WestRicochet.Infrastructure.Persistence;
 using WestRicochet.StateMachine.States;
+using YG;
 
 namespace WestRicochet.Root
 {
@@ -158,7 +159,7 @@ namespace WestRicochet.Root
 
                 _adsProvider = _platformFactory.CreateAdsProvider();
 
-                _leaderboardService = _platformFactory.CreateLeaderboardProvider();
+                _leaderboardService = _platformFactory.CreateLeaderboardProvider(_sceneReferences.LeaderboardYG);
 
                 _adsService = new AdsService(_adsProvider, _sceneReferences.AdsConfig);
 

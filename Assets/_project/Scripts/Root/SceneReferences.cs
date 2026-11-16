@@ -14,6 +14,7 @@ using WestRicochet.Gameplay.Rewards.Flow;
 using WestRicochet.Infrastructure.Ads;
 using WestRicochet.Meta;
 using WestRicochet.UI.Screens;
+using YG;
 
 namespace WestRicochet.Root
 {
@@ -44,6 +45,7 @@ namespace WestRicochet.Root
 
         [Header("Services")]
         [SerializeField] private AdsConfig _adsConfig;
+        [SerializeField] private LeaderboardYG _leaderboard;
 
         [SerializeField] private AudioMixer _audioMixer;
 
@@ -68,12 +70,13 @@ namespace WestRicochet.Root
         public ObstacleAreaReleaser ObstacleAreaReleaser => _obstacleAreaReleaser;
 
         public AdsConfig AdsConfig => _adsConfig;
+        public LeaderboardYG LeaderboardYG => _leaderboard;
 
         public AudioMixer AudioMixer => _audioMixer;
 
         public bool TryValidate(out string errorMessage)
         {
-            List<string> errors = new List<string>();
+            List<string> errors = new();
 
             ValidateReference(_mainMenuScreen, nameof(_mainMenuScreen), errors);
             ValidateReference(_runScreen, nameof(_runScreen), errors);
@@ -96,6 +99,7 @@ namespace WestRicochet.Root
             ValidateReference(_obstacleAreaReleaser, nameof(_obstacleAreaReleaser), errors);
 
             ValidateReference(_adsConfig, nameof(_adsConfig), errors);
+            ValidateReference(_leaderboard, nameof(_leaderboard), errors);
 
             ValidateReference(_audioMixer, nameof(_audioMixer), errors);
 

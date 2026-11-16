@@ -74,7 +74,9 @@ namespace WestRicochet.UI.Presenters
 
         private void OnBonusGranted(int bonus)
         {
-            _screen.SetCollectedCoins(_rewardCollector.CollectedThisRun + bonus);
+            int collectedBonus = _rewardCollector.CollectedThisRun + bonus;
+            _screen.SetCollectedCoins(collectedBonus);
+
             _screen.SetMultiplyAvailable(false);
         }
 

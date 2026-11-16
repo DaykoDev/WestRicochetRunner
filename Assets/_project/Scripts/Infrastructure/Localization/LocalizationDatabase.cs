@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace WestRicochet.Infrastructure.Localization
@@ -6,33 +5,26 @@ namespace WestRicochet.Infrastructure.Localization
     [CreateAssetMenu(fileName = "LocalizationDatabase", menuName = "Game/Localization/Database")]
     public sealed class LocalizationDatabase : ScriptableObject
     {
-        [Serializable]
-        private sealed class Entry
-        {
-            [SerializeField] private string _key;
+        private const string RussianLanguage = "ru";
+        private const string EnglishLanguage = "en";
+        private const string TurkishLanguage = "tr";
 
-            [SerializeField, TextArea]
-            private string _ru;
-
-            [SerializeField, TextArea]
-            private string _en;
-
-            [SerializeField, TextArea]
-            private string _tr;
-
-            public string Key => _key;
-            public string Ru => _ru;
-            public string En => _en;
-            public string Tr => _tr;
-        }
-
-        [SerializeField] private Entry[] _entries;
+        [SerializeField] private LocalizationEntry[] _entries;
 
         public string Get(string key, string language)
         {
+            if (_entries == null)
+            {
+                Debug.LogError(
+                    "Localization entries are not assigned.",
+                    this);
+
+                return key;
+            }
+
             string normalizedLanguage = NormalizeLanguage(language);
 
-            foreach (Entry entry in _entries)
+            foreach (LocalizationEntry entry in _entries)
             {
                 if (entry == null || entry.Key != key)
                 {
@@ -41,8 +33,8 @@ namespace WestRicochet.Infrastructure.Localization
 
                 return normalizedLanguage switch
                 {
-                    "ru" => entry.Ru,
-                    "tr" => entry.Tr,
+                    RussianLanguage => entry.Ru,
+                    TurkishLanguage => entry.Tr,
                     _ => entry.En
                 };
             }
@@ -56,9 +48,9 @@ namespace WestRicochet.Infrastructure.Localization
         {
             return language switch
             {
-                "ru" => "ru",
-                "tr" => "tr",
-                _ => "en"
+                RussianLanguage => RussianLanguage,
+                TurkishLanguage => TurkishLanguage,
+                _ => EnglishLanguage
             };
         }
     }

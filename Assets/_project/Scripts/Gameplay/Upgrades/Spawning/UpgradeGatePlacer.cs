@@ -67,12 +67,6 @@ namespace WestRicochet.Gameplay.Upgrades.Spawning
             Shuffle(prefabs, random);
 
             int maxPossible = Mathf.Min(points.Count, prefabs.Count);
-
-            if (maxPossible == 0)
-            {
-                return;
-            }
-
             int minCount = Mathf.Clamp(_minGates, 1, maxPossible);
             int maxCount = Mathf.Clamp(_maxGates, minCount, maxPossible);
             int gateCount = random.Next(minCount, maxCount + 1);

@@ -14,6 +14,8 @@ namespace WestRicochet.UI.Presenters
             _screen = screen;
             _leaderboardService = leaderboardService;
 
+            _screen.Initialize(_leaderboardService);
+
             _screen.CloseClicked += OnCloseClicked;
             _screen.AuthorizationClicked += OnAuthorizationClicked;
 
@@ -50,7 +52,7 @@ namespace WestRicochet.UI.Presenters
 
             if (_screen.gameObject.activeSelf)
             {
-                _screen.RefreshLeaderboard();
+                _leaderboardService.Refresh();
             }
         }
 

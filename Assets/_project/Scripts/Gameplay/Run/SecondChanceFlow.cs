@@ -1,15 +1,14 @@
 using System;
 using WestRicochet.Gameplay.Obstacles;
-using WestRicochet.Gameplay.Obstacles.Spawning;
 using WestRicochet.Gameplay.Player;
 using WestRicochet.Gameplay.Player.Damage;
+using WestRicochet.Gameplay.Rewards.Flow;
 using WestRicochet.Infrastructure.Ads;
 
 namespace WestRicochet.Gameplay.Run
 {
-    public class SecondChanceFlow : IDisposable
+    public class SecondChanceFlow : RewardedFlowBase
     {
-        private readonly AdsService _adsService;
         private readonly ObstacleAreaReleaser _obstacleAreaReleaser;
         private readonly PlayerController _player;
         private readonly PlayerHealth _playerHealth;
@@ -18,36 +17,35 @@ namespace WestRicochet.Gameplay.Run
         private RunContext _context;
         private RunContext _requestContext;
 
-        private bool _requestInFlight;
-        private int _activeRequestId;
-
         public SecondChanceFlow(
-            AdsService adsService,
+            IRewardedAdsService adsService,
             ObstacleAreaReleaser obstacleAreaReleaser,
             PlayerController player,
             PlayerHealth playerHealth,
             float clearRadius)
+            : base(adsService)
         {
-            _adsService = adsService;
             _obstacleAreaReleaser = obstacleAreaReleaser;
             _player = player;
             _playerHealth = playerHealth;
             _clearRadius = clearRadius;
         }
+
         public event Action SecondChanceGranted;
-        public event Action AvailabilityChanged;
 
         public bool CanOffer =>
             _context != null &&
             _context.SecondChanceUsed == false &&
-            _requestInFlight == false;
+            RequestInFlight == false;
 
         public void SetContext(RunContext context)
         {
             Cancel();
 
+            _requestContext = null;
             _context = context;
-            AvailabilityChanged?.Invoke();
+
+            NotifyAvailabilityChanged();
         }
 
         public void Request()
@@ -57,47 +55,22 @@ namespace WestRicochet.Gameplay.Run
                 return;
             }
 
-            _requestInFlight = true;
             _requestContext = _context;
 
-            bool isStarted = _adsService.ShowRewarded(AdsPlacements.SecondChance, OnRewarded, OnAdError, out _activeRequestId);
-
-            if (isStarted == false)
-            {
-                CompleteRequest();
-            }
-
-            AvailabilityChanged?.Invoke();
+            StartRequest(AdsPlacements.SecondChance);
         }
 
-        public void Cancel()
+        public override void Dispose()
         {
-            if (_requestInFlight == false)
-            {
-                return;
-            }
+            base.Dispose();
 
-            _adsService.CancelRewarded(_activeRequestId);
-            CompleteRequest();
-
-            AvailabilityChanged?.Invoke();
-        }
-
-        public void Dispose()
-        {
-            Cancel();
             _context = null;
+            _requestContext = null;
         }
 
-        private void OnRewarded(int requestId)
+        protected override void HandleRewarded()
         {
-            if (IsActiveRequest(requestId) == false)
-            {
-                return;
-            }
-
             RunContext requestContext = _requestContext;
-            CompleteRequest();
 
             bool isContextValid =
                 requestContext != null &&
@@ -106,40 +79,24 @@ namespace WestRicochet.Gameplay.Run
 
             if (isContextValid == false)
             {
-                AvailabilityChanged?.Invoke();
+                NotifyAvailabilityChanged();
                 return;
             }
 
             requestContext.UseSecondChance();
 
-            _obstacleAreaReleaser.Release(_player.transform.position, _clearRadius);
+            _obstacleAreaReleaser.Release(
+                _player.transform.position,
+                _clearRadius);
 
             _playerHealth.ResetHealth();
 
-            AvailabilityChanged?.Invoke();
+            NotifyAvailabilityChanged();
             SecondChanceGranted?.Invoke();
         }
 
-        private void OnAdError(int requestId)
+        protected override void OnRequestCompleted()
         {
-            if (IsActiveRequest(requestId) == false)
-            {
-                return;
-            }
-
-            CompleteRequest();
-            AvailabilityChanged?.Invoke();
-        }
-
-        private bool IsActiveRequest(int requestId)
-        {
-            return _requestInFlight && _activeRequestId == requestId;
-        }
-
-        private void CompleteRequest()
-        {
-            _requestInFlight = false;
-            _activeRequestId = 0;
             _requestContext = null;
         }
     }

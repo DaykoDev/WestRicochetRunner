@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using YG;
@@ -54,7 +55,7 @@ namespace WestRicochet.Infrastructure.Localization
             Apply();
         }
 
-        private void OnLanguageChanged(string language)
+        private void OnLanguageChanged(string _)
         {
             Apply();
         }
@@ -79,9 +80,25 @@ namespace WestRicochet.Infrastructure.Localization
 
             string template = _database.Get(_key, YG2.lang);
 
-            _text.text = _arguments == null || _arguments.Length == 0
-                ? template
-                : string.Format(template, _arguments);
+            if (_arguments == null || _arguments.Length == 0)
+            {
+                _text.text = template;
+                return;
+            }
+
+            try
+            {
+                _text.text = string.Format(template, _arguments);
+            }
+            catch (FormatException exception)
+            {
+                Debug.LogWarning(
+                    $"Invalid localization template '{_key}': " +
+                    exception.Message,
+                    this);
+
+                _text.text = template;
+            }
         }
     }
 }

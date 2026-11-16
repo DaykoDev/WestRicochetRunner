@@ -14,14 +14,28 @@ namespace WestRicochet.UI.Components
         {
             if (_target == null)
             {
-                _target = transform as RectTransform;
+                Debug.LogError(
+                    "PopInAnimation: Target is not assigned.",
+                    this);
+
+                enabled = false;
             }
         }
 
         private void OnEnable()
         {
+            if (_target == null || enabled == false)
+            {
+                return;
+            }
+
+            _target.DOKill();
             _target.localScale = Vector3.one * _startScale;
-            _target.DOScale(Vector3.one, _duration).SetEase(_ease).SetUpdate(true);
+
+            _target
+                .DOScale(Vector3.one, _duration)
+                .SetEase(_ease)
+                .SetUpdate(true);
         }
 
         private void OnDisable()

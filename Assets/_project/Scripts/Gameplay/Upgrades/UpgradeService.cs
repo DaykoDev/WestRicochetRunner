@@ -44,12 +44,12 @@ namespace WestRicochet.Gameplay.Upgrades
 
         public int GetMaxLevel(PermanentUpgradeType type)
         {
-            return TryGetDefinition(type, out PermanentUpgradeSettings.Definition definition) ? definition.MaxLevel : -1;
+            return TryGetDefinition(type, out PermanentUpgradeDefinition definition) ? definition.MaxLevel : -1;
         }
 
         public int GetNextCost(PermanentUpgradeType type)
         {
-            if (TryGetDefinition(type, out PermanentUpgradeSettings.Definition definition) == false)
+            if (TryGetDefinition(type, out PermanentUpgradeDefinition definition) == false)
             {
                 return 0;
             }
@@ -59,7 +59,7 @@ namespace WestRicochet.Gameplay.Upgrades
 
         public bool CanPurchase(PermanentUpgradeType type)
         {
-            if (TryGetDefinition(type, out PermanentUpgradeSettings.Definition definition) == false ||
+            if (TryGetDefinition(type, out PermanentUpgradeDefinition definition) == false ||
                 CurrentLevel < definition.UnlockLevel)
             {
                 return false;
@@ -78,7 +78,7 @@ namespace WestRicochet.Gameplay.Upgrades
 
         public bool TryPurchase(PermanentUpgradeType type)
         {
-            if (TryGetDefinition(type, out PermanentUpgradeSettings.Definition definition) == false ||
+            if (TryGetDefinition(type, out PermanentUpgradeDefinition definition) == false ||
                 CurrentLevel < definition.UnlockLevel)
             {
                 return false;
@@ -142,7 +142,7 @@ namespace WestRicochet.Gameplay.Upgrades
 
         public bool IsUnlocked(PermanentUpgradeType type)
         {
-            return TryGetDefinition(type, out PermanentUpgradeSettings.Definition definition) &&
+            return TryGetDefinition(type, out PermanentUpgradeDefinition definition) &&
                 CurrentLevel >= definition.UnlockLevel;
         }
 
@@ -166,7 +166,7 @@ namespace WestRicochet.Gameplay.Upgrades
         {
             if (TryGetDefinition(
                     type,
-                    out PermanentUpgradeSettings.Definition definition) == false)
+                    out PermanentUpgradeDefinition definition) == false)
             {
                 return;
             }
@@ -183,7 +183,7 @@ namespace WestRicochet.Gameplay.Upgrades
             apply(modifiers, bonus);
         }
 
-        private bool TryGetDefinition(PermanentUpgradeType type, out PermanentUpgradeSettings.Definition definition)
+        private bool TryGetDefinition(PermanentUpgradeType type, out PermanentUpgradeDefinition definition)
         {
             if (_playerProgress != null &&
                 _wallet != null &&
@@ -198,7 +198,7 @@ namespace WestRicochet.Gameplay.Upgrades
             return false;
         }
 
-        private static bool IsMaxLevelReached(PermanentUpgradeSettings.Definition definition, int level)
+        private static bool IsMaxLevelReached(PermanentUpgradeDefinition definition, int level)
         {
             return definition.MaxLevel > 0 && level >= definition.MaxLevel;
         }

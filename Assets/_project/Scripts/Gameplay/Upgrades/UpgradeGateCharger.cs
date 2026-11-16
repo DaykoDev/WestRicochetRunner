@@ -146,7 +146,8 @@ namespace WestRicochet.Gameplay.Upgrades
             }
             else
             {
-                _bonusText.text = $"+{Mathf.RoundToInt(value)}";
+                int intValue = Mathf.RoundToInt(value);
+                _bonusText.text = $"+{intValue}";
             }
         }
     }

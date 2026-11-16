@@ -4,11 +4,14 @@ namespace WestRicochet.Infrastructure.Leaderboard
 {
     public interface ILeaderboardService
     {
-        event Action AuthorizationChanged;
-        
         bool IsAuthorized { get; }
 
+        event Action AuthorizationChanged;
+        event Action DataUpdated;
+
         void SubmitScore(int score);
+        void Refresh();
         void RequestAuthorization();
+
     }
 }

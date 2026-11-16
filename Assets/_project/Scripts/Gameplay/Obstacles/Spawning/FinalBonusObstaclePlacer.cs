@@ -116,7 +116,7 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
                     }
 
                     _placedObstacles.Add(obstacle);
-                    placementGrid.Occupy(anchor, crateSize);
+                    placementGrid.TryOccupy(anchor, crateSize);
                 }
             }
 

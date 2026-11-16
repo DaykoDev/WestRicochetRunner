@@ -95,7 +95,7 @@ namespace WestRicochet.Root
             _mainMenuState.Entered += OnMainMenuEntered;
 
             _coinsFlow.RewardGranted += OnRewardGranted;
-            _multiplierFlow.BonusGranted += OnRewardGranted;
+            _multiplierFlow.BonusGranted += OnVictoryBonusGranted;
         }
 
         private void Unsubscribe()
@@ -113,10 +113,10 @@ namespace WestRicochet.Root
             _mainMenuState.Entered -= OnMainMenuEntered;
 
             _coinsFlow.RewardGranted -= OnRewardGranted;
-            _multiplierFlow.BonusGranted -= OnRewardGranted;
+            _multiplierFlow.BonusGranted -= OnVictoryBonusGranted;
         }
 
-        private void OnProgressChanged(int level)
+        private void OnProgressChanged(int _)
         {
             SaveAndFlush();
         }
@@ -131,7 +131,7 @@ namespace WestRicochet.Root
             SaveAndFlush();
         }
 
-        private void OnVolumeChanged(float volume)
+        private void OnVolumeChanged(float _)
         {
             ScheduleSettingsSave();
         }
@@ -150,7 +150,7 @@ namespace WestRicochet.Root
                 .SetUpdate(true);
         }
 
-        private void OnSettingChanged(bool isEnabled)
+        private void OnSettingChanged(bool _)
         {
             SaveAndFlush();
         }
@@ -165,7 +165,12 @@ namespace WestRicochet.Root
             SaveAndFlush();
         }
 
-        private void OnRewardGranted(int amount)
+        private void OnRewardGranted()
+        {
+            SaveAndFlush();
+        }
+
+        private void OnVictoryBonusGranted(int _)
         {
             SaveAndFlush();
         }

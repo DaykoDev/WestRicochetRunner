@@ -14,16 +14,29 @@ namespace WestRicochet.UI.Components
 
         private string _previousText;
         private bool _isInitialized;
+        private bool _isScaleCaptured;
         private Tween _punchTween;
+        private Vector3 _initialScale;
+
+        private void Awake()
+        {
+            if (_text == null)
+            {
+                Debug.LogError("PunchTextView: Text is not assigned.", this);
+                enabled = false;
+                return;
+            }
+
+            CaptureInitialScale();
+        }
 
         private void OnDisable()
         {
             _punchTween?.Kill();
-            _punchTween = null;
 
             if (_text != null)
             {
-                _text.transform.localScale = Vector3.one;
+                _text.transform.localScale = _initialScale;
             }
         }
 
@@ -34,11 +47,11 @@ namespace WestRicochet.UI.Components
                 return;
             }
 
-            bool shouldAnimate =
-                _isInitialized && text != _previousText;
+            CaptureInitialScale();
+
+            bool shouldAnimate = _isInitialized && text != _previousText;
 
             _text.text = text;
-
             _previousText = text;
             _isInitialized = true;
 
@@ -50,18 +63,32 @@ namespace WestRicochet.UI.Components
             PlayPunch();
         }
 
+        private void CaptureInitialScale()
+        {
+            if (_isScaleCaptured)
+            {
+                return;
+            }
+
+            _initialScale = _text.transform.localScale;
+            _isScaleCaptured = true;
+        }
+
         private void PlayPunch()
         {
             Transform target = _text.transform;
 
             _punchTween?.Kill();
-            target.localScale = Vector3.one;
+            target.localScale = _initialScale;
 
             _punchTween = target
-                .DOPunchScale(
-                    Vector3.up * _punchStrength,
-                    _punchDuration)
-                .OnComplete(() => _punchTween = null);
+                .DOPunchScale(Vector3.up * _punchStrength, _punchDuration)
+                .SetUpdate(true)
+                .OnComplete(() =>
+                {
+                    target.localScale = _initialScale;
+                    _punchTween = null;
+                });
         }
     }
 }

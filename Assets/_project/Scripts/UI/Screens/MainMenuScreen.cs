@@ -10,29 +10,6 @@ namespace WestRicochet.UI.Screens
 {
     public class MainMenuScreen : MonoBehaviour
     {
-        [Serializable]
-        private class UpgradePurchaseView
-        {
-            [SerializeField] private PermanentUpgradeType _type;
-            [SerializeField] private Button _button;
-            [SerializeField] private LocalizedText _levelText;
-            [SerializeField] private LocalizedText _costText;
-            [SerializeField] private GameObject _root;
-
-            public PermanentUpgradeType Type => _type;
-            public Button Button => _button;
-            public LocalizedText LevelText => _levelText;
-            public LocalizedText CostText => _costText;
-            public GameObject Root => _root;
-
-            public event Action<PermanentUpgradeType> PurchaseRequested;
-
-            public void HandleButtonClicked()
-            {
-                PurchaseRequested?.Invoke(_type);
-            }
-        }
-
         [Header("Progress")]
         [SerializeField] private LocalizedText _levelText;
 
@@ -59,6 +36,19 @@ namespace WestRicochet.UI.Screens
 
         private void Awake()
         {
+            if (_startButton == null ||
+                _coinsRewardButton == null ||
+                _settingsButton == null ||
+                _leaderboardButton == null)
+            {
+                Debug.LogError(
+                    "MainMenuScreen: All buttons must be assigned.",
+                    this);
+
+                enabled = false;
+                return;
+            }
+
             if (_upgradeViews == null)
             {
                 return;
@@ -100,10 +90,10 @@ namespace WestRicochet.UI.Screens
 
         private void OnDisable()
         {
-            _startButton.onClick.RemoveListener(OnStartClicked);
-            _coinsRewardButton.onClick.RemoveListener(OnCoinsRewardClicked);
-            _settingsButton.onClick.RemoveListener(OnSettingsClicked);
-            _leaderboardButton.onClick.RemoveListener(OnLeaderboardClicked);
+            _startButton?.onClick.RemoveListener(OnStartClicked);
+            _coinsRewardButton?.onClick.RemoveListener(OnCoinsRewardClicked);
+            _settingsButton?.onClick.RemoveListener(OnSettingsClicked);
+            _leaderboardButton?.onClick.RemoveListener(OnLeaderboardClicked);
 
             foreach (UpgradePurchaseView view in _views.Values)
             {

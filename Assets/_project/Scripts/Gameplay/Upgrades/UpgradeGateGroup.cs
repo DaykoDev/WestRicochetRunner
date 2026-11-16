@@ -5,7 +5,7 @@ namespace WestRicochet.Gameplay.Upgrades
 {
     public class UpgradeGateGroup : MonoBehaviour
     {
-        private readonly List<UpgradeGateApplier> _gates = new();
+        private readonly HashSet<UpgradeGateApplier> _gates = new();
 
         private void OnDestroy()
         {
@@ -13,7 +13,7 @@ namespace WestRicochet.Gameplay.Upgrades
             {
                 if (gate != null)
                 {
-                    gate.Applied -= OnGateApplied;
+                    gate.ClearGroup(this);
                 }
             }
 
@@ -22,15 +22,29 @@ namespace WestRicochet.Gameplay.Upgrades
 
         public void Register(UpgradeGateApplier gate)
         {
-            _gates.Add(gate);
-            gate.Applied += OnGateApplied;
+            if (gate == null)
+            {
+                return;
+            }
+
+            if (_gates.Add(gate) == false)
+            {
+                return;
+            }
+
+            gate.SetGroup(this);
         }
 
-        private void OnGateApplied(UpgradeGateApplier appliedGate)
+        public void HandleApplied(UpgradeGateApplier appliedGate)
         {
+            if (appliedGate == null)
+            {
+                return;
+            }
+
             foreach (UpgradeGateApplier gate in _gates)
             {
-                if (gate != appliedGate)
+                if (gate != null && gate != appliedGate)
                 {
                     gate.Deactivate();
                 }

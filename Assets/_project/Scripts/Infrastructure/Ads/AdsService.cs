@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace WestRicochet.Infrastructure.Ads
 {
-    public class AdsService : IDisposable
+    public class AdsService : IDisposable, IRewardedAdsService
     {
         private readonly IAdsService _provider;
         private readonly AdsConfig _config;
@@ -24,7 +24,8 @@ namespace WestRicochet.Infrastructure.Ads
         public bool IsBusy => _provider.IsBusy;
 
         public bool CanShowInterstitial =>
-            _provider.IsBusy == false && Time.unscaledTime - _lastInterstitialTime >= _config.InterstitialCooldownSeconds;
+            _provider.IsBusy == false &&
+            Time.unscaledTime - _lastInterstitialTime >= _config.InterstitialCooldownSeconds;
 
         public bool TryShowInterstitial()
         {

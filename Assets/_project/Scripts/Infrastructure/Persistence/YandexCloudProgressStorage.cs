@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using YG;
 
@@ -6,25 +7,27 @@ namespace WestRicochet.Infrastructure.Persistence
 {
     public sealed class YandexCloudProgressStorage : IProgressStorage, IDisposable
     {
+        private readonly List<Action<PlayerSaveData>> _pendingLoads = new();
+
         private bool _isSubscribed;
         private bool _isDisposed;
 
-        private Action<PlayerSaveData> _pendingLoad;
+        
 
         public void Load(Action<PlayerSaveData> onCompleted)
         {
-            if (_isDisposed)
+            if (_isDisposed || onCompleted == null)
             {
                 return;
             }
 
             if (YG2.isSDKEnabled)
             {
-                onCompleted?.Invoke(ReadSave());
+                onCompleted.Invoke(ReadSave());
                 return;
             }
 
-            _pendingLoad = onCompleted;
+            _pendingLoads.Add(onCompleted);
             SubscribeToSdkData();
         }
 
@@ -35,7 +38,34 @@ namespace WestRicochet.Infrastructure.Persistence
                 return;
             }
 
-            YG2.saves.ProgressJson = JsonUtility.ToJson(data);
+            if (YG2.isSDKEnabled == false)
+            {
+                Debug.LogWarning(
+                    "YandexCloudProgressStorage: SDK is not enabled, " +
+                    "cloud save skipped.");
+
+                return;
+            }
+
+            if (YG2.saves == null)
+            {
+                Debug.LogError(
+                    "YandexCloudProgressStorage: YG2.saves is not " +
+                    "available.");
+
+                return;
+            }
+
+            try
+            {
+                YG2.saves.ProgressJson = JsonUtility.ToJson(data);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError(
+                    $"YandexCloudProgressStorage: failed to serialize " +
+                    $"save data. {exception.Message}");
+            }
         }
 
         public void Flush()
@@ -58,7 +88,31 @@ namespace WestRicochet.Infrastructure.Persistence
             _isDisposed = true;
 
             UnsubscribeFromSdkData();
-            _pendingLoad = null;
+            _pendingLoads.Clear();
+        }
+
+        private PlayerSaveData ReadSave()
+        {
+            try
+            {
+                string json = YG2.saves?.ProgressJson;
+
+                if (string.IsNullOrEmpty(json))
+                {
+                    return new PlayerSaveData();
+                }
+
+                return JsonUtility.FromJson<PlayerSaveData>(json)
+                       ?? new PlayerSaveData();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError(
+                    $"YandexCloudProgressStorage: failed to deserialize " +
+                    $"save data. {exception.Message}");
+
+                return new PlayerSaveData();
+            }
         }
 
         private void SubscribeToSdkData()
@@ -85,37 +139,16 @@ namespace WestRicochet.Infrastructure.Persistence
 
         private void OnSdkDataReceived()
         {
-            if (_isDisposed)
-            {
-                return;
-            }
-
             UnsubscribeFromSdkData();
 
-            Action<PlayerSaveData> callback = _pendingLoad;
-            _pendingLoad = null;
+            List<Action<PlayerSaveData>> callbacks = new(_pendingLoads);
+            _pendingLoads.Clear();
 
-            callback?.Invoke(ReadSave());
-        }
+            PlayerSaveData data = ReadSave();
 
-        private PlayerSaveData ReadSave()
-        {
-            string json = YG2.saves.ProgressJson;
-
-            if (string.IsNullOrWhiteSpace(json))
+            foreach (Action<PlayerSaveData> callback in callbacks)
             {
-                return null;
-            }
-
-            try
-            {
-                return JsonUtility.FromJson<PlayerSaveData>(json);
-            }
-            catch (Exception exception)
-            {
-                Debug.LogError($"Failed to read cloud save: {exception.Message}");
-
-                return null;
+                callback?.Invoke(data);
             }
         }
     }

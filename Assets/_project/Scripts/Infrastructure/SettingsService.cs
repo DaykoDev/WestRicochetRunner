@@ -20,7 +20,12 @@ namespace WestRicochet.Infrastructure
         private float _soundVolume;
         private float _musicVolume;
 
-        public SettingsService(bool soundEnabled, bool musicEnabled, float soundVolume, float musicVolume, AudioMixer audioMixer)
+        public SettingsService(
+            bool soundEnabled,
+            bool musicEnabled,
+            float soundVolume,
+            float musicVolume,
+            AudioMixer audioMixer)
         {
             _soundEnabled = soundEnabled;
             _musicEnabled = musicEnabled;

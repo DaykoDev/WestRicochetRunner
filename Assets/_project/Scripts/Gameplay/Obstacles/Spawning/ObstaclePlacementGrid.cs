@@ -45,7 +45,7 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
             {
                 for (int x = 0; x < footprintSize.x; x++)
                 {
-                    Vector2Int cell = new Vector2Int(anchor.x + x, anchor.y + z);
+                    Vector2Int cell = new(anchor.x + x, anchor.y + z);
 
                     if (_grid.IsAllowed(cell) == false)
                     {
@@ -61,17 +61,24 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
             return true;
         }
 
-        public void Occupy(Vector2Int anchor, Vector2Int footprintSize)
+        public bool TryOccupy(Vector2Int anchor, Vector2Int footprintSize)
         {
+            if (CanPlace(anchor, footprintSize) == false)
+            {
+                return false;
+            }
+
             for (int z = 0; z < footprintSize.y; z++)
             {
                 for (int x = 0; x < footprintSize.x; x++)
                 {
-                    Vector2Int cell = new Vector2Int(anchor.x + x, anchor.y + z);
+                    Vector2Int cell = new(anchor.x + x, anchor.y + z);
 
                     _occupiedCells[GetIndex(cell)] = true;
                 }
             }
+
+            return true;
         }
 
         private int GetIndex(Vector2Int cell)

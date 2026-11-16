@@ -4,36 +4,38 @@ using WestRicochet.Infrastructure.Ads;
 
 namespace WestRicochet.Gameplay.Rewards.Flow
 {
-    public class RewardedMultiplierFlow : IDisposable
+    public class RewardedMultiplierFlow : RewardedFlowBase
     {
-        private readonly AdsService _adsService;
         private readonly Wallet _wallet;
         private readonly RunRewardCollector _rewardCollector;
         private readonly float _multiplier;
 
         private bool _isUsed;
-        private bool _requestInFlight;
-
-        private int _activeRequestId;
         private int _requestedCoins;
 
-        public RewardedMultiplierFlow(AdsService adsService,
+        public RewardedMultiplierFlow(
+            IRewardedAdsService adsService,
             Wallet wallet,
             RunRewardCollector rewardCollector,
             float multiplier)
+            : base(adsService)
         {
-            _adsService = adsService;
             _wallet = wallet;
             _rewardCollector = rewardCollector;
             _multiplier = multiplier;
         }
 
         public event Action<int> BonusGranted;
-        public event Action AvailabilityChanged;
 
-        public bool CanApply => _isUsed == false && _requestInFlight == false;
+        public bool CanApply =>
+            _isUsed == false && RequestInFlight == false;
 
-        public int CurrentBonus => Mathf.Max(0, Mathf.RoundToInt(_rewardCollector.CollectedThisRun * (_multiplier - 1f)));
+        public int CurrentBonus =>
+            Mathf.Max(
+                0,
+                Mathf.RoundToInt(
+                    _rewardCollector.CollectedThisRun *
+                    (_multiplier - 1f)));
 
         public void Reset()
         {
@@ -42,7 +44,7 @@ namespace WestRicochet.Gameplay.Rewards.Flow
             _isUsed = false;
             _requestedCoins = 0;
 
-            AvailabilityChanged?.Invoke();
+            NotifyAvailabilityChanged();
         }
 
         public void Request()
@@ -52,78 +54,26 @@ namespace WestRicochet.Gameplay.Rewards.Flow
                 return;
             }
 
-            _requestInFlight = true;
-            _requestedCoins = _rewardCollector.CollectedThisRun;
+            _requestedCoins =
+                _rewardCollector.CollectedThisRun;
 
-            bool isStarted = _adsService.ShowRewarded(AdsPlacements.VictoryMultiplier, OnRewarded, OnAdError, out _activeRequestId);
-
-            if (isStarted == false)
-            {
-                CompleteRequest();
-            }
-
-            AvailabilityChanged?.Invoke();
+            StartRequest(AdsPlacements.VictoryMultiplier);
         }
 
-        public void Cancel()
+        protected override void HandleRewarded()
         {
-            if (_requestInFlight == false)
-            {
-                return;
-            }
-
-            _adsService.CancelRewarded(_activeRequestId);
-            CompleteRequest();
-
-            AvailabilityChanged?.Invoke();
-        }
-
-        public void Dispose()
-        {
-            Cancel();
-        }
-
-        private void OnRewarded(int requestId)
-        {
-            if (IsActiveRequest(requestId) == false)
-            {
-                return;
-            }
-
-            CompleteRequest();
             _isUsed = true;
 
-            int bonus = Mathf.RoundToInt(_requestedCoins * (_multiplier - 1f));
+            int bonus = Mathf.RoundToInt(
+                _requestedCoins * (_multiplier - 1f));
 
             if (bonus > 0)
             {
                 _wallet.Add(bonus);
             }
 
-            AvailabilityChanged?.Invoke();
+            NotifyAvailabilityChanged();
             BonusGranted?.Invoke(bonus);
-        }
-
-        private void OnAdError(int requestId)
-        {
-            if (IsActiveRequest(requestId) == false)
-            {
-                return;
-            }
-
-            CompleteRequest();
-            AvailabilityChanged?.Invoke();
-        }
-
-        private bool IsActiveRequest(int requestId)
-        {
-            return _requestInFlight && _activeRequestId == requestId;
-        }
-
-        private void CompleteRequest()
-        {
-            _requestInFlight = false;
-            _activeRequestId = 0;
         }
     }
 }

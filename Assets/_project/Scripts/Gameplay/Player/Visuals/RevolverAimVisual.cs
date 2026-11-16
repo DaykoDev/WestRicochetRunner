@@ -37,7 +37,10 @@ namespace WestRicochet.Gameplay.Player.Visuals
             }
 
             Quaternion targetRotation = Quaternion.LookRotation(direction);
-            _aimPivot.rotation = Quaternion.RotateTowards(_aimPivot.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
+            _aimPivot.rotation = Quaternion.RotateTowards(
+                _aimPivot.rotation,
+                targetRotation,
+                _rotationSpeed * Time.deltaTime);
         }
     }
 }

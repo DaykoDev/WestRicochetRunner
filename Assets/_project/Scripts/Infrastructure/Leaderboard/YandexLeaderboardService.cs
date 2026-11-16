@@ -3,20 +3,29 @@ using YG;
 
 namespace WestRicochet.Infrastructure.Leaderboard
 {
-    public sealed class YandexLeaderboardService : ILeaderboardService, IDisposable
+    public sealed class YandexLeaderboardService : ILeaderboardService
     {
+        private readonly LeaderboardYG _leaderboard;
+
         public event Action AuthorizationChanged;
+        public event Action DataUpdated;
 
-        public bool IsAuthorized => YG2.isSDKEnabled && YG2.player.auth;
+        public bool IsAuthorized => YG2.player.auth;
 
-        public YandexLeaderboardService()
+        public YandexLeaderboardService(LeaderboardYG leaderboard)
         {
-            YG2.onGetSDKData += OnGetSDKData;
+            _leaderboard = leaderboard != null
+                ? leaderboard
+                : throw new ArgumentNullException(nameof(leaderboard));
+
+            _leaderboard.onUpdateData.AddListener(OnDataUpdated);
+
+            YG2.onGetSDKData += OnAuthorizationChanged;
         }
 
         public void SubmitScore(int score)
         {
-            if (YG2.isSDKEnabled == false)
+            if (IsAuthorized == false)
             {
                 return;
             }
@@ -24,24 +33,33 @@ namespace WestRicochet.Infrastructure.Leaderboard
             YG2.SetLeaderboard(LeaderboardNames.BestLevel, score);
         }
 
-        public void RequestAuthorization()
+        public void Refresh()
         {
-            if (YG2.isSDKEnabled == false || IsAuthorized)
+            int highlightTopCount = _leaderboard.quantityTop;
+
+            if (IsAuthorized == false)
             {
-                return;
+                _leaderboard.quantityTop = _leaderboard.maxQuantityPlayers;
             }
 
+            _leaderboard.UpdateLB();
+
+            _leaderboard.quantityTop = highlightTopCount;
+        }
+
+        public void RequestAuthorization()
+        {
             YG2.OpenAuthDialog();
         }
 
-        public void Dispose()
-        {
-            YG2.onGetSDKData -= OnGetSDKData;
-        }
-
-        private void OnGetSDKData()
+        private void OnAuthorizationChanged()
         {
             AuthorizationChanged?.Invoke();
+        }
+
+        private void OnDataUpdated()
+        {
+            DataUpdated?.Invoke();
         }
     }
 }

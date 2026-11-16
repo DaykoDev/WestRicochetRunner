@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 7221998120476542333}
   - component: {fileID: 5039241037269653990}
   - component: {fileID: 2431052068324142314}
-  - component: {fileID: 7172807870014646855}
   m_Layer: 7
   m_Name: BonusBulletSpeed
   m_TagString: Untagged
@@ -95,22 +94,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3.5, y: 3, z: 0.35}
   m_Center: {x: 0, y: 1, z: 0}
---- !u!114 &7172807870014646855
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 131155365346529476}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d22124462984864090a15c91a323452, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _texts:
-  - {fileID: 9090165984982637478}
-  - {fileID: 4472770826714612668}
-  _renderQueue: 3100
 --- !u!1 &210555453959011492
 GameObject:
   m_ObjectHideFlags: 0

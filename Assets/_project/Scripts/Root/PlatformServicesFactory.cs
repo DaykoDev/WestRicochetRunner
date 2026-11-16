@@ -1,6 +1,7 @@
 using WestRicochet.Infrastructure.Ads;
 using WestRicochet.Infrastructure.Leaderboard;
 using WestRicochet.Infrastructure.Persistence;
+using YG;
 
 namespace WestRicochet.Root
 {
@@ -24,12 +25,12 @@ namespace WestRicochet.Root
 #endif
         }
 
-        public ILeaderboardService CreateLeaderboardProvider()
+        public ILeaderboardService CreateLeaderboardProvider(LeaderboardYG leaderboard)
         {
 #if UNITY_WEBGL && !UNITY_EDITOR && YANDEX_GAMES
-        return new YandexLeaderboardService();
+        return new YandexLeaderboardService(leaderboard);
 #else
-            return new EditorLeaderboardService();
+            return new EditorLeaderboardService(leaderboard);
 #endif
         }
     }

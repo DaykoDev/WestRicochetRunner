@@ -99,7 +99,7 @@ namespace WestRicochet.Root
             ReturnToMainMenu();
         }
 
-        public void CompleteVictoryBonus(int bonus)
+        public void CompleteVictoryBonus(int _)
         {
             ReturnToMainMenu();
         }

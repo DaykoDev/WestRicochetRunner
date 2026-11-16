@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using WestRicochet.Gameplay.Player;
 using WestRicochet.Gameplay.Run;
@@ -14,8 +13,7 @@ namespace WestRicochet.Gameplay.Upgrades
 
         private RunModifiers _runModifiers;
         private bool _hasApplied;
-
-        public event Action<UpgradeGateApplier> Applied;
+        private UpgradeGateGroup _group;
 
         private void Awake()
         {
@@ -23,17 +21,6 @@ namespace WestRicochet.Gameplay.Upgrades
             {
                 _gateRoot = gameObject;
             }
-        }
-
-        public void SetRunModifiers(RunModifiers modifiers)
-        {
-            _runModifiers = modifiers;
-            _hasApplied = false;
-        }
-
-        public void Deactivate()
-        {
-            _gateRoot.SetActive(false);
         }
 
         private void OnTriggerEnter(Collider other)
@@ -51,8 +38,36 @@ namespace WestRicochet.Gameplay.Upgrades
             _runModifiers.Apply(_charger.Type, _charger.CurrentBonus);
             _hasApplied = true;
 
-            Applied?.Invoke(this);
+            if (_group != null)
+            {
+                _group.HandleApplied(this);
+            }
+
             Deactivate();
+        }
+
+        public void SetRunModifiers(RunModifiers modifiers)
+        {
+            _runModifiers = modifiers;
+            _hasApplied = false;
+        }
+
+        public void Deactivate()
+        {
+            _gateRoot.SetActive(false);
+        }
+
+        public void SetGroup(UpgradeGateGroup group)
+        {
+            _group = group;
+        }
+
+        public void ClearGroup(UpgradeGateGroup group)
+        {
+            if (_group == group)
+            {
+                _group = null;
+            }
         }
     }
 }

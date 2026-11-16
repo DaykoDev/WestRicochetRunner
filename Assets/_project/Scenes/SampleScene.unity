@@ -2458,6 +2458,7 @@ MonoBehaviour:
   _obstacleFactory: {fileID: 796848499}
   _obstacleAreaReleaser: {fileID: 796848505}
   _adsConfig: {fileID: 11400000, guid: a78a661dbaaf0ae4ab21e4bba3a585e5, type: 2}
+  _leaderboard: {fileID: 969213182}
   _audioMixer: {fileID: 24100000, guid: 6749329fb35ca7b4ea15babdfd40276a, type: 2}
 --- !u!4 &260073109
 Transform:
@@ -7426,7 +7427,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.09803922}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -17091,11 +17092,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c000cd99be8ab564a8bc4e088c7bf108, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _leaderboard: {fileID: 969213182}
-  _authorizationRoot: {fileID: 1634345886}
   _authorizationButton: {fileID: 1579380211}
   _closeButton: {fileID: 663133961}
   _outsideButton: {fileID: 1075972683}
+  _authorizationRoot: {fileID: 1634345886}
   _scrollRect: {fileID: 804718824}
 --- !u!224 &2022805510
 RectTransform:

@@ -67,6 +67,7 @@ namespace WestRicochet.StateMachine.States
 
             StartNewRun();
         }
+
         public bool PrepareRun()
         {
             if (HasPreparedRun)

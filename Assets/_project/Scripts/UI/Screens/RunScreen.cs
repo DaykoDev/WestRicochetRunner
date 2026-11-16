@@ -40,6 +40,22 @@ namespace WestRicochet.UI.Screens
         public event Action TutorialDismissed;
         public event Action SettingsClicked;
 
+        private void Awake()
+        {
+            if (_settingsButton == null ||
+                _tutorialDismissButton == null ||
+                _tutorialHint == null ||
+                _healthIcons == null)
+            {
+                Debug.LogError(
+                    "RunScreen: Buttons, tutorial hint and health icons " +
+                    "must be assigned.",
+                    this);
+
+                enabled = false;
+            }
+        }
+
         private void OnEnable()
         {
             _tutorialDismissButton.onClick.AddListener(OnTutorialDismissed);
@@ -48,8 +64,8 @@ namespace WestRicochet.UI.Screens
 
         private void OnDisable()
         {
-            _tutorialDismissButton.onClick.RemoveListener(OnTutorialDismissed);
-            _settingsButton.onClick.RemoveListener(OnSettingsClicked);
+            _tutorialDismissButton?.onClick.RemoveListener(OnTutorialDismissed);
+            _settingsButton?.onClick.RemoveListener(OnSettingsClicked);
         }
 
         private void Update()
