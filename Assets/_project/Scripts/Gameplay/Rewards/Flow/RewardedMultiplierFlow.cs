@@ -27,15 +27,7 @@ namespace WestRicochet.Gameplay.Rewards.Flow
 
         public event Action<int> BonusGranted;
 
-        public bool CanApply =>
-            _isUsed == false && RequestInFlight == false;
-
-        public int CurrentBonus =>
-            Mathf.Max(
-                0,
-                Mathf.RoundToInt(
-                    _rewardCollector.CollectedThisRun *
-                    (_multiplier - 1f)));
+        public bool CanApply => _isUsed == false && RequestInFlight == false;
 
         public void Reset()
         {

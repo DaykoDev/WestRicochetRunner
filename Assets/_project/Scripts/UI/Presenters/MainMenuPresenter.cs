@@ -92,6 +92,11 @@ namespace WestRicochet.UI.Presenters
             _screen.SetUpgradeInfo(type, level, maxLevel, nextCost, canPurchase);
         }
 
+        private void RefreshCoinsReward()
+        {
+            _screen.SetCoinsReward(_coinsFlow.CurrentReward, _coinsFlow.CanRequest);
+        }
+
         private void OnUpgradePurchaseRequested(PermanentUpgradeType type)
         {
             _upgradeService.TryPurchase(type);
@@ -137,11 +142,6 @@ namespace WestRicochet.UI.Presenters
         private void OnCoinsRewardAvailabilityChanged()
         {
             RefreshCoinsReward();
-        }
-
-        private void RefreshCoinsReward()
-        {
-            _screen.SetCoinsReward(_coinsFlow.CurrentReward, _coinsFlow.CanRequest);
         }
     }
 }

@@ -13,9 +13,10 @@ namespace WestRicochet.Gameplay.Obstacles.Types
         [SerializeField] private LayerMask _obstacleMask;
         [SerializeField, Min(4)] private int _hitBufferSize = 16;
 
+        private readonly HashSet<Obstacle> _damagedObstacles = new();
+
         private EffectPool _explosionPool;
         private Collider[] _hitBuffer;
-        private readonly HashSet<Obstacle> _damagedObstacles = new();
 
         private void Awake()
         {

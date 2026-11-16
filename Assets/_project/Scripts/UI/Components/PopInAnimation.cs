@@ -14,9 +14,7 @@ namespace WestRicochet.UI.Components
         {
             if (_target == null)
             {
-                Debug.LogError(
-                    "PopInAnimation: Target is not assigned.",
-                    this);
+                Debug.LogError("PopInAnimation: Target is not assigned.", this);
 
                 enabled = false;
             }
@@ -40,6 +38,11 @@ namespace WestRicochet.UI.Components
 
         private void OnDisable()
         {
+            if (_target == null || enabled == false)
+            {
+                return;
+            }
+
             _target.DOKill();
         }
     }

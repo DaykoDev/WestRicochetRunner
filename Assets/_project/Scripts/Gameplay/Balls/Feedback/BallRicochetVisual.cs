@@ -101,7 +101,7 @@ namespace WestRicochet.Gameplay.Balls.Feedback
             ApplyVisual();
         }
 
-        public void OnRicochet()
+        public void PlayRicochet()
         {
             if (_isRainbowMode)
             {

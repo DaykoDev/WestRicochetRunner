@@ -7,18 +7,6 @@ namespace WestRicochet.Gameplay.Balls.Movement
         private const float RightAngleDegrees = 90f;
         private const float MinBounceAngleLimit = 89f;
 
-        public static Vector3 GetFacingNormal(Vector3 incomingDirection, Vector3 normal)
-        {
-            normal.Normalize();
-
-            if (Vector3.Dot(incomingDirection, normal) > 0f)
-            {
-                normal = -normal;
-            }
-
-            return normal;
-        }
-
         public static Vector3 CalculateDirection(Vector3 incomingDirection, Vector3 normal, float minBounceAngle)
         {
             if (incomingDirection.sqrMagnitude < Mathf.Epsilon)
@@ -69,6 +57,18 @@ namespace WestRicochet.Gameplay.Balls.Movement
             reflectedDirection.y = 0f;
 
             return reflectedDirection.normalized;
+        }
+
+        private static Vector3 GetFacingNormal(Vector3 incomingDirection, Vector3 normal)
+        {
+            normal.Normalize();
+
+            if (Vector3.Dot(incomingDirection, normal) > 0f)
+            {
+                normal = -normal;
+            }
+
+            return normal;
         }
     }
 }

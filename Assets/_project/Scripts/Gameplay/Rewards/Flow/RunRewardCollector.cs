@@ -49,6 +49,11 @@ namespace WestRicochet.Gameplay.Rewards.Flow
             }
         }
 
+        private void OnDestroy()
+        {
+            UnregisterAllObstacles();
+        }
+
         public void BeginRun()
         {
             UnregisterAllObstacles();
@@ -74,7 +79,7 @@ namespace WestRicochet.Gameplay.Rewards.Flow
 
             if (_registeredObstacles.Add(obstacle))
             {
-                obstacle.Destroyed += OnObstacleDestroyed;
+                obstacle.Defeated += OnObstacleDestroyed;
             }
         }
 
@@ -84,8 +89,6 @@ namespace WestRicochet.Gameplay.Rewards.Flow
             {
                 return;
             }
-
-            _completionRewardGranted = true;
 
             if (_levelEconomySettings == null)
             {
@@ -97,6 +100,8 @@ namespace WestRicochet.Gameplay.Rewards.Flow
             int reward = _levelEconomySettings.GetCompletionReward(completedLevel);
 
             AddCollectedCoins(reward);
+
+            _completionRewardGranted = true;
         }
 
         private void AddCollectedCoins(int amount)
@@ -114,7 +119,7 @@ namespace WestRicochet.Gameplay.Rewards.Flow
 
         private void OnObstacleDestroyed(Obstacle obstacle)
         {
-            obstacle.Destroyed -= OnObstacleDestroyed;
+            obstacle.Defeated -= OnObstacleDestroyed;
             _registeredObstacles.Remove(obstacle);
 
             int reward = obstacle.Income;
@@ -144,16 +149,11 @@ namespace WestRicochet.Gameplay.Rewards.Flow
             {
                 if (obstacle != null)
                 {
-                    obstacle.Destroyed -= OnObstacleDestroyed;
+                    obstacle.Defeated -= OnObstacleDestroyed;
                 }
             }
 
             _registeredObstacles.Clear();
-        }
-
-        private void OnDestroy()
-        {
-            UnregisterAllObstacles();
         }
     }
 }

@@ -5,7 +5,6 @@ using UnityEngine.Audio;
 using WestRicochet.Gameplay.Balls.Shooting;
 using WestRicochet.Gameplay.Level.Generation;
 using WestRicochet.Gameplay.Level.Runtime;
-using WestRicochet.Gameplay.Obstacles;
 using WestRicochet.Gameplay.Obstacles.Spawning;
 using WestRicochet.Gameplay.Player;
 using WestRicochet.Gameplay.Player.Damage;
@@ -40,7 +39,6 @@ namespace WestRicochet.Root
         [SerializeField] private PermanentUpgradeSettings _permanentUpgradeSettings;
         [SerializeField] private LevelEconomySettings _levelEconomySettings;
         [SerializeField] private RunRewardCollector _runRewardCollector;
-        [SerializeField] private ObstacleFactory _obstacleFactory;
         [SerializeField] private ObstacleAreaReleaser _obstacleAreaReleaser;
 
         [Header("Services")]
@@ -66,7 +64,6 @@ namespace WestRicochet.Root
         public PermanentUpgradeSettings PermanentUpgradeSettings => _permanentUpgradeSettings;
         public LevelEconomySettings LevelEconomySettings => _levelEconomySettings;
         public RunRewardCollector RunRewardCollector => _runRewardCollector;
-        public ObstacleFactory ObstacleFactory => _obstacleFactory;
         public ObstacleAreaReleaser ObstacleAreaReleaser => _obstacleAreaReleaser;
 
         public AdsConfig AdsConfig => _adsConfig;
@@ -95,7 +92,6 @@ namespace WestRicochet.Root
             ValidateReference(_permanentUpgradeSettings, nameof(_permanentUpgradeSettings), errors);
             ValidateReference(_levelEconomySettings, nameof(_levelEconomySettings), errors);
             ValidateReference(_runRewardCollector, nameof(_runRewardCollector), errors);
-            ValidateReference(_obstacleFactory, nameof(_obstacleFactory), errors);
             ValidateReference(_obstacleAreaReleaser, nameof(_obstacleAreaReleaser), errors);
 
             ValidateReference(_adsConfig, nameof(_adsConfig), errors);

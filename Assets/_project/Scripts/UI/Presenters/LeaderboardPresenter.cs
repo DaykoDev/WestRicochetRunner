@@ -41,6 +41,11 @@ namespace WestRicochet.UI.Presenters
             _leaderboardService.AuthorizationChanged -= OnAuthorizationChanged;
         }
 
+        private void RefreshAuthorization()
+        {
+            _screen.SetAuthorizationVisible(_leaderboardService.IsAuthorized == false);
+        }
+
         private void OnAuthorizationClicked()
         {
             _leaderboardService.RequestAuthorization();
@@ -54,11 +59,6 @@ namespace WestRicochet.UI.Presenters
             {
                 _leaderboardService.Refresh();
             }
-        }
-
-        private void RefreshAuthorization()
-        {
-            _screen.SetAuthorizationVisible(_leaderboardService.IsAuthorized == false);
         }
 
         private void OnCloseClicked()

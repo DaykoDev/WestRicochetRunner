@@ -59,6 +59,11 @@ namespace WestRicochet.Gameplay.Level.Runtime
 
         public void ResetPosition()
         {
+            if (_scrollRoot == null)
+            {
+                return;
+            }
+
             StopScrolling();
             _scrollRoot.SetPositionAndRotation(_initialPosition, _initialRotation);
             Physics.SyncTransforms();

@@ -26,6 +26,14 @@ namespace WestRicochet.Gameplay.Balls.Shooting
             _availableCount = _currentCapacity;
         }
 
+        private void OnDestroy()
+        {
+            if (_runModifiers != null)
+            {
+                _runModifiers.Changed -= OnModifiersChanged;
+            }
+        }
+
         public void SetRunModifiers(RunModifiers modifiers)
         {
             if (_runModifiers != null)
@@ -76,21 +84,11 @@ namespace WestRicochet.Gameplay.Balls.Shooting
             }
         }
 
-        public void ResetQueue()
+        public void Reset()
         {
             SetRunModifiers(null);
-            _ballPool?.ResetPool();
+            _ballPool?.Reset();
             _availableCount = _currentCapacity;
-            AvailableCountChanged?.Invoke(_availableCount, _currentCapacity);
-        }
-
-        public void SetCapacity(int newCapacity)
-        {
-            newCapacity = Mathf.Max(1, newCapacity);
-
-            int difference = newCapacity - _currentCapacity;
-            _currentCapacity = newCapacity;
-            _availableCount = Mathf.Clamp(_availableCount + difference, 0, _currentCapacity);
             AvailableCountChanged?.Invoke(_availableCount, _currentCapacity);
         }
 
@@ -116,6 +114,16 @@ namespace WestRicochet.Gameplay.Balls.Shooting
             SetCapacity(upgradedCapacity * _capacityMultiplier);
         }
 
+        private void SetCapacity(int newCapacity)
+        {
+            newCapacity = Mathf.Max(1, newCapacity);
+
+            int difference = newCapacity - _currentCapacity;
+            _currentCapacity = newCapacity;
+            _availableCount = Mathf.Clamp(_availableCount + difference, 0, _currentCapacity);
+            AvailableCountChanged?.Invoke(_availableCount, _currentCapacity);
+        }
+
         private void OnModifiersChanged()
         {
             UpdateCapacity();
@@ -126,14 +134,6 @@ namespace WestRicochet.Gameplay.Balls.Shooting
             ball.ReturnedToPool -= OnBallReturnedToPool;
             _availableCount = Mathf.Min(_availableCount + 1, _currentCapacity);
             AvailableCountChanged?.Invoke(_availableCount, _currentCapacity);
-        }
-
-        private void OnDestroy()
-        {
-            if (_runModifiers != null)
-            {
-                _runModifiers.Changed -= OnModifiersChanged;
-            }
         }
     }
 }

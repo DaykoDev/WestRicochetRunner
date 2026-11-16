@@ -7,10 +7,13 @@ namespace WestRicochet.Gameplay.Balls.Collision
     public static class BallCollisionQuery
     {
         public const float ContactEpsilon = 0.0001f;
-
         private const float NormalEpsilon = 0.000001f;
+        private const int MaxOverflowAttempts = 4;
+        private const int BufferGrowthFactor = 2;
 
-        public static bool SphereCast(
+        private static RaycastHit[] OverflowHits;
+
+        public static bool TrySphereCast(
             Vector3 origin,
             float radius,
             Vector3 direction,
@@ -31,14 +34,43 @@ namespace WestRicochet.Gameplay.Balls.Collision
 
             direction.Normalize();
 
+            RaycastHit[] hits = results;
+
             int hitCount = Physics.SphereCastNonAlloc(
                 origin,
                 radius,
                 direction,
-                results,
+                hits,
                 distance,
                 collisionMask,
                 QueryTriggerInteraction.Ignore);
+
+            int attempt = 0;
+
+            while (hitCount > 0 &&
+                   hitCount == hits.Length &&
+                   attempt < MaxOverflowAttempts)
+            {
+                int requiredSize = hits.Length * BufferGrowthFactor;
+
+                if (OverflowHits == null || OverflowHits.Length < requiredSize)
+                {
+                    OverflowHits = new RaycastHit[requiredSize];
+                }
+
+                hits = OverflowHits;
+
+                hitCount = Physics.SphereCastNonAlloc(
+                    origin,
+                    radius,
+                    direction,
+                    hits,
+                    distance,
+                    collisionMask,
+                    QueryTriggerInteraction.Ignore);
+
+                attempt++;
+            }
 
             if (hitCount <= 0)
             {
@@ -50,7 +82,7 @@ namespace WestRicochet.Gameplay.Balls.Collision
 
             for (int i = 0; i < hitCount; i++)
             {
-                RaycastHit hit = results[i];
+                RaycastHit hit = hits[i];
 
                 if (hit.collider == null)
                 {
@@ -74,7 +106,7 @@ namespace WestRicochet.Gameplay.Balls.Collision
                 return false;
             }
 
-            closestHit = results[closestIndex];
+            closestHit = hits[closestIndex];
 
             Vector3 normal = closestHit.normal;
 

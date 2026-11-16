@@ -56,7 +56,7 @@ namespace WestRicochet.Gameplay.Player.Shooting
 
             while (remainingDistance > 0f && PointCount < _trajectoryPoints.Length)
             {
-                bool hasHit = BallCollisionQuery.SphereCast(
+                bool hasHit = BallCollisionQuery.TrySphereCast(
                     simulationOrigin,
                     _movementSettings.Radius,
                     direction,
@@ -64,8 +64,7 @@ namespace WestRicochet.Gameplay.Player.Shooting
                     _raycastHits,
                     _movementSettings.CollisionMask,
                     out RaycastHit hit,
-                    out Vector3 normal
-                 );
+                    out Vector3 normal);
 
                 if (hasHit == false)
                 {
@@ -117,9 +116,7 @@ namespace WestRicochet.Gameplay.Player.Shooting
                     nameof(destinationArray));
             }
 
-            int count = Mathf.Min(PointCount, destinationArray.Length);
-
-            Array.Copy(_trajectoryPoints, destinationArray, count);
+            Array.Copy(_trajectoryPoints, destinationArray, PointCount);
         }
     }
 }

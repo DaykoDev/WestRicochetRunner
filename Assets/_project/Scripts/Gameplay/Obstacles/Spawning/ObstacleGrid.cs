@@ -63,6 +63,35 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
             EnsureInitialized();
         }
 
+        private void OnValidate()
+        {
+            _cellSize = Mathf.Max(MinimumCellSize, _cellSize);
+            EnsureInitialized();
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            if (_showGrid == false || IsFloorAvailable() == false)
+            {
+                return;
+            }
+
+            EnsureInitialized();
+
+            if (_size.x <= 0 || _size.y <= 0)
+            {
+                return;
+            }
+
+            Matrix4x4 previousMatrix = Gizmos.matrix;
+            Gizmos.matrix = transform.localToWorldMatrix;
+
+            DrawCells();
+            DrawLines();
+
+            Gizmos.matrix = previousMatrix;
+        }
+
         public void EnsureInitialized()
         {
             _cellSize = Mathf.Max(MinimumCellSize, _cellSize);
@@ -76,8 +105,7 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
 
             Vector2Int newSize = new(
                 Mathf.Max(0, Mathf.FloorToInt(bounds.size.x / _cellSize)),
-                Mathf.Max(0, Mathf.FloorToInt(bounds.size.z / _cellSize))
-            );
+                Mathf.Max(0, Mathf.FloorToInt(bounds.size.z / _cellSize)));
 
             _gridStart = new Vector3(
                 bounds.center.x - newSize.x * _cellSize * 0.5f,
@@ -104,8 +132,8 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
                 previousCells.Length == previousSize.x * previousSize.y;
 
             if (hasPreviousGrid == false &&
-            previousCells != null &&
-            previousCells.Length == requiredLength)
+                previousCells != null &&
+                previousCells.Length == requiredLength)
             {
                 _size = newSize;
                 return;
@@ -123,14 +151,6 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
             {
                 CopyPreviousCells(previousCells, previousSize);
             }
-        }
-
-        public bool IsInside(Vector2Int cell)
-        {
-            return cell.x >= 0 &&
-                cell.y >= 0 &&
-                cell.x < _size.x &&
-                cell.y < _size.y;
         }
 
         public bool IsAllowed(Vector2Int cell)
@@ -156,6 +176,14 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
             Vector3 localCenter = GetLocalCenter(anchor, footprintSize);
 
             return transform.TransformPoint(localCenter);
+        }
+
+        private bool IsInside(Vector2Int cell)
+        {
+            return cell.x >= 0 &&
+                cell.y >= 0 &&
+                cell.x < _size.x &&
+                cell.y < _size.y;
         }
 
         private bool IsFloorAvailable()
@@ -248,35 +276,6 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
                     _allowedCells[z * _size.x + x] = previousCells[previousIndex];
                 }
             }
-        }
-
-        private void OnValidate()
-        {
-            _cellSize = Mathf.Max(MinimumCellSize, _cellSize);
-            EnsureInitialized();
-        }
-
-        private void OnDrawGizmosSelected()
-        {
-            if (_showGrid == false || IsFloorAvailable() == false)
-            {
-                return;
-            }
-
-            EnsureInitialized();
-
-            if (_size.x <= 0 || _size.y <= 0)
-            {
-                return;
-            }
-
-            Matrix4x4 previousMatrix = Gizmos.matrix;
-            Gizmos.matrix = transform.localToWorldMatrix;
-
-            DrawCells();
-            DrawLines();
-
-            Gizmos.matrix = previousMatrix;
         }
 
         private void DrawCells()

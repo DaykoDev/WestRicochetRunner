@@ -27,6 +27,7 @@ namespace WestRicochet.Gameplay.Effects
             if (_particle == null)
             {
                 Debug.LogError("PooledEffect: Particle is missing.", this);
+                _pool?.Release(this);
 
                 return;
             }

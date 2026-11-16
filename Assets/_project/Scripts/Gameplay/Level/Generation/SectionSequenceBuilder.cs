@@ -32,10 +32,10 @@ namespace WestRicochet.Gameplay.Level.Generation
 
             var random = new Random(seed);
             var sequence = new List<TrackSection>
-        {
-            SelectSection(TrackSectionType.Start, level, random),
-            SelectSection(TrackSectionType.Safe, level, random)
-        };
+            {
+                SelectSection(TrackSectionType.Start, level, random),
+                SelectSection(TrackSectionType.Safe, level, random)
+            };
 
             for (int i = 0; i < challengeBlockCount; i++)
             {

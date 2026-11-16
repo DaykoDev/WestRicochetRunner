@@ -1,7 +1,7 @@
 using UnityEngine;
 using WestRicochet.Gameplay.Obstacles.Core;
 
-namespace WestRicochet.Gameplay.Obstacles
+namespace WestRicochet.Gameplay.Obstacles.Spawning
 {
     [DisallowMultipleComponent]
     public sealed class ObstacleAreaReleaser : MonoBehaviour

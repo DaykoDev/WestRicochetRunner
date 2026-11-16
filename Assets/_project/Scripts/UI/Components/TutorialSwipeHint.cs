@@ -20,7 +20,7 @@ namespace WestRicochet.UI.Components
         {
             if (_hand == null)
             {
-                Debug.LogError( "TutorialSwipeHint: Hand is not assigned.", this);
+                Debug.LogError("TutorialSwipeHint: Hand is not assigned.", this);
 
                 enabled = false;
                 return;

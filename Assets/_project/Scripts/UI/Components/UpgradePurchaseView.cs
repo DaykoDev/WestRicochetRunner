@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using WestRicochet.Infrastructure.Localization;
 using WestRicochet.Meta;
 
-namespace WestRicochet.UI.Screens
+namespace WestRicochet.UI.Components
 {
     [Serializable]
     public sealed class UpgradePurchaseView

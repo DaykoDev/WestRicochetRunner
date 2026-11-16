@@ -66,7 +66,7 @@ namespace WestRicochet.UI.Components
             }
         }
 
-        public void RefreshTexts()
+        private void RefreshTexts()
         {
             _texts = GetComponentsInChildren<TMP_Text>(true);
             _defaultColors = new Color[_texts.Length];

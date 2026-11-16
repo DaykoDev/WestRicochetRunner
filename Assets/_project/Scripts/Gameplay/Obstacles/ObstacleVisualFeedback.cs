@@ -48,7 +48,7 @@ namespace WestRicochet.Gameplay.Obstacles
             }
 
             _obstacle.HealthChanged += OnHealthChanged;
-            _obstacle.Destroyed += OnDestroyed;
+            _obstacle.Defeated += OnDestroyed;
             _obstacle.ReturnedToPool += OnReturnedToPool;
         }
 
@@ -60,7 +60,7 @@ namespace WestRicochet.Gameplay.Obstacles
             }
 
             _obstacle.HealthChanged -= OnHealthChanged;
-            _obstacle.Destroyed -= OnDestroyed;
+            _obstacle.Defeated -= OnDestroyed;
             _obstacle.ReturnedToPool -= OnReturnedToPool;
         }
 

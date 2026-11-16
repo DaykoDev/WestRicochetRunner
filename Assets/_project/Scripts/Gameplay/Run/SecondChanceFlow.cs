@@ -1,5 +1,5 @@
 using System;
-using WestRicochet.Gameplay.Obstacles;
+using WestRicochet.Gameplay.Obstacles.Spawning;
 using WestRicochet.Gameplay.Player;
 using WestRicochet.Gameplay.Player.Damage;
 using WestRicochet.Gameplay.Rewards.Flow;

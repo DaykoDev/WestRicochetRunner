@@ -48,6 +48,14 @@ namespace WestRicochet.Gameplay.Rewards.Currency
             _pool.Prewarm(_initialSize);
         }
 
+        private void OnValidate()
+        {
+            _maxSize = Mathf.Max(1, _maxSize);
+            _initialSize = Mathf.Clamp(_initialSize, 0, _maxSize);
+            _maxPickupsPerObstacle = Mathf.Max(1, _maxPickupsPerObstacle);
+            _targetValuePerPickup = Mathf.Max(1, _targetValuePerPickup);
+        }
+
         public void Spawn(int totalValue, Vector3 position)
         {
             if (totalValue <= 0 || _pool == null)
@@ -94,14 +102,6 @@ namespace WestRicochet.Gameplay.Rewards.Currency
             {
                 _pool?.Release(pickup);
             }
-        }
-
-        private void OnValidate()
-        {
-            _maxSize = Mathf.Max(1, _maxSize);
-            _initialSize = Mathf.Clamp(_initialSize, 0, _maxSize);
-            _maxPickupsPerObstacle = Mathf.Max(1, _maxPickupsPerObstacle);
-            _targetValuePerPickup = Mathf.Max(1, _targetValuePerPickup);
         }
     }
 }

@@ -15,8 +15,6 @@ namespace WestRicochet.Meta
         private bool _isTutorialCompleted;
         private int _bestCompletedLevel;
 
-        public PlayerProgress() : this(null) { }
-
         public PlayerProgress(PlayerSaveData saveData)
         {
             if (saveData == null)

@@ -21,17 +21,22 @@ namespace WestRicochet.Gameplay.Obstacles.Core
         private bool _isDestroyed;
 
         public event Action<int, int> HealthChanged;
-        public event Action<Obstacle> Destroyed;
-        public event Action<Obstacle> Died;
+        public event Action<Obstacle> Defeated;
+        public event Action<Obstacle> Removed;
         public event Action<Obstacle> ReturnedToPool;
 
         public int ContactDamage => _contactDamage;
-        public int MaxHealth => _maxHealth;
         public int CurrentHealth => _currentHealth;
         public int Income => _income;
         public float RewardWeight => _rewardWeight;
         public bool IsDestroyed => _isDestroyed;
         public Vector2Int GridSize => _gridSize;
+
+        private void OnValidate()
+        {
+            _gridSize.x = Mathf.Max(1, _gridSize.x);
+            _gridSize.y = Mathf.Max(1, _gridSize.y);
+        }
 
         public void ConfigureForLevel(
             int level,
@@ -80,7 +85,7 @@ namespace WestRicochet.Gameplay.Obstacles.Core
             }
 
             _isDestroyed = true;
-            Died?.Invoke(this);
+            Removed?.Invoke(this);
         }
 
         public void OnReturnedToPool()
@@ -110,14 +115,8 @@ namespace WestRicochet.Gameplay.Obstacles.Core
 
             _isDestroyed = true;
             OnDied();
-            Destroyed?.Invoke(this);
-            Died?.Invoke(this);
-        }
-
-        private void OnValidate()
-        {
-            _gridSize.x = Mathf.Max(1, _gridSize.x);
-            _gridSize.y = Mathf.Max(1, _gridSize.y);
+            Defeated?.Invoke(this);
+            Removed?.Invoke(this);
         }
     }
 }

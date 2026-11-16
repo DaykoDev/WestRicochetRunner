@@ -210,7 +210,7 @@ namespace WestRicochet.Gameplay.Obstacles.Spawning
             {
                 if (entry == null ||
                     entry.Prefab == null ||
-                    entry.Weight <= 0 |
+                    entry.Weight <= 0 ||
                     entry.IsAvailable(level, section) == false)
                 {
                     continue;

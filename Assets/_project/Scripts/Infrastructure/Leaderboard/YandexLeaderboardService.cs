@@ -3,14 +3,11 @@ using YG;
 
 namespace WestRicochet.Infrastructure.Leaderboard
 {
-    public sealed class YandexLeaderboardService : ILeaderboardService
+    public sealed class YandexLeaderboardService : ILeaderboardService, IDisposable
     {
         private readonly LeaderboardYG _leaderboard;
 
-        public event Action AuthorizationChanged;
-        public event Action DataUpdated;
-
-        public bool IsAuthorized => YG2.player.auth;
+        private bool _isDisposed;
 
         public YandexLeaderboardService(LeaderboardYG leaderboard)
         {
@@ -22,6 +19,11 @@ namespace WestRicochet.Infrastructure.Leaderboard
 
             YG2.onGetSDKData += OnAuthorizationChanged;
         }
+
+        public event Action AuthorizationChanged;
+        public event Action DataUpdated;
+
+        public bool IsAuthorized => YG2.player.auth;
 
         public void SubmitScore(int score)
         {
@@ -60,6 +62,23 @@ namespace WestRicochet.Infrastructure.Leaderboard
         private void OnDataUpdated()
         {
             DataUpdated?.Invoke();
+        }
+
+        public void Dispose()
+        {
+            if (_isDisposed)
+            {
+                return;
+            }
+
+            _isDisposed = true;
+
+            if (_leaderboard != null)
+            {
+                _leaderboard.onUpdateData.RemoveListener(OnDataUpdated);
+            }
+
+            YG2.onGetSDKData -= OnAuthorizationChanged;
         }
     }
 }

@@ -33,7 +33,7 @@ namespace WestRicochet.Gameplay.Balls.Shooting
             _pool?.Release(ball);
         }
 
-        public void ResetPool()
+        public void Reset()
         {
             _pool?.Reset();
         }

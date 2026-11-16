@@ -26,11 +26,11 @@ namespace WestRicochet.Gameplay.Player.Feedback
 
         private void OnEnable()
         {
-            _lastHealth = _playerHealth.CurrentHealth;
-
             if (_playerHealth != null)
             {
                 _playerHealth.HealthChanged += OnHealthChanged;
+
+                _lastHealth = _playerHealth.CurrentHealth;
             }
         }
 

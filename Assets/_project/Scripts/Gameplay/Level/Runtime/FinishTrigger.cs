@@ -19,7 +19,7 @@ namespace WestRicochet.Gameplay.Level.Runtime
                 return;
             }
 
-            if (other.GetComponentInParent<WestRicochet.Gameplay.Player.PlayerController>() == null)
+            if (other.GetComponentInParent<Player.PlayerController>() == null)
             {
                 return;
             }

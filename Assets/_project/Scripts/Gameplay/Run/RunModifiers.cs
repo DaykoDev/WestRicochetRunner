@@ -33,10 +33,10 @@ namespace WestRicochet.Gameplay.Run
                     BallCountBonus = AddBonus(BallCountBonus, value);
                     break;
                 case UpgradeType.FireRate:
-                    FireRateBonus = AddPositive(FireRateBonus, value / ConvertPercentageToFraction(value));
+                    FireRateBonus = AddPositive(FireRateBonus, ConvertPercentageToFraction(value));
                     break;
                 case UpgradeType.BallSpeed:
-                    BallSpeedBonus = AddPositive(BallSpeedBonus, value / ConvertPercentageToFraction(value));
+                    BallSpeedBonus = AddPositive(BallSpeedBonus, ConvertPercentageToFraction(value));
                     break;
                 case UpgradeType.BounceCount:
                     BounceCountBonus = AddBonus(BounceCountBonus, value);

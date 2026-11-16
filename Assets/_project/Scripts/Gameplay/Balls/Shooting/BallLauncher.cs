@@ -24,10 +24,11 @@ namespace WestRicochet.Gameplay.Balls.Shooting
         private bool _isDualWieldEnabled;
         private bool _useSecondaryNext;
         private bool _isRainbowVisualEnabled;
+        private bool _isValid;
 
         public event Action<int> Fired;
 
-        public BallStats CurrentStats
+        private BallStats CurrentStats
         {
             get
             {
@@ -46,14 +47,37 @@ namespace WestRicochet.Gameplay.Balls.Shooting
             }
         }
 
+        private void Awake()
+        {
+            if (_ballQueue == null || _playerAimer == null)
+            {
+                Debug.LogError("BallLauncher: BallQueue and PlayerAimer must be assigned.", this);
+
+                enabled = false;
+                return;
+            }
+
+            _isValid = true;
+        }
+
         public void SetRunModifiers(RunModifiers modifiers)
         {
+            if (_isValid == false)
+            {
+                return;
+            }
+
             _runModifiers = modifiers;
             _ballQueue.SetRunModifiers(modifiers);
         }
 
         public void SetDualWieldEnabled(bool isEnabled)
         {
+            if (_isValid == false)
+            {
+                return;
+            }
+
             _isDualWieldEnabled = isEnabled;
             _useSecondaryNext = false;
 
@@ -72,7 +96,7 @@ namespace WestRicochet.Gameplay.Balls.Shooting
         {
             stats = CurrentStats;
 
-            if (_playerAimer == null)
+            if (_isValid == false)
             {
                 return Vector3.zero;
             }
@@ -82,7 +106,7 @@ namespace WestRicochet.Gameplay.Balls.Shooting
 
         public bool TryLaunch()
         {
-            if (_ballQueue == null || _playerAimer == null)
+            if (_isValid == false)
             {
                 return false;
             }
@@ -91,7 +115,10 @@ namespace WestRicochet.Gameplay.Balls.Shooting
 
             bool useSecondary = canUseSecondary && _useSecondaryNext;
 
-            Vector3 firePosition = useSecondary ? _playerAimer.SecondaryFirePointPosition : _playerAimer.FirePointPosition;
+            Vector3 firePosition =
+                useSecondary ?
+                _playerAimer.SecondaryFirePointPosition :
+                _playerAimer.FirePointPosition;
 
             Vector3 velocity = GetLaunchVelocity(out BallStats stats);
 
@@ -119,12 +146,17 @@ namespace WestRicochet.Gameplay.Balls.Shooting
 
         public void ResetRun()
         {
+            if (_isValid == false)
+            {
+                return;
+            }
+
             _runModifiers = null;
             _isRainbowVisualEnabled = false;
 
             SetDualWieldEnabled(false);
 
-            _ballQueue.ResetQueue();
+            _ballQueue.Reset();
         }
 
         private bool TryLaunchSingle(Vector3 position, Vector3 velocity, BallStats stats)

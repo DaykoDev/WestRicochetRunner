@@ -42,25 +42,7 @@ namespace WestRicochet.Gameplay.Player.Shooting
             }
         }
 
-        public Vector3 TrajectoryOriginPosition
-        {
-            get
-            {
-                if (_isTrajectoryCentered && HasSecondaryFirePoint)
-                {
-                    return (FirePointPosition + SecondaryFirePointPosition) * 0.5f;
-                }
-
-                return FirePointPosition;
-            }
-        }
-
         private Vector3 AimOriginPosition => _aimOrigin != null ? _aimOrigin.position : transform.position;
-
-        public void SetTrajectoryCentered(bool isCentered)
-        {
-            _isTrajectoryCentered = isCentered;
-        }
 
         private void OnDrawGizmosSelected()
         {
@@ -74,6 +56,24 @@ namespace WestRicochet.Gameplay.Player.Shooting
             Gizmos.color = Color.cyan;
             Gizmos.DrawLine(_firePoint.position, aimPoint);
             Gizmos.DrawWireSphere(aimPoint, 0.2f);
+        }
+
+        public Vector3 TrajectoryOriginPosition
+        {
+            get
+            {
+                if (_isTrajectoryCentered && HasSecondaryFirePoint)
+                {
+                    return (FirePointPosition + SecondaryFirePointPosition) * 0.5f;
+                }
+
+                return FirePointPosition;
+            }
+        }
+
+        public void SetTrajectoryCentered(bool isCentered)
+        {
+            _isTrajectoryCentered = isCentered;
         }
     }
 }

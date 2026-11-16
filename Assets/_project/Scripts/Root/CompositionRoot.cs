@@ -4,7 +4,6 @@ using WestRicochet.Infrastructure.Ads;
 using WestRicochet.Infrastructure.Leaderboard;
 using WestRicochet.Infrastructure.Persistence;
 using WestRicochet.StateMachine.States;
-using YG;
 
 namespace WestRicochet.Root
 {

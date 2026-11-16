@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using WestRicochet.Gameplay.Balls.Movement;
 
@@ -49,7 +50,7 @@ namespace WestRicochet.Gameplay.Balls.Collision
 
         public bool TryGetCollision(Vector3 direction, float distance, out RaycastHit hit, out Vector3 normal)
         {
-            return BallCollisionQuery.SphereCast(
+            return BallCollisionQuery.TrySphereCast(
                 _transform.position,
                 _settings.Radius,
                 direction,
@@ -69,7 +70,7 @@ namespace WestRicochet.Gameplay.Balls.Collision
             }
         }
 
-        public float Separate(RaycastHit hit, Vector3 normal)
+        public float Separate(Vector3 normal)
         {
             float separation = BallCollisionQuery.GetSeparationDistance(_settings);
 

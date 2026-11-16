@@ -47,8 +47,10 @@ namespace WestRicochet.Gameplay.Rewards.Currency
 
         private void Update()
         {
-            if (_state == MovementState.Inactive || _owner == null || _target == null)
+            if (_target == null)
             {
+                Expire();
+
                 return;
             }
 
@@ -85,11 +87,6 @@ namespace WestRicochet.Gameplay.Rewards.Currency
 
         public void Launch(CurrencyDropSpawner owner, Transform target, int value, Vector3 position)
         {
-            if (owner == null || target == null)
-            {
-                return;
-            }
-
             StopDropAnimation();
 
             _owner = owner;

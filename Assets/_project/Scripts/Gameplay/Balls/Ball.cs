@@ -4,6 +4,7 @@ using WestRicochet.Gameplay.Balls.Collision;
 using WestRicochet.Gameplay.Balls.Feedback;
 using WestRicochet.Gameplay.Balls.Movement;
 using WestRicochet.Gameplay.Effects;
+using WestRicochet.Gameplay.Rewards;
 using WestRicochet.Infrastructure.Pooling;
 
 namespace WestRicochet.Gameplay.Balls
@@ -30,7 +31,7 @@ namespace WestRicochet.Gameplay.Balls
         private float _lifetimeTimer;
         private bool _isActive;
 
-        public event Action<Ball> Died;
+        public event Action<Ball> Removed;
         public event Action<Ball> ReturnedToPool;
         public event Action<Vector3> Ricocheted;
 
@@ -40,6 +41,14 @@ namespace WestRicochet.Gameplay.Balls
 
         private void Awake()
         {
+            if (_movementSettings == null)
+            {
+                Debug.LogError("Ball: BallMovementSettings is not assigned.", this);
+                enabled = false;
+
+                return;
+            }
+
             SphereCollider sphereCollider = GetComponent<SphereCollider>();
 
             _collisionResolver = new BallCollisionResolver(transform, sphereCollider, _movementSettings);
@@ -145,19 +154,6 @@ namespace WestRicochet.Gameplay.Balls
             _movement.Tick(Time.fixedDeltaTime);
         }
 
-        private void OnMovementRicocheted(Vector3 position)
-        {
-            FaceDirection();
-            _ricochetVisual.OnRicochet();
-
-            Ricocheted?.Invoke(position);
-        }
-
-        private void OnBouncesExhausted()
-        {
-            BeginReturn();
-        }
-
         private void FaceDirection()
         {
             Vector3 direction = _movement.Direction;
@@ -182,7 +178,7 @@ namespace WestRicochet.Gameplay.Balls
 
             _returnFeedback.Play(transform.position, shouldPlayEffect);
 
-            Died?.Invoke(this);
+            Removed?.Invoke(this);
         }
 
         private bool IsOutsideScreen()
@@ -211,6 +207,19 @@ namespace WestRicochet.Gameplay.Balls
                    viewportPosition.x <= 1f &&
                    viewportPosition.y >= _returnEffectMinViewportY &&
                    viewportPosition.y <= 1f;
+        }
+
+        private void OnMovementRicocheted(Vector3 position)
+        {
+            FaceDirection();
+            _ricochetVisual.PlayRicochet();
+
+            Ricocheted?.Invoke(position);
+        }
+
+        private void OnBouncesExhausted()
+        {
+            BeginReturn();
         }
     }
 }

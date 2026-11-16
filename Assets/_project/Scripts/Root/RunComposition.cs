@@ -48,14 +48,14 @@ namespace WestRicochet.Root
             PausedState = new PausedState();
 
             List<IState> states = new()
-        {
-            BootstrapState,
-            MainMenuState,
-            RunState,
-            VictoryState,
-            DefeatState,
-            PausedState
-        };
+            {
+                BootstrapState,
+                MainMenuState,
+                RunState,
+                VictoryState,
+                DefeatState,
+                PausedState
+            };
 
             StateMachine = new GameStateMachine(states);
 

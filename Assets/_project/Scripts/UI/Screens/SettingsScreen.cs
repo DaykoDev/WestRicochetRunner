@@ -82,21 +82,6 @@ namespace WestRicochet.UI.Screens
             UpdateMusicIcons(enabled);
         }
 
-        private void OnSoundVolumeChanged(float volume) => SoundVolumeChanged?.Invoke(volume);
-        private void OnMusicVolumeChanged(float volume) => MusicVolumeChanged?.Invoke(volume);
-
-        private void OnSoundChanged(bool value)
-        {
-            UpdateSoundIcons(value);
-            SoundToggled?.Invoke(value);
-        }
-
-        private void OnMusicChanged(bool value)
-        {
-            UpdateMusicIcons(value);
-            MusicToggled?.Invoke(value);
-        }
-
         private void UpdateSoundIcons(bool enabled)
         {
             _soundOnIcon.SetActive(enabled);
@@ -111,5 +96,20 @@ namespace WestRicochet.UI.Screens
 
         private void OnClose() => CloseClicked?.Invoke();
         private void OnExitToMenu() => ExitToMenuClicked?.Invoke();
+
+        private void OnSoundVolumeChanged(float volume) => SoundVolumeChanged?.Invoke(volume);
+        private void OnMusicVolumeChanged(float volume) => MusicVolumeChanged?.Invoke(volume);
+
+        private void OnSoundChanged(bool value)
+        {
+            UpdateSoundIcons(value);
+            SoundToggled?.Invoke(value);
+        }
+
+        private void OnMusicChanged(bool value)
+        {
+            UpdateMusicIcons(value);
+            MusicToggled?.Invoke(value);
+        }
     }
 }

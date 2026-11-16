@@ -12,11 +12,21 @@ namespace WestRicochet.Infrastructure.Pooling
         private readonly ObjectPool<T> _pool;
         private readonly List<T> _activeObjects = new();
 
-        public ComponentPool(T prefab, Transform container, int capacity = 20, int maxSize = 50, Action<T> onCreated = null)
+        public ComponentPool(
+            T prefab,
+            Transform container,
+            int capacity = 20,
+            int _maxPooled = 50,
+            Action<T> onCreated = null)
         {
             if (container == null)
             {
                 throw new ArgumentNullException(nameof(container));
+            }
+
+            if (prefab == null)
+            {
+                throw new ArgumentNullException(nameof(prefab));
             }
 
             if (capacity < 0)
@@ -24,16 +34,14 @@ namespace WestRicochet.Infrastructure.Pooling
                 throw new ArgumentOutOfRangeException(nameof(capacity));
             }
 
-            if (maxSize < 1)
+            if (_maxPooled < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(maxSize));
+                throw new ArgumentOutOfRangeException(nameof(_maxPooled));
             }
 
-            if (capacity > maxSize)
+            if (capacity > _maxPooled)
             {
-                throw new ArgumentException(
-                    "Capacity cannot exceed maxSize.",
-                    nameof(capacity));
+                throw new ArgumentException("Capacity cannot exceed maxSize.", nameof(capacity));
             }
 
             _prefab = prefab;
@@ -46,51 +54,51 @@ namespace WestRicochet.Infrastructure.Pooling
                     onCreated?.Invoke(instance);
                     return instance;
                 },
-                actionOnGet: obj => obj.gameObject.SetActive(true),
-                actionOnRelease: obj =>
+                actionOnGet: instance => instance.gameObject.SetActive(true),
+                actionOnRelease: instance =>
                 {
-                    if (obj.transform.parent != _container)
+                    if (instance.transform.parent != _container)
                     {
-                        obj.transform.SetParent(_container);
+                        instance.transform.SetParent(_container);
                     }
 
-                    obj.gameObject.SetActive(false);
+                    instance.gameObject.SetActive(false);
                 },
-                actionOnDestroy: obj => UnityEngine.Object.Destroy(obj.gameObject),
+                actionOnDestroy: instance => UnityEngine.Object.Destroy(instance.gameObject),
                 collectionCheck: true,
                 defaultCapacity: capacity,
-                maxSize: maxSize
+                maxSize: _maxPooled
             );
         }
 
         public T Get()
         {
-            T obj = _pool.Get();
+            T instance = _pool.Get();
 
-            _activeObjects.Add(obj);
+            _activeObjects.Add(instance);
 
-            if (obj is IPoolable<T> poolable)
+            if (instance is IPoolable<T> poolable)
             {
-                poolable.Died += Release;
+                poolable.Removed += Release;
             }
 
-            return obj;
+            return instance;
         }
 
-        public void Release(T obj)
+        public void Release(T instance)
         {
-            if (obj == null || _activeObjects.Remove(obj) == false)
+            if (instance == null || _activeObjects.Remove(instance) == false)
             {
                 return;
             }
 
-            if (obj is IPoolable<T> poolable)
+            if (instance is IPoolable<T> poolable)
             {
-                poolable.Died -= Release;
+                poolable.Removed -= Release;
                 poolable.OnReturnedToPool();
             }
 
-            _pool.Release(obj);
+            _pool.Release(instance);
         }
 
         public void Prewarm(int count)
@@ -117,15 +125,15 @@ namespace WestRicochet.Infrastructure.Pooling
         {
             for (int i = _activeObjects.Count - 1; i >= 0; i--)
             {
-                T obj = _activeObjects[i];
+                T instance = _activeObjects[i];
 
-                if (obj == null)
+                if (instance == null)
                 {
                     _activeObjects.RemoveAt(i);
                 }
                 else
                 {
-                    Release(obj);
+                    Release(instance);
                 }
             }
         }

@@ -137,7 +137,7 @@ namespace WestRicochet.Gameplay.Balls.Movement
 
                 Ricocheted?.Invoke(_transform.position);
 
-                float separation = _collisionResolver.Separate(hit, normal);
+                float separation = _collisionResolver.Separate(normal);
 
                 remainingDistance = Mathf.Max(0f, remainingDistance - separation);
 

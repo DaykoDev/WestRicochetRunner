@@ -21,9 +21,7 @@ namespace WestRicochet.Infrastructure.Ads
         private Action<int> _pendingRewarded;
         private Action<int> _pendingError;
 
-        public bool IsBusy => _provider.IsBusy;
-
-        public bool CanShowInterstitial =>
+        private bool CanShowInterstitial =>
             _provider.IsBusy == false &&
             Time.unscaledTime - _lastInterstitialTime >= _config.InterstitialCooldownSeconds;
 

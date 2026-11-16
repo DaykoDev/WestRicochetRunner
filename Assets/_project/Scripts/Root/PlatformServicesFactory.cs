@@ -10,7 +10,7 @@ namespace WestRicochet.Root
         public IProgressStorage CreateProgressStorage()
         {
 #if UNITY_WEBGL && !UNITY_EDITOR && YANDEX_GAMES
-        return new YandexCloudProgressStorage();
+            return new YandexCloudProgressStorage();
 #else
             return new LocalProgressStorage();
 #endif
@@ -19,7 +19,7 @@ namespace WestRicochet.Root
         public IAdsService CreateAdsProvider()
         {
 #if UNITY_WEBGL && !UNITY_EDITOR && YANDEX_GAMES
-        return new YandexAdsService();
+            return new YandexAdsService();
 #else
             return new EditorAdsService();
 #endif
@@ -28,7 +28,7 @@ namespace WestRicochet.Root
         public ILeaderboardService CreateLeaderboardProvider(LeaderboardYG leaderboard)
         {
 #if UNITY_WEBGL && !UNITY_EDITOR && YANDEX_GAMES
-        return new YandexLeaderboardService(leaderboard);
+            return new YandexLeaderboardService(leaderboard);
 #else
             return new EditorLeaderboardService(leaderboard);
 #endif

@@ -23,6 +23,13 @@ namespace WestRicochet.Gameplay.Player.Shooting
             _lineRenderer.useWorldSpace = true;
             _lineRenderer.textureMode = LineTextureMode.Tile;
 
+            if (_trajectoryPredictor == null)
+            {
+                Debug.LogError("TrajectoryRenderer: TrajectoryPredictor is not assigned.", this);
+                SetVisible(false);
+                return;
+            }
+
             _cachedPoints = new Vector3[_trajectoryPredictor.MaxPointCount];
 
             _lineMaterial = _lineRenderer.material;

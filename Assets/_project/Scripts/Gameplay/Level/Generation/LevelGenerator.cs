@@ -24,10 +24,10 @@ namespace WestRicochet.Gameplay.Level.Generation
 
         [SerializeField] private DifficultyTiersSettings _difficultyTiers;
 
-        private SectionSequenceBuilder _sequenceBuilder;
         private readonly List<GameObject> _spawnedSections = new();
         private readonly List<FinishTrigger> _finishTriggers = new();
 
+        private SectionSequenceBuilder _sequenceBuilder;
         private Vector3 _buildAnchorPosition;
         private Quaternion _buildAnchorRotation;
         private Obstacle _finalBonusChest;
@@ -41,6 +41,11 @@ namespace WestRicochet.Gameplay.Level.Generation
         {
             _buildAnchorPosition = transform.position;
             _buildAnchorRotation = transform.rotation;
+        }
+
+        private void OnDestroy()
+        {
+            ClearLevel();
         }
 
         public bool BuildLevel(int level, int seed, RunModifiers modifiers)
@@ -156,7 +161,7 @@ namespace WestRicochet.Gameplay.Level.Generation
                         return false;
                     }
 
-                    _finalBonusChest.Destroyed += OnFinalBonusChestDestroyed;
+                    _finalBonusChest.Defeated += OnFinalBonusChestDestroyed;
                 }
                 else
                 {
@@ -192,7 +197,7 @@ namespace WestRicochet.Gameplay.Level.Generation
         {
             if (_finalBonusChest != null)
             {
-                _finalBonusChest.Destroyed -= OnFinalBonusChestDestroyed;
+                _finalBonusChest.Defeated -= OnFinalBonusChestDestroyed;
                 _finalBonusChest = null;
             }
 
@@ -234,11 +239,6 @@ namespace WestRicochet.Gameplay.Level.Generation
             sectionRoot.position = targetPosition - rootRotation * localPosition;
         }
 
-        private void OnDestroy()
-        {
-            ClearLevel();
-        }
-
         private void OnFinishReached()
         {
             Finished?.Invoke();
@@ -248,7 +248,7 @@ namespace WestRicochet.Gameplay.Level.Generation
         {
             if (_finalBonusChest != null)
             {
-                _finalBonusChest.Destroyed -= OnFinalBonusChestDestroyed;
+                _finalBonusChest.Defeated -= OnFinalBonusChestDestroyed;
                 _finalBonusChest = null;
             }
 
