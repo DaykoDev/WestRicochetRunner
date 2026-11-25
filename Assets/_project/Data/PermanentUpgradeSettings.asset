@@ -14,27 +14,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _definitions:
   - _type: 0
-    _baseCost: 120
+    _baseCost: 100
     _maxLevel: 10
     _bonusPerLevel: 1
     _costGrowthMultiplier: 1
-    _unlockLevel: 1
+    _unlockLevel: 3
   - _type: 1
-    _baseCost: 180
+    _baseCost: 280
     _maxLevel: 0
     _bonusPerLevel: 1
-    _costGrowthMultiplier: 1.2
-    _unlockLevel: 1
+    _costGrowthMultiplier: 1.1
+    _unlockLevel: 12
   - _type: 2
-    _baseCost: 120
+    _baseCost: 200
     _maxLevel: 20
     _bonusPerLevel: 0.1
     _costGrowthMultiplier: 1
-    _unlockLevel: 2
+    _unlockLevel: 10
   - _type: 3
-    _baseCost: 220
+    _baseCost: 140
     _maxLevel: 3
     _bonusPerLevel: 1
-    _costGrowthMultiplier: 1.2
-    _unlockLevel: 7
+    _costGrowthMultiplier: 1
+    _unlockLevel: 6
   _costGrowth: 1.3

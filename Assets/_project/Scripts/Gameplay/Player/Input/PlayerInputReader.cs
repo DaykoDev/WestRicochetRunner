@@ -12,6 +12,8 @@ namespace WestRicochet.Gameplay.Player.Input
         public event Action<Vector2> Moved;
         public event Action<bool> HoldPointerChanged;
 
+        public float KeyboardDirection { get; private set; }
+
         private void Awake()
         {
             _controls = new PlayerInputActions();
@@ -37,6 +39,7 @@ namespace WestRicochet.Gameplay.Player.Input
             }
 
             _controls.Player.Disable();
+            KeyboardDirection = 0f;
             SetHoldPointerState(false);
         }
 
@@ -61,6 +64,18 @@ namespace WestRicochet.Gameplay.Player.Input
             else if (context.canceled)
             {
                 SetHoldPointerState(false);
+            }
+        }
+
+        public void OnMoveKeyboard(InputAction.CallbackContext context)
+        {
+            if (context.performed)
+            {
+                KeyboardDirection = context.ReadValue<float>();
+            }
+            else if (context.canceled)
+            {
+                KeyboardDirection = 0f;
             }
         }
 

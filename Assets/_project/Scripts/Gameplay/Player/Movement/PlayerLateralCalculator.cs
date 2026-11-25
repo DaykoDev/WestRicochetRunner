@@ -6,6 +6,7 @@ namespace WestRicochet.Gameplay.Player.Movement
     {
         [SerializeField, Min(0f)] private float _sensitivity = 6f;
         [SerializeField] private float _lateralLimit = 3f;
+        [SerializeField, Min(0f)] private float _keyboardSpeed = 4f;
 
         private float _targetX;
         private bool _isPointerHeld;
@@ -38,6 +39,16 @@ namespace WestRicochet.Gameplay.Player.Movement
             float normalizedDelta = horizontalDeltaPixels / Screen.width;
 
             _targetX += normalizedDelta * _sensitivity;
+            _targetX = Mathf.Clamp(_targetX, -_lateralLimit, _lateralLimit);
+
+            return _targetX;
+        }
+
+        public float CalculateKeyboardTargetX(float direction, float deltaTime)
+        {
+            float clampedDirection = Mathf.Clamp(direction, -1f, 1f);
+
+            _targetX += clampedDirection * _keyboardSpeed * deltaTime;
             _targetX = Mathf.Clamp(_targetX, -_lateralLimit, _lateralLimit);
 
             return _targetX;

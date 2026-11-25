@@ -109,6 +109,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MoveKeyboard"",
+                    ""type"": ""Value"",
+                    ""id"": ""bee84754-7b21-44e1-a9fb-cdda423df9aa"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -133,6 +142,72 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""HoldPointer"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""6716b9b3-9da5-4023-9f70-0cd466ebe0d4"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveKeyboard"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""35a2209d-ee08-405c-b930-47a6ce1e425d"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveKeyboard"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""e04e1b75-48aa-4510-9341-ac570bc666fd"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveKeyboard"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""cbbe08fe-8d97-4978-8f86-4cc992cc0037"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveKeyboard"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""9ff80166-a97e-46c3-b0e7-a7b43516f227"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveKeyboard"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""2cc20433-6534-4dbb-8731-411c7dc1d880"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveKeyboard"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         },
@@ -171,6 +246,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
         m_Player_MovePointer = m_Player.FindAction("MovePointer", throwIfNotFound: true);
         m_Player_HoldPointer = m_Player.FindAction("HoldPointer", throwIfNotFound: true);
+        m_Player_MoveKeyboard = m_Player.FindAction("MoveKeyboard", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Newaction = m_UI.FindAction("New action", throwIfNotFound: true);
@@ -257,6 +333,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
     private readonly InputAction m_Player_MovePointer;
     private readonly InputAction m_Player_HoldPointer;
+    private readonly InputAction m_Player_MoveKeyboard;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -276,6 +353,10 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/HoldPointer".
         /// </summary>
         public InputAction @HoldPointer => m_Wrapper.m_Player_HoldPointer;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/MoveKeyboard".
+        /// </summary>
+        public InputAction @MoveKeyboard => m_Wrapper.m_Player_MoveKeyboard;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -308,6 +389,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @HoldPointer.started += instance.OnHoldPointer;
             @HoldPointer.performed += instance.OnHoldPointer;
             @HoldPointer.canceled += instance.OnHoldPointer;
+            @MoveKeyboard.started += instance.OnMoveKeyboard;
+            @MoveKeyboard.performed += instance.OnMoveKeyboard;
+            @MoveKeyboard.canceled += instance.OnMoveKeyboard;
         }
 
         /// <summary>
@@ -325,6 +409,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @HoldPointer.started -= instance.OnHoldPointer;
             @HoldPointer.performed -= instance.OnHoldPointer;
             @HoldPointer.canceled -= instance.OnHoldPointer;
+            @MoveKeyboard.started -= instance.OnMoveKeyboard;
+            @MoveKeyboard.performed -= instance.OnMoveKeyboard;
+            @MoveKeyboard.canceled -= instance.OnMoveKeyboard;
         }
 
         /// <summary>
@@ -475,6 +562,13 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnHoldPointer(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "MoveKeyboard" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMoveKeyboard(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

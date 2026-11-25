@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 98bcabb0c8ff14544a83081e9e709613
+guid: 984ab3a98d370e847b1b590f102d8ac5
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -43,7 +43,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -108,18 +108,128 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: desert_ui_thin_0
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 825
+        width: 385
+        height: 135
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a1b994acb7dd7e74a82fc3b7f6b3851e
+      internalID: -1671213956
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: desert_ui_thin_1
+      rect:
+        serializedVersion: 2
+        x: 458
+        y: 826
+        width: 358
+        height: 136
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 13, y: 12, z: 12, w: 14}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 316f6b3e9907c724ab2b7fb89bf30077
+      internalID: 1945307909
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: desert_ui_thin_2
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 655
+        width: 531
+        height: 135
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 13, y: 12, z: 12, w: 13}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 83e4fde478a1a2642ad6e740323a007f
+      internalID: 1641857694
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: desert_ui_thin_3
+      rect:
+        serializedVersion: 2
+        x: 612
+        y: 655
+        width: 529
+        height: 135
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e1fd6e871c5d4ce478f60052618d5cf7
+      internalID: -1749552390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: desert_ui_thin_4
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 110
+        width: 838
+        height: 512
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 15, y: 14, z: 13, w: 14}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 09cd927454c837246a0b9003d96b5609
+      internalID: 1155437270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: e1ef70f3ab141c8439d867e4aa95fdbe
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      desert_ui_thin_0: -1671213956
+      desert_ui_thin_1: 1945307909
+      desert_ui_thin_2: 1641857694
+      desert_ui_thin_3: -1749552390
+      desert_ui_thin_4: 1155437270
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

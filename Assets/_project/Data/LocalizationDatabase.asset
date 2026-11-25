@@ -38,7 +38,7 @@ MonoBehaviour:
     _en: Settings
     _tr: Ayarlar
   - _key: Leaderboard.Title
-    _ru: "\u041B\u0438\u0434\u0435\u0440\u0431\u043E\u0440\u0434"
+    _ru: "\u0422\u0430\u0431\u043B\u0438\u0446\u0430 \u041B\u0438\u0434\u0435\u0440\u043E\u0432"
     _en: Leaderboard
     _tr: Liderlik Tablosu
   - _key: Leaderboard.SignIn

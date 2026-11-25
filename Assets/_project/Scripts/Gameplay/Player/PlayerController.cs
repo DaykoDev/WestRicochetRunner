@@ -37,6 +37,27 @@ namespace WestRicochet.Gameplay.Player
             _mover.Initialize(initialX);
         }
 
+        private void Update()
+        {
+            if (_isControlEnabled == false)
+            {
+                return;
+            }
+
+            float direction = _inputReader.KeyboardDirection;
+
+            if (direction == 0f)
+            {
+                return;
+            }
+
+            float targetX = _lateralCalculator.CalculateKeyboardTargetX(
+                direction,
+                Time.deltaTime);
+
+            _mover.SetTargetX(targetX);
+        }
+
         private void OnEnable()
         {
             _inputReader.Moved += OnPointerMoved;

@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: LevelEconomySettings
   m_EditorClassIdentifier: 
   _regularObstacleBudget: 35
-  _completionReward: 10
-  _finalBonusBudget: 35
-  _rewardGrowth: 1.1
+  _completionReward: 15
+  _finalBonusBudget: 30
+  _rewardGrowth: 1.08
   _bonusLevelSettings: {fileID: 11400000, guid: 5dec57d98882fa3489e6baac707d561c, type: 2}
   _bonusLevelRewardMultiplier: 1.5
-  _menuBaseReward: 70
-  _menuRewardMultiplier: 1
+  _menuBaseReward: 75
+  _menuRewardMultiplier: 1.5

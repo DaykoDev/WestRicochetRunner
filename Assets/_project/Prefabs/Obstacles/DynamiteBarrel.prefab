@@ -290,9 +290,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f956098bb623d945a12eaf8b7ee6ae8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _baseHealth: 5
+  _baseHealth: 4
   _contactDamage: 1
-  _rewardWeight: 1
+  _rewardWeight: 1.5
   _gridSize: {x: 1, y: 1}
   _explosionRadius: 4
   _explosionDamage: 6
